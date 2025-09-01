@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-policies.dev/schemas/manifest.json",
+  "title": "AI Policies Manifest",
+  "description": "Configuration file schema for AI Policies (.ai-policies.yaml)",
+  "type": "object",
+  "required": ["requires", "output", "compose"],
+  "properties": {
+    "requires": {
+      "type": "object",
+      "description": "Policy packages and their version ranges",
+      "patternProperties": {
+        "^@[a-z0-9-]+/[a-z0-9-]+$": {
+          "type": "string",
+          "pattern": "^(\\^|~|>=|>|<=|<|=)?[0-9]+\\.[0-9]+\\.[0-9]+([a-zA-Z0-9.-]*)?$",
+          "description": "Semantic version range"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "output": {
+      "type": "object",
+      "description": "Output file paths for different IDE providers",
+      "properties": {
+        "cursor": {
+          "type": "string",
+          "description": "Path for Cursor rules file (.cursorrules)",
+          "pattern": "^[^\\\\:*?\"<>|]+$"
+        },
+        "copilot": {
+          "type": "string",
+          "description": "Path for GitHub Copilot instructions file",
+          "pattern": "^[^\\\\:*?\"<>|]+$"
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["cursor"] },
+        { "required": ["copilot"] },
+        { "required": ["cursor", "copilot"] }
+      ]
+    },
+    "compose": {
+      "type": "object",
+      "description": "Composition settings for merging policy partials",
+      "required": ["order", "protectedLayers", "teamAppend"],
+      "properties": {
+        "order": {
+          "type": "array",
+          "description": "Layer composition order (higher priority layers come later)",
+          "items": {
+            "type": "string",
+            "enum": ["core", "domain", "stack", "team"]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "protectedLayers": {
+          "type": "array",
+          "description": "Layers that cannot be overridden by higher priority layers",
+          "items": {
+            "type": "string",
+            "enum": ["core", "domain", "stack", "team"]
+          },
+          "uniqueItems": true
+        },
+        "teamAppend": {
+          "type": "boolean",
+          "description": "Allow team layer to append content rather than override"
+        }
+      },
+      "additionalProperties": false
+    },
+    "overrides": {
+      "type": "object",
+      "description": "Team-specific overrides and customizations",
+      "properties": {
+        "teamAppendContent": {
+          "type": "string",
+          "description": "Additional content to append to team layer"
+        },
+        "excludePartials": {
+          "type": "array",
+          "description": "Partial IDs to exclude from composition",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

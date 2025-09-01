@@ -1,0 +1,36 @@
+{
+  "name": "@ai-policies/policy-registry",
+  "version": "1.0.0",
+  "description": "Default open-source policy packages for AI Policies",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": "./policies/core/package.json",
+    "./frontend-react": "./policies/frontend-react/package.json",
+    "./workflows-jira": "./policies/workflows-jira/package.json"
+  },
+  "files": [
+    "dist",
+    "policies"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "validate-policies": "node scripts/validate-policies.js"
+  },
+  "dependencies": {
+    "@ai-policies/core-schemas": "workspace:*",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4"
+  }
+}

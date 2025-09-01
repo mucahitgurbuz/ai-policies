@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-policies.dev/schemas/package.json",
+  "title": "AI Policies Package",
+  "description": "Schema for AI Policies package.json files",
+  "type": "object",
+  "required": ["name", "version"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Package name in scoped format",
+      "pattern": "^@[a-z0-9-]+/[a-z0-9-]+$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([a-zA-Z0-9.-]*)?$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Package description",
+      "maxLength": 500
+    },
+    "keywords": {
+      "type": "array",
+      "description": "Keywords for package discovery",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "license": {
+      "type": "string",
+      "description": "License identifier (SPDX)",
+      "pattern": "^[A-Za-z0-9.-]+$"
+    },
+    "author": {
+      "type": "string",
+      "description": "Package author"
+    },
+    "homepage": {
+      "type": "string",
+      "description": "Homepage URL",
+      "format": "uri"
+    },
+    "repository": {
+      "type": "object",
+      "description": "Repository information",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["git"]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "Package dependencies",
+      "patternProperties": {
+        "^@[a-z0-9-]+/[a-z0-9-]+$": {
+          "type": "string",
+          "pattern": "^(\\^|~|>=|>|<=|<|=)?[0-9]+\\.[0-9]+\\.[0-9]+([a-zA-Z0-9.-]*)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ai-policies": {
+      "type": "object",
+      "description": "AI Policies specific configuration",
+      "properties": {
+        "partials": {
+          "type": "object",
+          "description": "Partial directories for different providers",
+          "properties": {
+            "cursor": {
+              "type": "string",
+              "description": "Directory containing Cursor partials",
+              "default": "cursor/partials"
+            },
+            "copilot": {
+              "type": "string",
+              "description": "Directory containing Copilot partials",
+              "default": "copilot/partials"
+            }
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags that apply to all partials in this package",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

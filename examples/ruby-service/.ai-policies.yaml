@@ -1,0 +1,37 @@
+requires:
+  "@ai-policies/core": "^1.0.0"
+
+output:
+  cursor: ./.cursorrules
+  copilot: ./.copilot/instructions.md
+
+compose:
+  order: [core, domain, stack, team]
+  protectedLayers: [core]
+  teamAppend: true
+
+overrides:
+  teamAppendContent: |
+    ## Team-Specific Ruby Guidelines
+
+    ### Code Style
+    - Follow Rubocop configuration for consistent formatting
+    - Use descriptive method and variable names
+    - Prefer explicit returns for clarity
+
+    ### Database
+    - Use Sequel ORM for all database operations
+    - Always use transactions for data modifications
+    - Include proper database constraints and validations
+
+    ### API Design
+    - Follow RESTful conventions for endpoints
+    - Use proper HTTP status codes
+    - Include comprehensive error handling
+    - Implement rate limiting for public endpoints
+
+    ### Testing
+    - Write RSpec tests for all public methods
+    - Use factories for test data generation
+    - Mock external service calls in tests
+    - Maintain high test coverage (>90%)

@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ai-policies.dev/schemas/partial.json",
+  "title": "AI Policies Partial",
+  "description": "Schema for policy partial frontmatter in Markdown files",
+  "type": "object",
+  "required": ["id", "layer", "weight", "protected", "dependsOn", "owner"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this partial within its package",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "layer": {
+      "type": "string",
+      "description": "Composition layer for this partial",
+      "enum": ["core", "domain", "stack", "team"]
+    },
+    "weight": {
+      "type": "integer",
+      "description": "Ordering weight within the layer (lower weights come first)",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "protected": {
+      "type": "boolean",
+      "description": "Whether this partial's content is protected from being overridden"
+    },
+    "dependsOn": {
+      "type": "array",
+      "description": "List of partial IDs that this partial depends on",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Team or individual responsible for maintaining this partial",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "tags": {
+      "type": "array",
+      "description": "Optional tags for categorizing and filtering partials",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "providers": {
+      "type": "array",
+      "description": "IDE providers this partial applies to (if not specified, applies to all)",
+      "items": {
+        "type": "string",
+        "enum": ["cursor", "copilot"]
+      },
+      "uniqueItems": true
+    },
+    "version": {
+      "type": "string",
+      "description": "Version when this partial was last modified",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this partial does",
+      "maxLength": 500
+    }
+  },
+  "additionalProperties": false
+}
