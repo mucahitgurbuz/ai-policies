@@ -7,6 +7,6 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@ai-policies/examples-*"],
+  "ignore": ["@ai-policies/example-*"],
   "bumpVersionsWithWorkspaceProtocolOnly": true
 }

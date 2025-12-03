@@ -89,7 +89,8 @@ async function validatePackage(packagePath, packageName) {
     return;
   }
 
-  // Collect all partial IDs for dependency validation
+  // Collect all partial IDs for dependency validation (per provider to allow same ID across providers)
+  const partialIdsByProvider = {};
   const allPartialIds = new Set();
   const partials = [];
 
@@ -102,28 +103,39 @@ async function validatePackage(packagePath, packageName) {
       continue;
     }
 
+    partialIdsByProvider[provider] = new Set();
     const fullPartialsPath = path.join(packagePath, partialsDir);
 
     try {
       await fs.access(fullPartialsPath);
+      const files = await findMarkdownFiles(fullPartialsPath);
+
+      if (files.length === 0) {
+        warnings.push(
+          `${packageName}: No partials found in "${partialsDir}" for ${provider}`
+        );
+        continue;
+      }
+
+      for (const file of files) {
+        const partial = await validatePartial(file, packageName, provider);
+        if (partial) {
+          // Check for duplicates within the same provider only
+          if (partialIdsByProvider[provider].has(partial.id)) {
+            errors.push(
+              `${packageName}: Duplicate partial ID "${partial.id}" in ${provider}`
+            );
+          }
+          partialIdsByProvider[provider].add(partial.id);
+          allPartialIds.add(partial.id);
+          partials.push(partial);
+        }
+      }
     } catch {
       warnings.push(
         `${packageName}: Partials directory "${partialsDir}" not found for ${provider}`
       );
       continue;
-    }
-
-    const files = await findMarkdownFiles(fullPartialsPath);
-
-    for (const file of files) {
-      const partial = await validatePartial(file, packageName, provider);
-      if (partial) {
-        if (allPartialIds.has(partial.id)) {
-          errors.push(`${packageName}: Duplicate partial ID "${partial.id}"`);
-        }
-        allPartialIds.add(partial.id);
-        partials.push(partial);
-      }
     }
   }
 
