@@ -23,11 +23,20 @@ jobs:
         with:
           version: 8
 
+      - name: Check for lock file
+        id: lockfile
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: ${{ steps.lockfile.outputs.exists == 'true' && 'pnpm' || '' }}
 
       - name: Install dependencies
         run: |
@@ -64,11 +73,20 @@ jobs:
         with:
           version: 8
 
+      - name: Check for lock file
+        id: lockfile
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: ${{ steps.lockfile.outputs.exists == 'true' && 'pnpm' || '' }}
 
       - name: Install dependencies
         run: |
@@ -112,11 +130,20 @@ jobs:
         with:
           version: 8
 
+      - name: Check for lock file
+        id: lockfile
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: ${{ steps.lockfile.outputs.exists == 'true' && 'pnpm' || '' }}
 
       - name: Install dependencies
         run: |
