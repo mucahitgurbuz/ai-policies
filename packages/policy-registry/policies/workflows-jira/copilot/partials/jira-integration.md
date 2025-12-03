@@ -13,6 +13,7 @@ description: Guidelines for Jira integration and workflow management in code
 ## 📋 Ticket Reference Patterns
 
 ### Commit Messages
+
 - **Always reference Jira tickets** in commit messages using the standard format
 - **Include ticket numbers at the beginning** of commit messages
 - **Use descriptive commit messages** that explain the change
@@ -33,6 +34,7 @@ PROJ-456 fix: resolve database connection timeout issue
 ```
 
 ### Branch Naming
+
 - **Include ticket numbers** in branch names for traceability
 - **Use descriptive branch names** that indicate the work being done
 - **Follow team conventions** for branch prefixes
@@ -46,37 +48,45 @@ feature/PROJ-101-payment-integration
 ```
 
 ### Pull Request Templates
+
 ```markdown
 ## 🎫 Related Jira Ticket
+
 [PROJ-123](https://company.atlassian.net/browse/PROJ-123)
 
 ## 📝 Description
+
 Brief description of the changes made.
 
 ## 🧪 Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests verified
 - [ ] Manual testing completed
 
 ## 📋 Checklist
+
 - [ ] Code follows team coding standards
 - [ ] Self-review completed
 - [ ] Documentation updated if needed
 - [ ] Breaking changes documented
 
 ## 🚀 Deployment Notes
+
 Any special deployment considerations or rollback plans.
 ```
 
 ## 🔄 Workflow Integration
 
 ### Status Updates
+
 - **Update Jira status** when moving code through pipeline stages
 - **Add comments** to tickets when significant progress is made
 - **Link pull requests** to Jira tickets for traceability
 - **Tag stakeholders** when review or input is needed
 
 ### Automated Integrations
+
 ```yaml
 # Example GitHub Actions workflow for Jira integration
 name: Update Jira on PR
@@ -99,12 +109,13 @@ jobs:
         uses: atlassian/gajira-transition@master
         with:
           issue: ${{ steps.ticket.outputs.ticket }}
-          transition: "In Review"
+          transition: 'In Review'
 ```
 
 ## 📊 Code Documentation
 
 ### Jira-Linked Comments
+
 ```typescript
 /**
  * User authentication service
@@ -137,6 +148,7 @@ function calculatePricing(user: User, items: CartItem[]): PricingResult {
 ```
 
 ### Issue Tracking in Code
+
 ```typescript
 // TODO: PROJ-345 - Implement rate limiting for API endpoints
 // FIXME: PROJ-456 - Address memory leak in WebSocket connections
@@ -148,8 +160,10 @@ function calculatePricing(user: User, items: CartItem[]): PricingResult {
 ## 🔍 Code Review Integration
 
 ### Review Comments Linking
+
 ```markdown
 <!-- In code review comments -->
+
 This change addresses the requirement in [PROJ-123](https://company.atlassian.net/browse/PROJ-123).
 
 However, I notice this might conflict with the approach discussed in [PROJ-456](https://company.atlassian.net/browse/PROJ-456). Can we align these implementations?
@@ -158,6 +172,7 @@ However, I notice this might conflict with the approach discussed in [PROJ-456](
 ```
 
 ### Quality Gates
+
 - **Verify ticket requirements** are met before approving
 - **Check for proper testing** as specified in acceptance criteria
 - **Ensure documentation** matches ticket requirements
@@ -166,6 +181,7 @@ However, I notice this might conflict with the approach discussed in [PROJ-456](
 ## 📈 Reporting and Metrics
 
 ### Development Tracking
+
 ```typescript
 // Add timing information for performance tickets
 const PERFORMANCE_TICKET = 'PROJ-888';
@@ -178,12 +194,13 @@ const endTime = performance.now();
 if (endTime - startTime > 1000) {
   logger.warn(`Slow query detected for ${PERFORMANCE_TICKET}`, {
     duration: endTime - startTime,
-    query: 'user-profile-fetch'
+    query: 'user-profile-fetch',
   });
 }
 ```
 
 ### Progress Tracking
+
 ```typescript
 // For epic or large feature tracking
 interface FeatureProgress {
@@ -202,6 +219,7 @@ const trackFeatureProgress = (epic: string): FeatureProgress => {
 ## 🚨 Error Handling
 
 ### Error Reporting with Context
+
 ```typescript
 class JiraLinkedError extends Error {
   constructor(
@@ -215,23 +233,23 @@ class JiraLinkedError extends Error {
 }
 
 // Usage
-throw new JiraLinkedError(
-  'User validation failed',
-  'PROJ-567',
-  { userId, validationRules }
-);
+throw new JiraLinkedError('User validation failed', 'PROJ-567', {
+  userId,
+  validationRules,
+});
 
 // In error logging
 logger.error('Operation failed', {
   error: error.message,
   relatedTicket: 'PROJ-234',
-  context: { userId, operation: 'userUpdate' }
+  context: { userId, operation: 'userUpdate' },
 });
 ```
 
 ## 📋 Prompt Templates for Jira Integration
 
 ### Code Generation Prompts
+
 ```
 Generate a TypeScript function that implements the requirements from Jira ticket PROJ-123:
 - User input validation as specified in acceptance criteria
@@ -241,6 +259,7 @@ Generate a TypeScript function that implements the requirements from Jira ticket
 ```
 
 ### Documentation Prompts
+
 ```
 Create documentation for this feature that includes:
 - Reference to the original Jira epic PROJ-100

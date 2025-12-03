@@ -1,6 +1,6 @@
 requires:
-  "@ai-policies/core": "^1.0.0"
-  "@ai-policies/frontend-react": "^1.0.0"
+  '@ai-policies/core': '^1.0.0'
+  '@ai-policies/frontend-react': '^1.0.0'
 
 output:
   cursor: ./.cursorrules

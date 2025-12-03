@@ -11,7 +11,8 @@ export async function extractProtectedBlocks(
   const blocks: ProtectedBlock[] = [];
 
   // Protected block pattern: <!-- BEGIN PROTECTED:id -->...<!-- END PROTECTED -->
-  const protectedRegex = /<!--\\s*BEGIN\\s+PROTECTED:([^\\s]+)\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
+  const protectedRegex =
+    /<!--\\s*BEGIN\\s+PROTECTED:([^\\s]+)\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
 
   let match;
   while ((match = protectedRegex.exec(existingContent)) !== null) {
@@ -81,11 +82,14 @@ export function hasProtectedBlocks(content: string): boolean {
 /**
  * Validate protected blocks in content
  */
-export function validateProtectedBlocks(content: string): Array<{ message: string; blockId?: string }> {
+export function validateProtectedBlocks(
+  content: string
+): Array<{ message: string; blockId?: string }> {
   const errors: Array<{ message: string; blockId?: string }> = [];
 
   // Check for unmatched BEGIN markers
-  const beginMatches = content.match(/<!--\\s*BEGIN\\s+PROTECTED:([^\\s]+)\\s*-->/g) || [];
+  const beginMatches =
+    content.match(/<!--\\s*BEGIN\\s+PROTECTED:([^\\s]+)\\s*-->/g) || [];
   const endMatches = content.match(/<!--\\s*END\\s+PROTECTED\\s*-->/g) || [];
 
   if (beginMatches.length !== endMatches.length) {
@@ -95,14 +99,16 @@ export function validateProtectedBlocks(content: string): Array<{ message: strin
   }
 
   // Check for nested protected blocks
-  const protectedRegex = /<!--\\s*BEGIN\\s+PROTECTED:([^\\s]+)\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
+  const protectedRegex =
+    /<!--\\s*BEGIN\\s+PROTECTED:([^\\s]+)\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
   let match;
 
   while ((match = protectedRegex.exec(content)) !== null) {
     const [fullMatch, blockId] = match;
 
     // Check if this block contains other protected blocks
-    const nestedBegin = (fullMatch.match(/<!--\\s*BEGIN\\s+PROTECTED:/g) || []).length;
+    const nestedBegin = (fullMatch.match(/<!--\\s*BEGIN\\s+PROTECTED:/g) || [])
+      .length;
     if (nestedBegin > 1) {
       errors.push({
         message: `Protected block '${blockId}' contains nested protected blocks`,
@@ -125,7 +131,10 @@ function insertProtectedBlock(content: string, block: ProtectedBlock): string {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    if (line.startsWith('#') && line.toLowerCase().includes(block.id.toLowerCase())) {
+    if (
+      line.startsWith('#') &&
+      line.toLowerCase().includes(block.id.toLowerCase())
+    ) {
       // Insert after this header
       lines.splice(i + 1, 0, '', block.content, '');
       return lines.join('\\n');
@@ -139,7 +148,9 @@ function insertProtectedBlock(content: string, block: ProtectedBlock): string {
 /**
  * Extract protected content from a partial
  */
-export function extractProtectedContentFromPartial(partial: PolicyPartial): ProtectedBlock[] {
+export function extractProtectedContentFromPartial(
+  partial: PolicyPartial
+): ProtectedBlock[] {
   const blocks: ProtectedBlock[] = [];
 
   if (!partial.frontmatter.protected) {
@@ -170,8 +181,11 @@ export function extractProtectedContentFromPartial(partial: PolicyPartial): Prot
  * Remove protected blocks from content
  */
 export function removeProtectedBlocks(content: string): string {
-  const protectedRegex = /<!--\\s*BEGIN\\s+PROTECTED:[^\\s]+\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
-  return content.replace(protectedRegex, '').replace(/\\n\\s*\\n\\s*\\n/g, '\\n\\n');
+  const protectedRegex =
+    /<!--\\s*BEGIN\\s+PROTECTED:[^\\s]+\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
+  return content
+    .replace(protectedRegex, '')
+    .replace(/\\n\\s*\\n\\s*\\n/g, '\\n\\n');
 }
 
 /**

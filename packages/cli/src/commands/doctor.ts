@@ -20,14 +20,16 @@ export const doctorCommand: CommandModule<{}, DoctorOptions> = {
       default: false,
     },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       logger.info('🩺 Running AI Policies health check...\n');
 
       const issues = await runHealthChecks(argv.fix ?? false);
 
       if (issues.length === 0) {
-        logger.success('✨ All checks passed! Your AI Policies setup looks healthy.');
+        logger.success(
+          '✨ All checks passed! Your AI Policies setup looks healthy.'
+        );
         return;
       }
 
@@ -42,14 +44,18 @@ export const doctorCommand: CommandModule<{}, DoctorOptions> = {
       }
 
       if (argv.fix) {
-        logger.info('Some issues may have been automatically fixed. Please review the changes.');
+        logger.info(
+          'Some issues may have been automatically fixed. Please review the changes.'
+        );
       } else {
         logger.info('Run with --fix to automatically resolve fixable issues.');
       }
 
       process.exit(1);
     } catch (error) {
-      logger.error(`Doctor check failed: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Doctor check failed: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
   },
@@ -86,10 +92,12 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
       const cursorPath = path.resolve(projectRoot, config.output.cursor);
       const cursorDir = path.dirname(cursorPath);
 
-      if (!await fs.pathExists(cursorDir)) {
+      if (!(await fs.pathExists(cursorDir))) {
         issues.push({
           message: `Cursor output directory does not exist: ${path.relative(projectRoot, cursorDir)}`,
-          fix: autoFix ? 'Creating directory...' : `Create directory: mkdir -p ${path.relative(projectRoot, cursorDir)}`,
+          fix: autoFix
+            ? 'Creating directory...'
+            : `Create directory: mkdir -p ${path.relative(projectRoot, cursorDir)}`,
           severity: 'warning',
         });
 
@@ -103,10 +111,12 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
       const copilotPath = path.resolve(projectRoot, config.output.copilot);
       const copilotDir = path.dirname(copilotPath);
 
-      if (!await fs.pathExists(copilotDir)) {
+      if (!(await fs.pathExists(copilotDir))) {
         issues.push({
           message: `Copilot output directory does not exist: ${path.relative(projectRoot, copilotDir)}`,
-          fix: autoFix ? 'Creating directory...' : `Create directory: mkdir -p ${path.relative(projectRoot, copilotDir)}`,
+          fix: autoFix
+            ? 'Creating directory...'
+            : `Create directory: mkdir -p ${path.relative(projectRoot, copilotDir)}`,
           severity: 'warning',
         });
 
@@ -117,11 +127,18 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
     }
 
     // Check 4: File length limits
-    if (config.output.cursor && await fs.pathExists(path.resolve(projectRoot, config.output.cursor))) {
-      const cursorContent = await fs.readFile(path.resolve(projectRoot, config.output.cursor), 'utf8');
+    if (
+      config.output.cursor &&
+      (await fs.pathExists(path.resolve(projectRoot, config.output.cursor)))
+    ) {
+      const cursorContent = await fs.readFile(
+        path.resolve(projectRoot, config.output.cursor),
+        'utf8'
+      );
       if (cursorContent.length > 50000) {
         issues.push({
-          message: 'Cursor rules file is very large (>50KB). This may impact IDE performance.',
+          message:
+            'Cursor rules file is very large (>50KB). This may impact IDE performance.',
           fix: 'Consider reducing the number of policy packages or splitting into more focused rules',
           severity: 'warning',
         });
@@ -133,7 +150,9 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
 
     // Check 6: Duplicate packages
     const packageNames = Object.keys(config.requires);
-    const duplicates = packageNames.filter((name, index) => packageNames.indexOf(name) !== index);
+    const duplicates = packageNames.filter(
+      (name, index) => packageNames.indexOf(name) !== index
+    );
     if (duplicates.length > 0) {
       issues.push({
         message: `Duplicate packages found: ${duplicates.join(', ')}`,
@@ -144,7 +163,6 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
 
     // Check 7: Missing metadata in generated files
     await checkGeneratedFileMetadata(config, projectRoot, issues);
-
   } catch (error) {
     issues.push({
       message: `Invalid manifest file: ${error instanceof Error ? error.message : String(error)}`,
@@ -156,7 +174,11 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
   return issues;
 }
 
-async function checkForEmptySections(config: any, projectRoot: string, issues: HealthIssue[]) {
+async function checkForEmptySections(
+  config: any,
+  projectRoot: string,
+  issues: HealthIssue[]
+) {
   const outputs = [
     { path: config.output.cursor, type: 'Cursor' },
     { path: config.output.copilot, type: 'Copilot' },
@@ -168,7 +190,9 @@ async function checkForEmptySections(config: any, projectRoot: string, issues: H
     const filePath = path.resolve(projectRoot, output.path);
     if (await fs.pathExists(filePath)) {
       const content = await fs.readFile(filePath, 'utf8');
-      const contentWithoutComments = content.replace(/<!--[\\s\\S]*?-->/g, '').trim();
+      const contentWithoutComments = content
+        .replace(/<!--[\\s\\S]*?-->/g, '')
+        .trim();
 
       if (contentWithoutComments.length < 100) {
         issues.push({
@@ -181,7 +205,11 @@ async function checkForEmptySections(config: any, projectRoot: string, issues: H
   }
 }
 
-async function checkGeneratedFileMetadata(config: any, projectRoot: string, issues: HealthIssue[]) {
+async function checkGeneratedFileMetadata(
+  config: any,
+  projectRoot: string,
+  issues: HealthIssue[]
+) {
   const outputs = [
     { path: config.output.cursor, type: 'Cursor' },
     { path: config.output.copilot, type: 'Copilot' },

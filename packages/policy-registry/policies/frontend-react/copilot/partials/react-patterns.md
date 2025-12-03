@@ -13,12 +13,14 @@ description: React development patterns and best practices for Copilot
 ## 🧩 Component Development
 
 ### Modern React Patterns
+
 - Use **functional components with hooks** instead of class components
 - Implement **TypeScript interfaces** for all props and state
 - Follow **single responsibility principle** for components
 - Use **composition over inheritance** for component reuse
 
 ### Component Structure Template
+
 ```tsx
 interface ComponentProps {
   // Define clear prop types
@@ -32,21 +34,25 @@ export const MyComponent: React.FC<ComponentProps> = ({
   title,
   items,
   onItemClick,
-  className
+  className,
 }) => {
   // 1. State declarations
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // 2. Computed values
-  const filteredItems = useMemo(() =>
-    items.filter(item => item.isActive), [items]
+  const filteredItems = useMemo(
+    () => items.filter(item => item.isActive),
+    [items]
   );
 
   // 3. Event handlers
-  const handleItemClick = useCallback((item: Item) => {
-    setSelectedId(item.id);
-    onItemClick?.(item);
-  }, [onItemClick]);
+  const handleItemClick = useCallback(
+    (item: Item) => {
+      setSelectedId(item.id);
+      onItemClick?.(item);
+    },
+    [onItemClick]
+  );
 
   // 4. Effects
   useEffect(() => {
@@ -54,17 +60,14 @@ export const MyComponent: React.FC<ComponentProps> = ({
   }, []);
 
   // 5. Render
-  return (
-    <div className={className}>
-      {/* JSX content */}
-    </div>
-  );
+  return <div className={className}>{/* JSX content */}</div>;
 };
 ```
 
 ## 🎣 Hooks Guidelines
 
 ### State Management
+
 ```tsx
 // ✅ Use useState for simple state
 const [isLoading, setIsLoading] = useState(false);
@@ -74,7 +77,7 @@ const [user, setUser] = useState<User | null>(null);
 const [state, dispatch] = useReducer(reducer, {
   data: [],
   loading: false,
-  error: null
+  error: null,
 });
 
 // ✅ Custom hooks for reusable logic
@@ -83,7 +86,9 @@ const useApi = (url: string) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData(url).then(setData).finally(() => setLoading(false));
+    fetchData(url)
+      .then(setData)
+      .finally(() => setLoading(false));
   }, [url]);
 
   return { data, loading };
@@ -91,6 +96,7 @@ const useApi = (url: string) => {
 ```
 
 ### Effect Patterns
+
 ```tsx
 // ✅ Data fetching
 useEffect(() => {
@@ -129,6 +135,7 @@ useEffect(() => {
 ## 🚀 Performance Optimization
 
 ### Memoization Patterns
+
 ```tsx
 // ✅ Expensive calculations
 const expensiveValue = useMemo(() => {
@@ -136,9 +143,12 @@ const expensiveValue = useMemo(() => {
 }, [items]);
 
 // ✅ Stable function references
-const handleSubmit = useCallback((data: FormData) => {
-  onSubmit(data);
-}, [onSubmit]);
+const handleSubmit = useCallback(
+  (data: FormData) => {
+    onSubmit(data);
+  },
+  [onSubmit]
+);
 
 // ✅ Component memoization
 const OptimizedComponent = React.memo(({ data, onAction }) => {
@@ -147,6 +157,7 @@ const OptimizedComponent = React.memo(({ data, onAction }) => {
 ```
 
 ### Lazy Loading
+
 ```tsx
 // ✅ Route-based code splitting
 const LazyPage = lazy(() => import('./pages/Dashboard'));
@@ -157,12 +168,13 @@ const HeavyComponent = lazy(() => import('./HeavyComponent'));
 // Usage with Suspense
 <Suspense fallback={<Loading />}>
   <LazyPage />
-</Suspense>
+</Suspense>;
 ```
 
 ## 🔄 State Management
 
 ### Context API Pattern
+
 ```tsx
 interface AppContextType {
   user: User | null;
@@ -174,7 +186,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
-  children
+  children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [theme, setTheme] = useState<Theme>('light');
@@ -184,21 +196,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
-  const value = useMemo(() => ({
-    user,
-    theme,
-    updateUser,
-    toggleTheme
-  }), [user, theme, updateUser, toggleTheme]);
-
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      theme,
+      updateUser,
+      toggleTheme,
+    }),
+    [user, theme, updateUser, toggleTheme]
   );
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 // Custom hook for consuming context
@@ -214,26 +225,28 @@ export const useApp = () => {
 ## 📝 Form Handling
 
 ### Controlled Components
+
 ```tsx
 const ContactForm: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = useCallback((
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  }, [errors]);
+      // Clear error when user starts typing
+      if (errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: '' }));
+      }
+    },
+    [errors]
+  );
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -252,14 +265,17 @@ const ContactForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (validateForm()) {
-      // Submit form
-      console.log('Form submitted:', formData);
-    }
-  }, [formData]);
+      if (validateForm()) {
+        // Submit form
+        console.log('Form submitted:', formData);
+      }
+    },
+    [formData]
+  );
 
   return (
     <form onSubmit={handleSubmit}>
@@ -272,7 +288,9 @@ const ContactForm: React.FC = () => {
         aria-describedby={errors.name ? 'name-error' : undefined}
       />
       {errors.name && (
-        <span id="name-error" role="alert">{errors.name}</span>
+        <span id="name-error" role="alert">
+          {errors.name}
+        </span>
       )}
 
       {/* Other form fields */}
@@ -284,6 +302,7 @@ const ContactForm: React.FC = () => {
 ## 🎨 Styling Guidelines
 
 ### CSS-in-JS Patterns
+
 ```tsx
 // ✅ Styled components (if using styled-components)
 const StyledButton = styled.button<{ variant: 'primary' | 'secondary' }>`
@@ -292,15 +311,19 @@ const StyledButton = styled.button<{ variant: 'primary' | 'secondary' }>`
   border: none;
   font-weight: 600;
 
-  ${props => props.variant === 'primary' && css`
-    background-color: #007bff;
-    color: white;
-  `}
+  ${props =>
+    props.variant === 'primary' &&
+    css`
+      background-color: #007bff;
+      color: white;
+    `}
 
-  ${props => props.variant === 'secondary' && css`
-    background-color: #6c757d;
-    color: white;
-  `}
+  ${props =>
+    props.variant === 'secondary' &&
+    css`
+      background-color: #6c757d;
+      color: white;
+    `}
 `;
 
 // ✅ CSS Modules pattern
@@ -308,10 +331,7 @@ import styles from './Button.module.css';
 
 const Button: React.FC<ButtonProps> = ({ variant, children, ...props }) => {
   return (
-    <button
-      className={`${styles.button} ${styles[variant]}`}
-      {...props}
-    >
+    <button className={`${styles.button} ${styles[variant]}`} {...props}>
       {children}
     </button>
   );
@@ -321,12 +341,15 @@ const Button: React.FC<ButtonProps> = ({ variant, children, ...props }) => {
 ## ⚠️ Common Anti-Patterns
 
 ### ❌ Avoid These Patterns
+
 ```tsx
 // DON'T: Create objects/arrays in render
-<Component style={{ margin: 10 }} items={data.map(x => x.id)} />
+<Component style={{ margin: 10 }} items={data.map(x => x.id)} />;
 
 // DON'T: Use array index as key
-{items.map((item, index) => <Item key={index} data={item} />)}
+{
+  items.map((item, index) => <Item key={index} data={item} />);
+}
 
 // DON'T: Call hooks conditionally
 if (condition) {
@@ -345,13 +368,16 @@ function Component() {
 ```
 
 ### ✅ Correct Patterns
+
 ```tsx
 // DO: Use stable references
 const style = useMemo(() => ({ margin: 10 }), []);
 const itemIds = useMemo(() => data.map(x => x.id), [data]);
 
 // DO: Use stable, unique keys
-{items.map(item => <Item key={item.id} data={item} />)}
+{
+  items.map(item => <Item key={item.id} data={item} />);
+}
 
 // DO: Always call hooks at top level
 const [state, setState] = useState();

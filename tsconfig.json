@@ -28,8 +28,12 @@
       "@ai-policies/cli": ["./packages/cli/src"],
       "@ai-policies/core-schemas": ["./packages/core-schemas/src"],
       "@ai-policies/compose-engine": ["./packages/compose-engine/src"],
-      "@ai-policies/provider-cursor": ["./packages/providers/provider-cursor/src"],
-      "@ai-policies/provider-copilot": ["./packages/providers/provider-copilot/src"],
+      "@ai-policies/provider-cursor": [
+        "./packages/providers/provider-cursor/src"
+      ],
+      "@ai-policies/provider-copilot": [
+        "./packages/providers/provider-copilot/src"
+      ],
       "@ai-policies/policy-registry": ["./packages/policy-registry/src"],
       "@ai-policies/update-bot-action": ["./packages/update-bot-action/src"]
     }

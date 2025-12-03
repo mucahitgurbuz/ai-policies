@@ -3,7 +3,11 @@ import { context } from '@actions/github';
 
 import { GitHubClient } from './github-api.js';
 import { GitOperations } from './git-operations.js';
-import { parseRepositoryList, validateInputs, formatPullRequestBody } from './utils.js';
+import {
+  parseRepositoryList,
+  validateInputs,
+  formatPullRequestBody,
+} from './utils.js';
 
 export interface ActionInputs {
   token: string;
@@ -60,12 +64,7 @@ export async function runUpdateBot(): Promise<void> {
       try {
         core.info(`Processing repository: ${repo}`);
 
-        const updateResult = await processRepository(
-          github,
-          git,
-          repo,
-          inputs
-        );
+        const updateResult = await processRepository(github, git, repo, inputs);
 
         if (updateResult.updated) {
           results.repositoriesUpdated++;
@@ -83,18 +82,30 @@ export async function runUpdateBot(): Promise<void> {
     }
 
     // Set outputs
-    core.setOutput('repositories-updated', results.repositoriesUpdated.toString());
-    core.setOutput('pull-requests-created', results.pullRequestsCreated.join('\\n'));
-    core.setOutput('repositories-skipped', results.repositoriesSkipped.join('\\n'));
+    core.setOutput(
+      'repositories-updated',
+      results.repositoriesUpdated.toString()
+    );
+    core.setOutput(
+      'pull-requests-created',
+      results.pullRequestsCreated.join('\\n')
+    );
+    core.setOutput(
+      'repositories-skipped',
+      results.repositoriesSkipped.join('\\n')
+    );
     core.setOutput('errors', results.errors.join('\\n'));
 
     // Summary
     core.info(`✅ Update bot completed:`);
     core.info(`  - Repositories updated: ${results.repositoriesUpdated}`);
-    core.info(`  - Pull requests created: ${results.pullRequestsCreated.length}`);
-    core.info(`  - Repositories skipped: ${results.repositoriesSkipped.length}`);
+    core.info(
+      `  - Pull requests created: ${results.pullRequestsCreated.length}`
+    );
+    core.info(
+      `  - Repositories skipped: ${results.repositoriesSkipped.length}`
+    );
     core.info(`  - Errors: ${results.errors.length}`);
-
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     core.setFailed(`Update bot failed: ${message}`);
@@ -111,13 +122,28 @@ function getActionInputs(): ActionInputs {
     repositories: parseRepositoryList(core.getInput('repositories')),
     organization: core.getInput('organization'),
     branchName: core.getInput('branch-name') || 'ai-policies/auto-update',
-    commitMessage: core.getInput('commit-message') || 'chore: update AI Policies configurations',
-    prTitle: core.getInput('pr-title') || 'chore: update AI Policies configurations',
+    commitMessage:
+      core.getInput('commit-message') ||
+      'chore: update AI Policies configurations',
+    prTitle:
+      core.getInput('pr-title') || 'chore: update AI Policies configurations',
     prBody: core.getInput('pr-body') || 'Automated AI Policies update',
     autoMerge: core.getBooleanInput('auto-merge'),
-    reviewers: core.getInput('reviewers').split(',').map(r => r.trim()).filter(Boolean),
-    teamReviewers: core.getInput('team-reviewers').split(',').map(r => r.trim()).filter(Boolean),
-    labels: core.getInput('labels').split(',').map(l => l.trim()).filter(Boolean),
+    reviewers: core
+      .getInput('reviewers')
+      .split(',')
+      .map(r => r.trim())
+      .filter(Boolean),
+    teamReviewers: core
+      .getInput('team-reviewers')
+      .split(',')
+      .map(r => r.trim())
+      .filter(Boolean),
+    labels: core
+      .getInput('labels')
+      .split(',')
+      .map(l => l.trim())
+      .filter(Boolean),
     dryRun: core.getBooleanInput('dry-run'),
   };
 }
@@ -141,7 +167,9 @@ async function getTargetRepositories(
 
   // Fallback to current repository
   const currentRepo = `${context.repo.owner}/${context.repo.repo}`;
-  core.warning(`No repositories or organization specified, using current repo: ${currentRepo}`);
+  core.warning(
+    `No repositories or organization specified, using current repo: ${currentRepo}`
+  );
   return [currentRepo];
 }
 
@@ -164,7 +192,11 @@ async function processRepository(
   }
 
   // Check if update branch already exists
-  const branchExists = await github.branchExists(owner, repo, inputs.branchName);
+  const branchExists = await github.branchExists(
+    owner,
+    repo,
+    inputs.branchName
+  );
   if (branchExists) {
     core.info(`Skipping ${repository} - update branch already exists`);
     return { updated: false };
@@ -231,13 +263,14 @@ async function processRepository(
       await github.enableAutoMerge(owner, repo, pullRequest.number);
     }
 
-    core.info(`✅ Created pull request for ${repository}: ${pullRequest.html_url}`);
+    core.info(
+      `✅ Created pull request for ${repository}: ${pullRequest.html_url}`
+    );
 
     return {
       updated: true,
       pullRequestUrl: pullRequest.html_url,
     };
-
   } finally {
     // Clean up working directory
     await git.cleanup(workingDir);

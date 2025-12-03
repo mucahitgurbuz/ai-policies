@@ -5,6 +5,7 @@ This is an example React application demonstrating how to use AI Policies to man
 ## Overview
 
 This React application uses AI Policies to:
+
 - Enforce security and safety guidelines for AI-generated code
 - Apply React-specific development patterns and best practices
 - Maintain consistent code quality across the team
@@ -33,11 +34,13 @@ This React application uses AI Policies to:
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 2. Install AI Policies CLI globally:
+
 ```bash
 pnpm install -g @ai-policies/cli
 ```
@@ -45,21 +48,25 @@ pnpm install -g @ai-policies/cli
 ### Development
 
 1. Start the development server:
+
 ```bash
 pnpm dev
 ```
 
 2. To update AI Policies configurations:
+
 ```bash
 pnpm run policies:sync
 ```
 
 3. To check for policy changes:
+
 ```bash
 pnpm run policies:diff
 ```
 
 4. To validate your setup:
+
 ```bash
 pnpm run policies:doctor
 ```
@@ -67,17 +74,20 @@ pnpm run policies:doctor
 ## AI Policies Features Demonstrated
 
 ### Security Guidelines
+
 - Environment variable usage for secrets
 - Input validation patterns
 - Secure error handling
 
 ### React Best Practices
+
 - Functional components with hooks
 - TypeScript interfaces for props
 - Performance optimization patterns
 - Accessibility guidelines
 
 ### Team Customizations
+
 - Material-UI component preferences
 - State management with React Query and Zustand
 - Testing patterns with React Testing Library
@@ -118,9 +128,9 @@ Update the `requires` section in `.ai-policies.yaml`:
 
 ```yaml
 requires:
-  "@ai-policies/core": "^1.0.0"
-  "@ai-policies/frontend-react": "^1.0.0"
-  "@ai-policies/your-custom-package": "^1.0.0"
+  '@ai-policies/core': '^1.0.0'
+  '@ai-policies/frontend-react': '^1.0.0'
+  '@ai-policies/your-custom-package': '^1.0.0'
 ```
 
 ### Excluding Specific Partials
@@ -130,7 +140,7 @@ Add exclusions to filter out specific policy rules:
 ```yaml
 overrides:
   excludePartials:
-    - "partial-id-to-exclude"
+    - 'partial-id-to-exclude'
 ```
 
 ## CI/CD Integration
@@ -148,13 +158,17 @@ Add AI Policies validation to your CI pipeline:
 ## Working with AI Assistants
 
 ### Cursor IDE
+
 With the generated `.cursorrules` file, Cursor will automatically:
+
 - Follow security best practices
 - Apply React patterns consistently
 - Suggest team-approved libraries and patterns
 
 ### GitHub Copilot
+
 The `.copilot/instructions.md` file helps Copilot understand:
+
 - Project-specific conventions
 - Preferred state management approaches
 - Testing patterns and requirements

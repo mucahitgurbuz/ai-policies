@@ -9,7 +9,7 @@ import type {
   PartialFrontmatter,
   PolicyPackageConfig,
   ValidationResult,
-  ValidationError
+  ValidationError,
 } from './types.js';
 
 // Get current directory for schema files
@@ -18,9 +18,15 @@ const __dirname = dirname(__filename);
 const schemasDir = join(__dirname, '..', 'schemas');
 
 // Load JSON schemas
-const manifestSchema = JSON.parse(readFileSync(join(schemasDir, 'manifest.json'), 'utf8'));
-const partialSchema = JSON.parse(readFileSync(join(schemasDir, 'partial.json'), 'utf8'));
-const packageSchema = JSON.parse(readFileSync(join(schemasDir, 'package.json'), 'utf8'));
+const manifestSchema = JSON.parse(
+  readFileSync(join(schemasDir, 'manifest.json'), 'utf8')
+);
+const partialSchema = JSON.parse(
+  readFileSync(join(schemasDir, 'partial.json'), 'utf8')
+);
+const packageSchema = JSON.parse(
+  readFileSync(join(schemasDir, 'package.json'), 'utf8')
+);
 
 // Create AJV instance with formats support
 const ajv = new Ajv({
@@ -100,13 +106,16 @@ export function validatePackageConfig(data: unknown): ValidationResult {
 /**
  * Perform additional semantic validation for manifest
  */
-function performSemanticManifestValidation(manifest: ManifestConfig): ValidationError[] {
+function performSemanticManifestValidation(
+  manifest: ManifestConfig
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   // Check that at least one output is specified
   if (!manifest.output.cursor && !manifest.output.copilot) {
     errors.push({
-      message: 'At least one output target (cursor or copilot) must be specified',
+      message:
+        'At least one output target (cursor or copilot) must be specified',
       path: 'output',
     });
   }
@@ -151,7 +160,9 @@ function performSemanticManifestValidation(manifest: ManifestConfig): Validation
 /**
  * Perform additional semantic validation for partial frontmatter
  */
-function performSemanticPartialValidation(partial: PartialFrontmatter): ValidationError[] {
+function performSemanticPartialValidation(
+  partial: PartialFrontmatter
+): ValidationError[] {
   const errors: ValidationError[] = [];
 
   // Check for self-dependencies
@@ -166,7 +177,8 @@ function performSemanticPartialValidation(partial: PartialFrontmatter): Validati
   // Check weight bounds for specific layers
   if (partial.layer === 'core' && partial.weight > 100) {
     errors.push({
-      message: 'Core layer partials should have weight <= 100 to maintain priority',
+      message:
+        'Core layer partials should have weight <= 100 to maintain priority',
       path: 'weight',
       value: partial.weight,
     });

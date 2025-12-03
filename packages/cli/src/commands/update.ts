@@ -33,11 +33,13 @@ export const updateCommand: CommandModule<{}, UpdateOptions> = {
       default: false,
     },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       const manifestPath = await findManifest();
       if (!manifestPath) {
-        logger.error('No .ai-policies.yaml found. Run "ai-policies init" first.');
+        logger.error(
+          'No .ai-policies.yaml found. Run "ai-policies init" first.'
+        );
         process.exit(1);
       }
 
@@ -59,13 +61,19 @@ export const updateCommand: CommandModule<{}, UpdateOptions> = {
         logger.info('Run "ai-policies sync" to apply the changes');
       }
     } catch (error) {
-      logger.error(`Failed to update: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Failed to update: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
   },
 };
 
-async function updateSpecificPackage(config: any, packageSpec: string, dry: boolean) {
+async function updateSpecificPackage(
+  config: any,
+  packageSpec: string,
+  dry: boolean
+) {
   const [packageName, version] = packageSpec.split('@');
 
   if (!packageName || !version) {
@@ -82,10 +90,14 @@ async function updateSpecificPackage(config: any, packageSpec: string, dry: bool
   const latestCompatible = resolveLatestCompatible(version);
 
   if (dry) {
-    logger.info(`Would update ${packageName}: ${currentVersion} → ${latestCompatible}`);
+    logger.info(
+      `Would update ${packageName}: ${currentVersion} → ${latestCompatible}`
+    );
   } else {
     config.requires[packageName] = latestCompatible;
-    logger.success(`Updated ${packageName}: ${currentVersion} → ${latestCompatible}`);
+    logger.success(
+      `Updated ${packageName}: ${currentVersion} → ${latestCompatible}`
+    );
   }
 }
 
@@ -114,10 +126,14 @@ async function updateAllPackages(config: any, dry: boolean) {
 
   for (const update of updates) {
     if (dry) {
-      logger.info(`Would update ${update.name}: ${update.current} → ${update.latest}`);
+      logger.info(
+        `Would update ${update.name}: ${update.current} → ${update.latest}`
+      );
     } else {
       config.requires[update.name] = update.latest;
-      logger.success(`Updated ${update.name}: ${update.current} → ${update.latest}`);
+      logger.success(
+        `Updated ${update.name}: ${update.current} → ${update.latest}`
+      );
     }
   }
 }

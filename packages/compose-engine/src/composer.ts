@@ -2,22 +2,25 @@ import type {
   PolicyPartial,
   ManifestConfig,
   CompositionResult,
-  Provider
+  Provider,
 } from '@ai-policies/core-schemas';
 import {
   shouldIncludePartialForProvider,
   createCompositionMetadata,
-  generateMetadataHeader
+  generateMetadataHeader,
 } from '@ai-policies/core-schemas';
 
 import type {
   CompositionOptions,
   CompositionError,
-  ContentTransformer
+  ContentTransformer,
 } from './types.js';
 import { resolveDependencies } from './resolver.js';
 import { mergePartials } from './merger.js';
-import { extractProtectedBlocks, mergeProtectedBlocks } from './protected-blocks.js';
+import {
+  extractProtectedBlocks,
+  mergeProtectedBlocks,
+} from './protected-blocks.js';
 import { sortPartialsByComposition, deduplicatePartials } from './utils.js';
 
 /**
@@ -31,7 +34,7 @@ export class PolicyComposer {
     this.addTransformer({
       name: 'remove-empty-lines',
       priority: 100,
-      transform: (content) => content.replace(/\n\s*\n\s*\n/g, '\n\n'),
+      transform: content => content.replace(/\n\s*\n\s*\n/g, '\n\n'),
     });
   }
 
@@ -60,18 +63,19 @@ export class PolicyComposer {
       );
 
       // Step 2: Exclude specified partials
-      const includedPartials = filteredPartials.filter(partial =>
-        !options.excludePartials?.includes(partial.frontmatter.id)
+      const includedPartials = filteredPartials.filter(
+        partial => !options.excludePartials?.includes(partial.frontmatter.id)
       );
 
       // Step 3: Deduplicate partials (same ID from different packages)
-      const { partials: deduplicatedPartials, conflicts } = deduplicatePartials(
-        includedPartials
-      );
+      const { partials: deduplicatedPartials, conflicts } =
+        deduplicatePartials(includedPartials);
 
       // Log conflicts as warnings
       for (const conflict of conflicts) {
-        console.warn(`Conflict resolved: Using ${conflict.winner.frontmatter.id} from ${conflict.winner.packageName} over ${conflict.losers.map(l => l.packageName).join(', ')}`);
+        console.warn(
+          `Conflict resolved: Using ${conflict.winner.frontmatter.id} from ${conflict.winner.packageName} over ${conflict.losers.map(l => l.packageName).join(', ')}`
+        );
       }
 
       // Step 4: Resolve dependencies
@@ -95,7 +99,9 @@ export class PolicyComposer {
       }
 
       if (errors.length > 0 && !options.debug) {
-        throw new Error(`Composition failed: ${errors.map(e => e.message).join('; ')}`);
+        throw new Error(
+          `Composition failed: ${errors.map(e => e.message).join('; ')}`
+        );
       }
 
       // Step 5: Sort partials by composition rules
@@ -106,7 +112,10 @@ export class PolicyComposer {
 
       // Step 6: Extract protected blocks from existing content
       // (This would read from existing files in a real implementation)
-      const protectedBlocks = await extractProtectedBlocks('', config.compose.protectedLayers);
+      const protectedBlocks = await extractProtectedBlocks(
+        '',
+        config.compose.protectedLayers
+      );
 
       // Step 7: Merge partials into final content
       const mergedContent = await mergePartials(
@@ -123,10 +132,13 @@ export class PolicyComposer {
       const finalContent = mergeProtectedBlocks(mergedContent, protectedBlocks);
 
       // Step 9: Create metadata
-      const packages = sortedPartials.reduce((acc, partial) => {
-        acc[partial.packageName] = partial.packageVersion;
-        return acc;
-      }, {} as Record<string, string>);
+      const packages = sortedPartials.reduce(
+        (acc, partial) => {
+          acc[partial.packageName] = partial.packageVersion;
+          return acc;
+        },
+        {} as Record<string, string>
+      );
 
       const metadata = createCompositionMetadata(
         packages,
@@ -145,9 +157,10 @@ ${finalContent}`;
         content: output,
         metadata,
       };
-
     } catch (error) {
-      throw new Error(`Composition failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Composition failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 

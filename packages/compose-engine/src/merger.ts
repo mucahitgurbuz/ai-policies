@@ -1,4 +1,8 @@
-import type { PolicyPartial, ManifestConfig, Provider } from '@ai-policies/core-schemas';
+import type {
+  PolicyPartial,
+  ManifestConfig,
+  Provider,
+} from '@ai-policies/core-schemas';
 import type { ContentTransformer, TransformContext } from './types.js';
 
 export interface MergeOptions {
@@ -34,7 +38,9 @@ export async function mergePartials(
     const layerPartials = layerSections.get(layer);
 
     if (!layerPartials) {
-      console.warn(`Skipping partial ${partial.frontmatter.id} with unknown layer: ${layer}`);
+      console.warn(
+        `Skipping partial ${partial.frontmatter.id} with unknown layer: ${layer}`
+      );
       continue;
     }
 
@@ -72,7 +78,9 @@ export async function mergePartials(
 
   // Add team append content if enabled
   if (composeSettings.teamAppend && options.teamAppendContent) {
-    const teamAppendSection = createTeamAppendSection(options.teamAppendContent);
+    const teamAppendSection = createTeamAppendSection(
+      options.teamAppendContent
+    );
     sections.push(teamAppendSection);
   }
 
@@ -97,7 +105,9 @@ function createLayerHeader(layer: string): string {
     team: 'Team-Specific Policies',
   };
 
-  const title = layerTitles[layer as keyof typeof layerTitles] || `${layer.charAt(0).toUpperCase()}${layer.slice(1)} Policies`;
+  const title =
+    layerTitles[layer as keyof typeof layerTitles] ||
+    `${layer.charAt(0).toUpperCase()}${layer.slice(1)} Policies`;
 
   return `## ${title}`;
 }
@@ -179,13 +189,15 @@ export function extractSections(content: string): Map<string, string> {
  * Normalize whitespace in content
  */
 export function normalizeWhitespace(content: string): string {
-  return content
-    // Remove trailing whitespace from lines
-    .replace(/[ \\t]+$/gm, '')
-    // Normalize multiple blank lines to single blank line
-    .replace(/\\n\\s*\\n\\s*\\n/g, '\\n\\n')
-    // Ensure content ends with single newline
-    .replace(/\\n*$/, '\\n');
+  return (
+    content
+      // Remove trailing whitespace from lines
+      .replace(/[ \\t]+$/gm, '')
+      // Normalize multiple blank lines to single blank line
+      .replace(/\\n\\s*\\n\\s*\\n/g, '\\n\\n')
+      // Ensure content ends with single newline
+      .replace(/\\n*$/, '\\n')
+  );
 }
 
 /**

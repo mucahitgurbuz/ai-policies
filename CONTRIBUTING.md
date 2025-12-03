@@ -84,7 +84,7 @@ docs/                     # Documentation
 
 ### Example Policy Partial
 
-```markdown
+````markdown
 ---
 id: nodejs-error-handling
 layer: stack
@@ -98,6 +98,7 @@ description: Error handling patterns for Node.js applications
 # Node.js Error Handling
 
 ## Async Error Handling
+
 - Always use try-catch with async/await
 - Handle promise rejections explicitly
 - Use error-first callbacks consistently
@@ -116,7 +117,9 @@ async function fetchUser(id) {
   }
 }
 ```
-```
+````
+
+````
 
 ## Code Style
 
@@ -134,7 +137,7 @@ pnpm format
 
 # Check formatting
 pnpm format:check
-```
+````
 
 ### TypeScript Guidelines
 
@@ -186,7 +189,9 @@ describe('PolicyComposer', () => {
       createMockPartial('react-hooks', 'stack', 30),
     ];
 
-    const result = await composer.compose(partials, mockConfig, { provider: 'cursor' });
+    const result = await composer.compose(partials, mockConfig, {
+      provider: 'cursor',
+    });
 
     expect(result.content).toContain('core-safety');
     expect(result.content).toContain('react-hooks');
@@ -218,6 +223,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Run command '...'
 2. With configuration '....'
 3. See error
@@ -226,6 +232,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Environment:**
+
 - OS: [e.g. macOS, Windows, Linux]
 - Node.js version: [e.g. 18.16.0]
 - AI Policies version: [e.g. 1.0.0]
@@ -245,6 +252,7 @@ We love feature requests! Before submitting one:
 4. Provide a clear use case
 
 Feature requests should include:
+
 - Problem description
 - Proposed solution
 - Alternatives considered
@@ -293,6 +301,7 @@ By contributing, you agree that your contributions will be licensed under the MI
 ## Questions?
 
 Feel free to reach out:
+
 - Open a [GitHub Discussion](https://github.com/ai-policies/ai-policies/discussions)
 - Email us at [contributors@ai-policies.dev](mailto:contributors@ai-policies.dev)
 - Join our [Discord community](https://discord.gg/ai-policies)
@@ -300,6 +309,7 @@ Feel free to reach out:
 ## Recognition
 
 Contributors are recognized in:
+
 - Release notes
 - [Contributors page](https://github.com/ai-policies/ai-policies/graphs/contributors)
 - Annual contributor highlights

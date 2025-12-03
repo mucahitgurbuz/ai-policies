@@ -3,7 +3,11 @@ import path from 'path';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
 
-import { getDefaultManifest, saveManifest, MANIFEST_FILE } from '../utils/config.js';
+import {
+  getDefaultManifest,
+  saveManifest,
+  MANIFEST_FILE,
+} from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 
 interface InitOptions {
@@ -28,13 +32,13 @@ export const initCommand: CommandModule<{}, InitOptions> = {
       choices: ['basic', 'frontend', 'backend', 'fullstack'],
     },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       const cwd = process.cwd();
       const manifestPath = path.join(cwd, MANIFEST_FILE);
 
       // Check if manifest already exists
-      if (await fs.pathExists(manifestPath) && !argv.force) {
+      if ((await fs.pathExists(manifestPath)) && !argv.force) {
         const { overwrite } = await inquirer.prompt([
           {
             type: 'confirm',
@@ -65,7 +69,9 @@ export const initCommand: CommandModule<{}, InitOptions> = {
 
       // Create output directories
       if (config.output.copilot) {
-        const copilotDir = path.dirname(path.resolve(cwd, config.output.copilot));
+        const copilotDir = path.dirname(
+          path.resolve(cwd, config.output.copilot)
+        );
         await fs.ensureDir(copilotDir);
         logger.success(`Created directory ${path.relative(cwd, copilotDir)}`);
       }
@@ -73,10 +79,16 @@ export const initCommand: CommandModule<{}, InitOptions> = {
       logger.info('');
       logger.info('Next steps:');
       logger.info('  1. Review and customize your .ai-policies.yaml');
-      logger.info('  2. Run "ai-policies sync" to generate your IDE configurations');
-      logger.info('  3. Add .cursorrules and .copilot/ to your .gitignore if desired');
+      logger.info(
+        '  2. Run "ai-policies sync" to generate your IDE configurations'
+      );
+      logger.info(
+        '  3. Add .cursorrules and .copilot/ to your .gitignore if desired'
+      );
     } catch (error) {
-      logger.error(`Failed to initialize: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Failed to initialize: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
   },
@@ -136,7 +148,7 @@ async function promptForConfiguration() {
       name: 'includeWorkflows',
       message: 'Include workflow management policies (Jira, etc)?',
       default: false,
-      when: (answers) => answers.projectType !== 'basic',
+      when: answers => answers.projectType !== 'basic',
     },
     {
       type: 'confirm',

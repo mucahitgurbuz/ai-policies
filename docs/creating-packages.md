@@ -52,40 +52,42 @@ description: Security rules for all code
 # Security Rules
 
 ## Authentication
+
 - Always verify user identity before sensitive operations
 - Use secure token storage
 
 ## Data Protection
+
 - Never log sensitive information
 - Encrypt data at rest and in transit
 ```
 
 ### Frontmatter Fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `id` | Yes | Unique identifier (lowercase, hyphens only) |
-| `layer` | Yes | `core`, `domain`, `stack`, or `team` |
-| `weight` | Yes | Order within layer (0-1000, lower = first) |
-| `protected` | Yes | Prevent override by higher layers |
-| `dependsOn` | Yes | Array of required partial IDs |
-| `owner` | Yes | Team/person responsible |
-| `tags` | No | Categorization tags |
-| `providers` | No | `["cursor"]`, `["copilot"]`, or both |
-| `description` | No | Human-readable description |
+| Field         | Required | Description                                 |
+| ------------- | -------- | ------------------------------------------- |
+| `id`          | Yes      | Unique identifier (lowercase, hyphens only) |
+| `layer`       | Yes      | `core`, `domain`, `stack`, or `team`        |
+| `weight`      | Yes      | Order within layer (0-1000, lower = first)  |
+| `protected`   | Yes      | Prevent override by higher layers           |
+| `dependsOn`   | Yes      | Array of required partial IDs               |
+| `owner`       | Yes      | Team/person responsible                     |
+| `tags`        | No       | Categorization tags                         |
+| `providers`   | No       | `["cursor"]`, `["copilot"]`, or both        |
+| `description` | No       | Human-readable description                  |
 
 ### Layers
 
-| Layer | Weight Range | Purpose |
-|-------|-------------|---------|
-| `core` | 0-100 | Safety, security, fundamentals |
-| `domain` | 100-200 | Business domain rules |
-| `stack` | 200-300 | Technology-specific patterns |
-| `team` | 300-400 | Team customizations |
+| Layer    | Weight Range | Purpose                        |
+| -------- | ------------ | ------------------------------ |
+| `core`   | 0-100        | Safety, security, fundamentals |
+| `domain` | 100-200      | Business domain rules          |
+| `stack`  | 200-300      | Technology-specific patterns   |
+| `team`   | 300-400      | Team customizations            |
 
 ## Example: React Patterns
 
-```markdown
+````markdown
 ---
 id: react-hooks
 layer: stack
@@ -99,11 +101,13 @@ description: React hooks best practices
 # React Hooks Guidelines
 
 ## State Management
+
 - Use useState for local component state
 - Use useContext for shared state
 - Use useReducer for complex state logic
 
 ## Effects
+
 - Always include cleanup functions
 - Specify correct dependency arrays
 - Avoid infinite loops
@@ -118,7 +122,9 @@ useEffect(() => {
   return () => controller.abort();
 }, []);
 ```
-```
+````
+
+````
 
 ## Publishing
 
@@ -126,7 +132,7 @@ useEffect(() => {
 
 ```bash
 npm publish --access public
-```
+````
 
 ### Private Registry
 
@@ -140,8 +146,8 @@ Add to `.ai-policies.yaml`:
 
 ```yaml
 requires:
-  "@ai-policies/core": "^1.0.0"
-  "@your-org/my-policies": "^1.0.0"
+  '@ai-policies/core': '^1.0.0'
+  '@your-org/my-policies': '^1.0.0'
 ```
 
 Then run:
@@ -153,6 +159,7 @@ ai-policies sync
 ## Testing Your Package
 
 1. Link locally:
+
    ```bash
    cd my-policies
    npm link
@@ -162,6 +169,7 @@ ai-policies sync
    ```
 
 2. Test sync:
+
    ```bash
    ai-policies sync --verbose
    ```
@@ -170,4 +178,3 @@ ai-policies sync
    ```bash
    ai-policies validate --partials
    ```
-

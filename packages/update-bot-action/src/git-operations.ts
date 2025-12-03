@@ -14,8 +14,13 @@ export class GitOperations {
   /**
    * Clone a repository and create a new branch
    */
-  async cloneRepository(repositoryUrl: string, branchName: string): Promise<string> {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ai-policies-update-'));
+  async cloneRepository(
+    repositoryUrl: string,
+    branchName: string
+  ): Promise<string> {
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'ai-policies-update-')
+    );
     this.tempDirs.push(tempDir);
 
     core.info(`Cloning repository to ${tempDir}`);
@@ -29,7 +34,10 @@ export class GitOperations {
       // Configure git in the cloned repository
       const repoGit = simpleGit(tempDir);
       await repoGit.addConfig('user.name', 'AI Policies Bot');
-      await repoGit.addConfig('user.email', 'ai-policies-bot@users.noreply.github.com');
+      await repoGit.addConfig(
+        'user.email',
+        'ai-policies-bot@users.noreply.github.com'
+      );
 
       // Create and checkout new branch
       await repoGit.checkoutLocalBranch(branchName);
@@ -53,7 +61,7 @@ export class GitOperations {
     try {
       // Check if .ai-policies.yaml exists
       const manifestPath = path.join(workingDir, '.ai-policies.yaml');
-      if (!await fs.pathExists(manifestPath)) {
+      if (!(await fs.pathExists(manifestPath))) {
         throw new Error('No .ai-policies.yaml found in repository');
       }
 
@@ -69,7 +77,8 @@ export class GitOperations {
       // Check if there are changes after sync
       const statusAfter = await git.status();
 
-      const hasChanges = statusAfter.files.length > statusBefore.files.length ||
+      const hasChanges =
+        statusAfter.files.length > statusBefore.files.length ||
         statusAfter.modified.length > 0 ||
         statusAfter.created.length > 0 ||
         statusAfter.deleted.length > 0;
@@ -79,7 +88,9 @@ export class GitOperations {
 
         // Log the changes
         for (const file of statusAfter.files) {
-          core.info(`  ${file.working_dir === 'M' ? 'Modified' : file.working_dir === 'A' ? 'Added' : 'Deleted'}: ${file.path}`);
+          core.info(
+            `  ${file.working_dir === 'M' ? 'Modified' : file.working_dir === 'A' ? 'Added' : 'Deleted'}: ${file.path}`
+          );
         }
       } else {
         core.info('No changes detected after sync');
@@ -113,7 +124,6 @@ export class GitOperations {
       // Push branch
       await git.push('origin', branchName);
       core.info(`Pushed branch: ${branchName}`);
-
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to commit and push: ${message}`);

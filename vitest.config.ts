@@ -19,21 +19,35 @@ export default defineConfig({
       ],
     },
     include: ['packages/**/*.{test,spec}.{js,ts}'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
   },
   resolve: {
     alias: {
       '@ai-policies/cli': resolve(__dirname, './packages/cli/src'),
-      '@ai-policies/core-schemas': resolve(__dirname, './packages/core-schemas/src'),
-      '@ai-policies/compose-engine': resolve(__dirname, './packages/compose-engine/src'),
-      '@ai-policies/provider-cursor': resolve(__dirname, './packages/providers/provider-cursor/src'),
-      '@ai-policies/provider-copilot': resolve(__dirname, './packages/providers/provider-copilot/src'),
-      '@ai-policies/policy-registry': resolve(__dirname, './packages/policy-registry/src'),
-      '@ai-policies/update-bot-action': resolve(__dirname, './packages/update-bot-action/src'),
+      '@ai-policies/core-schemas': resolve(
+        __dirname,
+        './packages/core-schemas/src'
+      ),
+      '@ai-policies/compose-engine': resolve(
+        __dirname,
+        './packages/compose-engine/src'
+      ),
+      '@ai-policies/provider-cursor': resolve(
+        __dirname,
+        './packages/providers/provider-cursor/src'
+      ),
+      '@ai-policies/provider-copilot': resolve(
+        __dirname,
+        './packages/providers/provider-copilot/src'
+      ),
+      '@ai-policies/policy-registry': resolve(
+        __dirname,
+        './packages/policy-registry/src'
+      ),
+      '@ai-policies/update-bot-action': resolve(
+        __dirname,
+        './packages/update-bot-action/src'
+      ),
     },
   },
 });

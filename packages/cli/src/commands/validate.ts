@@ -29,13 +29,15 @@ export const validateCommand: CommandModule<{}, ValidateOptions> = {
       default: false,
     },
   },
-  handler: async (argv) => {
+  handler: async argv => {
     try {
       logger.info('🔍 Validating AI Policies configuration...\n');
 
       const manifestPath = await findManifest();
       if (!manifestPath) {
-        logger.error('No .ai-policies.yaml found. Run "ai-policies init" first.');
+        logger.error(
+          'No .ai-policies.yaml found. Run "ai-policies init" first.'
+        );
         process.exit(1);
       }
 
@@ -65,7 +67,9 @@ export const validateCommand: CommandModule<{}, ValidateOptions> = {
         process.exit(1);
       }
     } catch (error) {
-      logger.error(`Validation failed: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Validation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
       process.exit(1);
     }
   },
@@ -114,33 +118,43 @@ async function validateManifestSchema(manifestPath: string): Promise<string[]> {
 
       // Check that output has at least one target
       if (!manifest.output.cursor && !manifest.output.copilot) {
-        errors.push('At least one output target (cursor or copilot) must be specified');
+        errors.push(
+          'At least one output target (cursor or copilot) must be specified'
+        );
       }
 
       // Check that compose.order contains valid layers
       const validLayers = ['core', 'domain', 'stack', 'team'];
       for (const layer of manifest.compose.order) {
         if (!validLayers.includes(layer)) {
-          errors.push(`Invalid layer in compose.order: '${layer}'. Valid layers: ${validLayers.join(', ')}`);
+          errors.push(
+            `Invalid layer in compose.order: '${layer}'. Valid layers: ${validLayers.join(', ')}`
+          );
         }
       }
 
       // Check that protectedLayers are in compose.order
       for (const layer of manifest.compose.protectedLayers) {
         if (!manifest.compose.order.includes(layer)) {
-          errors.push(`Protected layer '${layer}' must be included in compose.order`);
+          errors.push(
+            `Protected layer '${layer}' must be included in compose.order`
+          );
         }
       }
 
       // Validate package names format
       for (const packageName of Object.keys(manifest.requires)) {
         if (!packageName.startsWith('@') || !packageName.includes('/')) {
-          errors.push(`Invalid package name format: '${packageName}'. Expected format: @scope/name`);
+          errors.push(
+            `Invalid package name format: '${packageName}'. Expected format: @scope/name`
+          );
         }
       }
     }
   } catch (yamlError) {
-    errors.push(`Invalid YAML syntax: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`);
+    errors.push(
+      `Invalid YAML syntax: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`
+    );
   }
 
   return errors;

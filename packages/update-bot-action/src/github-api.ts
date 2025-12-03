@@ -1,8 +1,10 @@
 import { getOctokit } from '@actions/github';
 import type { RestEndpointMethodTypes } from '@octokit/rest';
 
-type CreatePullRequestParams = RestEndpointMethodTypes['pulls']['create']['parameters'];
-type PullRequestResponse = RestEndpointMethodTypes['pulls']['create']['response']['data'];
+type CreatePullRequestParams =
+  RestEndpointMethodTypes['pulls']['create']['parameters'];
+type PullRequestResponse =
+  RestEndpointMethodTypes['pulls']['create']['response']['data'];
 
 /**
  * GitHub API client for update bot operations
@@ -36,7 +38,11 @@ export class GitHubClient {
   /**
    * Check if a branch exists
    */
-  async branchExists(owner: string, repo: string, branch: string): Promise<boolean> {
+  async branchExists(
+    owner: string,
+    repo: string,
+    branch: string
+  ): Promise<boolean> {
     try {
       await this.octokit.rest.repos.getBranch({
         owner,
@@ -55,7 +61,9 @@ export class GitHubClient {
   /**
    * Find repositories in an organization that have AI Policies
    */
-  async findRepositoriesWithAIPolicies(organization: string): Promise<string[]> {
+  async findRepositoriesWithAIPolicies(
+    organization: string
+  ): Promise<string[]> {
     const repositories: string[] = [];
     let page = 1;
     const perPage = 100;
@@ -75,13 +83,19 @@ export class GitHubClient {
       // Check each repository for AI Policies configuration
       for (const repo of response.data) {
         try {
-          const hasConfig = await this.hasAIPoliciesConfig(organization, repo.name);
+          const hasConfig = await this.hasAIPoliciesConfig(
+            organization,
+            repo.name
+          );
           if (hasConfig) {
             repositories.push(`${organization}/${repo.name}`);
           }
         } catch (error) {
           // Skip repositories we can't access
-          console.warn(`Could not check ${repo.name} for AI Policies config:`, error);
+          console.warn(
+            `Could not check ${repo.name} for AI Policies config:`,
+            error
+          );
         }
       }
 
@@ -168,7 +182,8 @@ export class GitHubClient {
   ): Promise<void> {
     try {
       // Note: This requires the GraphQL API
-      await this.octokit.graphql(`
+      await this.octokit.graphql(
+        `
         mutation(\$pullRequestId: ID!) {
           enablePullRequestAutoMerge(input: {
             pullRequestId: \$pullRequestId
@@ -179,9 +194,15 @@ export class GitHubClient {
             }
           }
         }
-      `, {
-        pullRequestId: await this.getPullRequestNodeId(owner, repo, pullNumber),
-      });
+      `,
+        {
+          pullRequestId: await this.getPullRequestNodeId(
+            owner,
+            repo,
+            pullNumber
+          ),
+        }
+      );
     } catch (error) {
       console.warn('Failed to enable auto-merge:', error);
       // Don't fail the entire action if auto-merge fails

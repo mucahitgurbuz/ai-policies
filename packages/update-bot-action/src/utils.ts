@@ -17,7 +17,9 @@ export function parseRepositoryList(input: string): string[] {
       // Validate repository format (owner/repo)
       const parts = repo.split('/');
       if (parts.length !== 2) {
-        throw new Error(`Invalid repository format: '${repo}'. Expected format: 'owner/repo'`);
+        throw new Error(
+          `Invalid repository format: '${repo}'. Expected format: 'owner/repo'`
+        );
       }
 
       return true;
@@ -77,8 +79,14 @@ export function formatPullRequestBody(
   formatted = formatted.replace(/\\$\\{repository\\}/g, variables.repository);
   formatted = formatted.replace(/\\$\\{branch\\}/g, variables.branch);
   formatted = formatted.replace(/\\$\\{timestamp\\}/g, variables.timestamp);
-  formatted = formatted.replace(/\\$\\{date\\}/g, new Date().toLocaleDateString());
-  formatted = formatted.replace(/\\$\\{time\\}/g, new Date().toLocaleTimeString());
+  formatted = formatted.replace(
+    /\\$\\{date\\}/g,
+    new Date().toLocaleDateString()
+  );
+  formatted = formatted.replace(
+    /\\$\\{time\\}/g,
+    new Date().toLocaleTimeString()
+  );
 
   return formatted;
 }
@@ -131,11 +139,7 @@ export async function retry<T>(
     maxDelay?: number;
   } = {}
 ): Promise<T> {
-  const {
-    maxAttempts = 3,
-    baseDelay = 1000,
-    maxDelay = 10000,
-  } = options;
+  const { maxAttempts = 3, baseDelay = 1000, maxDelay = 10000 } = options;
 
   let lastError: Error;
 
@@ -152,7 +156,10 @@ export async function retry<T>(
       // Calculate delay with exponential backoff
       const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
 
-      console.warn(`Attempt ${attempt} failed, retrying in ${delay}ms:`, lastError.message);
+      console.warn(
+        `Attempt ${attempt} failed, retrying in ${delay}ms:`,
+        lastError.message
+      );
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -195,11 +202,15 @@ export function generateBranchName(baseName: string): string {
 /**
  * Extract package version information from AI Policies output
  */
-export function extractPackageVersions(content: string): Record<string, string> {
+export function extractPackageVersions(
+  content: string
+): Record<string, string> {
   const packages: Record<string, string> = {};
 
   // Look for AI-POLICIES-META comment
-  const metaMatch = content.match(/<!--\\s*AI-POLICIES-META:\\s*([^-]+)\\s*-->/);
+  const metaMatch = content.match(
+    /<!--\\s*AI-POLICIES-META:\\s*([^-]+)\\s*-->/
+  );
 
   if (metaMatch) {
     try {

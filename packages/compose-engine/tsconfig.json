@@ -14,7 +14,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"],
-  "references": [
-    { "path": "../core-schemas" }
-  ]
+  "references": [{ "path": "../core-schemas" }]
 }

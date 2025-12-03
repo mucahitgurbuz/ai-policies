@@ -5,7 +5,9 @@ import type { DependencyResolutionResult } from './types.js';
 /**
  * Resolve partial dependencies using topological sort
  */
-export function resolveDependencies(partials: PolicyPartial[]): DependencyResolutionResult {
+export function resolveDependencies(
+  partials: PolicyPartial[]
+): DependencyResolutionResult {
   const partialMap = new Map<string, PolicyPartial>();
   const dependencyGraph = new Map<string, string[]>();
 
@@ -16,9 +18,7 @@ export function resolveDependencies(partials: PolicyPartial[]): DependencyResolu
   }
 
   // Detect circular dependencies
-  const circular = detectCircularDependencies(
-    partials.map(p => p.frontmatter)
-  );
+  const circular = detectCircularDependencies(partials.map(p => p.frontmatter));
 
   // Find missing dependencies
   const missing: Array<{ partialId: string; missingDeps: string[] }> = [];

@@ -3,7 +3,7 @@ import type {
   ManifestConfig,
   CompositionResult,
   CompositionMetadata,
-  Provider
+  Provider,
 } from '@ai-policies/core-schemas';
 
 export interface CompositionOptions {

@@ -8,7 +8,7 @@ import type {
   PartialFrontmatter,
   ManifestConfig,
   PolicyPartial,
-  CompositionMetadata
+  CompositionMetadata,
 } from './types.js';
 
 /**
@@ -81,7 +81,8 @@ export function isValidSemver(version: string): boolean {
  * Validate version range format
  */
 export function isValidVersionRange(range: string): boolean {
-  const versionRangeRegex = /^(\^|~|>=|>|<=|<|=)?[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]*)?$/;
+  const versionRangeRegex =
+    /^(\^|~|>=|>|<=|<|=)?[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]*)?$/;
   return versionRangeRegex.test(range);
 }
 
@@ -93,7 +94,7 @@ export function createContentHash(content: string): string {
   let hash = 0;
   for (let i = 0; i < content.length; i++) {
     const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(16);
@@ -125,7 +126,9 @@ export function createCompositionMetadata(
 /**
  * Parse metadata from generated file header
  */
-export function parseMetadataFromHeader(content: string): CompositionMetadata | null {
+export function parseMetadataFromHeader(
+  content: string
+): CompositionMetadata | null {
   const metaMatch = content.match(/<!--\s*AI-POLICIES-META:\s*([^-]+)\s*-->/);
 
   if (!metaMatch) {
@@ -164,7 +167,9 @@ Packages: ${packagesList}
 /**
  * Detect circular dependencies in partials
  */
-export function detectCircularDependencies(partials: PartialFrontmatter[]): string[][] {
+export function detectCircularDependencies(
+  partials: PartialFrontmatter[]
+): string[][] {
   const graph = new Map<string, string[]>();
 
   // Build dependency graph

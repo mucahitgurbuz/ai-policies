@@ -1,4 +1,8 @@
-import type { PolicyPartial, ManifestConfig, Layer } from '@ai-policies/core-schemas';
+import type {
+  PolicyPartial,
+  ManifestConfig,
+  Layer,
+} from '@ai-policies/core-schemas';
 import { getLayerPriority } from '@ai-policies/core-schemas';
 import type { ConflictResolution } from './types.js';
 
@@ -73,7 +77,9 @@ export function deduplicatePartials(partials: PolicyPartial[]): {
 /**
  * Resolve conflict between multiple partials with the same ID
  */
-function resolvePartialConflict(candidates: PolicyPartial[]): ConflictResolution {
+function resolvePartialConflict(
+  candidates: PolicyPartial[]
+): ConflictResolution {
   // Priority rules:
   // 1. Protected partials win
   // 2. Higher layer priority wins (team > stack > domain > core)
@@ -88,9 +94,12 @@ function resolvePartialConflict(candidates: PolicyPartial[]): ConflictResolution
 
     if (comparison < 0) {
       winner = candidate;
-      reason = comparison === -1 ? 'protected' :
-               comparison === -2 ? 'layer-priority' :
-               'weight';
+      reason =
+        comparison === -1
+          ? 'protected'
+          : comparison === -2
+            ? 'layer-priority'
+            : 'weight';
     }
   }
 
@@ -293,7 +302,9 @@ export function createCompositionSummary(
     lines.push('');
     lines.push('Conflicts resolved:');
     for (const conflict of conflicts) {
-      lines.push(`  ${conflict.winner.frontmatter.id}: ${conflict.winner.packageName} won over ${conflict.losers.map(l => l.packageName).join(', ')} (${conflict.reason})`);
+      lines.push(
+        `  ${conflict.winner.frontmatter.id}: ${conflict.winner.packageName} won over ${conflict.losers.map(l => l.packageName).join(', ')} (${conflict.reason})`
+      );
     }
   }
 

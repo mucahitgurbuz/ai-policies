@@ -4,8 +4,15 @@ import { fileURLToPath } from 'url';
 import { glob } from 'glob';
 import matter from 'gray-matter';
 
-import type { PolicyPackage, PolicyPartial, PolicyPackageConfig } from '@ai-policies/core-schemas';
-import { validatePartialFrontmatter, validatePackageConfig } from '@ai-policies/core-schemas';
+import type {
+  PolicyPackage,
+  PolicyPartial,
+  PolicyPackageConfig,
+} from '@ai-policies/core-schemas';
+import {
+  validatePartialFrontmatter,
+  validatePackageConfig,
+} from '@ai-policies/core-schemas';
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +43,10 @@ export class PolicyRegistry {
           const policyPackage = await this.loadPolicyPackage(packagePath);
           this.packages.set(policyPackage.config.name, policyPackage);
         } catch (error) {
-          console.warn('Failed to load policy package from ' + packagePath + ':', error);
+          console.warn(
+            'Failed to load policy package from ' + packagePath + ':',
+            error
+          );
         }
       }
     }
@@ -63,7 +73,9 @@ export class PolicyRegistry {
   /**
    * Get packages that match the specified requirements
    */
-  async resolvePackages(requirements: Record<string, string>): Promise<PolicyPackage[]> {
+  async resolvePackages(
+    requirements: Record<string, string>
+  ): Promise<PolicyPackage[]> {
     await this.initialize();
     const resolved: PolicyPackage[] = [];
 
@@ -83,7 +95,9 @@ export class PolicyRegistry {
   /**
    * Get all partials from resolved packages
    */
-  async getPartials(requirements: Record<string, string>): Promise<PolicyPartial[]> {
+  async getPartials(
+    requirements: Record<string, string>
+  ): Promise<PolicyPartial[]> {
     const packages = await this.resolvePackages(requirements);
     const allPartials: PolicyPartial[] = [];
 
@@ -100,12 +114,17 @@ export class PolicyRegistry {
   private async loadPolicyPackage(packagePath: string): Promise<PolicyPackage> {
     // Load package.json
     const packageJsonPath = path.join(packagePath, 'package.json');
-    const packageJson = await fs.readJson(packageJsonPath) as PolicyPackageConfig;
+    const packageJson = (await fs.readJson(
+      packageJsonPath
+    )) as PolicyPackageConfig;
 
     // Validate package configuration
     const validation = validatePackageConfig(packageJson);
     if (!validation.valid) {
-      throw new Error('Invalid package configuration: ' + validation.errors.map(e => e.message).join(', '));
+      throw new Error(
+        'Invalid package configuration: ' +
+          validation.errors.map(e => e.message).join(', ')
+      );
     }
 
     // Load partials
@@ -121,7 +140,10 @@ export class PolicyRegistry {
   /**
    * Load all partials from a package directory
    */
-  private async loadPartials(packagePath: string, config: PolicyPackageConfig): Promise<PolicyPartial[]> {
+  private async loadPartials(
+    packagePath: string,
+    config: PolicyPackageConfig
+  ): Promise<PolicyPartial[]> {
     const partials: PolicyPartial[] = [];
     const aiPoliciesConfig = config['ai-policies'];
 
@@ -130,7 +152,9 @@ export class PolicyRegistry {
     }
 
     // Load partials for each provider
-    for (const [provider, partialsDir] of Object.entries(aiPoliciesConfig.partials)) {
+    for (const [provider, partialsDir] of Object.entries(
+      aiPoliciesConfig.partials
+    )) {
       const fullPartialsPath = path.join(packagePath, partialsDir);
 
       if (await fs.pathExists(fullPartialsPath)) {
@@ -166,7 +190,10 @@ export class PolicyRegistry {
         // Validate frontmatter
         const validation = validatePartialFrontmatter(parsed.data);
         if (!validation.valid) {
-          console.warn('Invalid frontmatter in ' + filePath + ':', validation.errors);
+          console.warn(
+            'Invalid frontmatter in ' + filePath + ':',
+            validation.errors
+          );
           continue;
         }
 
@@ -206,11 +233,15 @@ export async function getAvailablePackages(): Promise<PolicyPackage[]> {
   return defaultRegistry.getPackages();
 }
 
-export async function resolvePackages(requirements: Record<string, string>): Promise<PolicyPackage[]> {
+export async function resolvePackages(
+  requirements: Record<string, string>
+): Promise<PolicyPackage[]> {
   return defaultRegistry.resolvePackages(requirements);
 }
 
-export async function getPartials(requirements: Record<string, string>): Promise<PolicyPartial[]> {
+export async function getPartials(
+  requirements: Record<string, string>
+): Promise<PolicyPartial[]> {
   return defaultRegistry.getPartials(requirements);
 }
 

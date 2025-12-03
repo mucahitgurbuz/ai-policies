@@ -44,39 +44,45 @@ These are fundamental safety rules that must be followed in all AI-generated cod
 ## Anti-Patterns to Avoid
 
 ❌ **Bad**: Hardcoded secrets
+
 ```javascript
-const API_KEY = "sk-1234567890abcdef"; // Never do this
+const API_KEY = 'sk-1234567890abcdef'; // Never do this
 ```
 
 ❌ **Bad**: Unsafe user input handling
+
 ```javascript
 const query = `SELECT * FROM users WHERE id = ${userId}`; // SQL injection risk
 ```
 
 ❌ **Bad**: Exposing sensitive data in logs
+
 ```javascript
-console.log("User login attempt:", { username, password }); // Never log passwords
+console.log('User login attempt:', { username, password }); // Never log passwords
 ```
 
 ## Approved Patterns
 
 ✅ **Good**: Environment variables for secrets
+
 ```javascript
 const API_KEY = process.env.API_KEY;
 if (!API_KEY) {
-  throw new Error("API_KEY environment variable is required");
+  throw new Error('API_KEY environment variable is required');
 }
 ```
 
 ✅ **Good**: Parameterized queries
+
 ```javascript
-const query = "SELECT * FROM users WHERE id = ?";
+const query = 'SELECT * FROM users WHERE id = ?';
 const result = await db.query(query, [userId]);
 ```
 
 ✅ **Good**: Safe error logging
+
 ```javascript
-logger.error("Authentication failed", {
+logger.error('Authentication failed', {
   username,
   timestamp: new Date().toISOString(),
   // Never log passwords or tokens

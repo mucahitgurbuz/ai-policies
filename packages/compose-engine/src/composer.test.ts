@@ -51,10 +51,17 @@ describe('PolicyComposer', () => {
   it('should compose partials into content', async () => {
     const composer = createComposer();
     const partials = [
-      createMockPartial('core-safety', 'core', 10, '# Core Safety\n\n- Rule 1\n- Rule 2'),
+      createMockPartial(
+        'core-safety',
+        'core',
+        10,
+        '# Core Safety\n\n- Rule 1\n- Rule 2'
+      ),
     ];
 
-    const result = await composer.compose(partials, testConfig, { provider: 'cursor' });
+    const result = await composer.compose(partials, testConfig, {
+      provider: 'cursor',
+    });
 
     expect(result.content).toContain('Core Safety');
     expect(result.content).toContain('Rule 1');
@@ -70,7 +77,9 @@ describe('PolicyComposer', () => {
       createMockPartial('stack-react', 'stack', 10, '# React Rules'),
     ];
 
-    const result = await composer.compose(partials, testConfig, { provider: 'cursor' });
+    const result = await composer.compose(partials, testConfig, {
+      provider: 'cursor',
+    });
 
     // Core should come before stack, stack before team
     const coreIndex = result.content.indexOf('Core Safety');
@@ -89,7 +98,9 @@ describe('PolicyComposer', () => {
       createMockPartial('third', 'core', 30, '# Third'),
     ];
 
-    const result = await composer.compose(partials, testConfig, { provider: 'cursor' });
+    const result = await composer.compose(partials, testConfig, {
+      provider: 'cursor',
+    });
 
     const firstIndex = result.content.indexOf('First');
     const secondIndex = result.content.indexOf('Second');
@@ -144,7 +155,9 @@ describe('PolicyComposer', () => {
       createMockPartial('core-safety', 'core', 10, '# Core Safety'),
     ];
 
-    const result = await composer.compose(partials, testConfig, { provider: 'cursor' });
+    const result = await composer.compose(partials, testConfig, {
+      provider: 'cursor',
+    });
 
     expect(result.metadata.contentHash).toBeDefined();
     expect(result.metadata.contentHash.length).toBeGreaterThan(0);
@@ -155,7 +168,9 @@ describe('PolicyComposer', () => {
   it('should handle empty partials list', async () => {
     const composer = createComposer();
 
-    const result = await composer.compose([], testConfig, { provider: 'cursor' });
+    const result = await composer.compose([], testConfig, {
+      provider: 'cursor',
+    });
 
     expect(result.content).toBeDefined();
     expect(result.metadata).toBeDefined();
@@ -186,7 +201,9 @@ describe('PolicyComposer.validateInputs', () => {
     const errors = composer.validateInputs(partials, testConfig);
 
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.some(e => e.message.includes('Duplicate partial ID'))).toBe(true);
+    expect(errors.some(e => e.message.includes('Duplicate partial ID'))).toBe(
+      true
+    );
   });
 
   it('should detect invalid layer in partial', () => {
@@ -198,7 +215,9 @@ describe('PolicyComposer.validateInputs', () => {
     const errors = composer.validateInputs(partials, testConfig);
 
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.some(e => e.message.includes('not in compose.order'))).toBe(true);
+    expect(errors.some(e => e.message.includes('not in compose.order'))).toBe(
+      true
+    );
   });
 
   it('should return no errors for valid partials', () => {
@@ -213,4 +232,3 @@ describe('PolicyComposer.validateInputs', () => {
     expect(errors).toHaveLength(0);
   });
 });
-

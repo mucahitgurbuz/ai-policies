@@ -59,6 +59,7 @@ description: Core code quality standards and best practices
 ## Examples
 
 ### ✅ Good Function Design
+
 ```javascript
 /**
  * Calculates the total price including tax for a cart
@@ -72,11 +73,11 @@ function calculateTotalWithTax(items, taxRate) {
   }
 
   if (taxRate < 0 || taxRate > 1) {
-    throw new Error("Tax rate must be between 0 and 1");
+    throw new Error('Tax rate must be between 0 and 1');
   }
 
   const subtotal = items.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
+    return sum + item.price * item.quantity;
   }, 0);
 
   return subtotal * (1 + taxRate);
@@ -84,6 +85,7 @@ function calculateTotalWithTax(items, taxRate) {
 ```
 
 ### ❌ Poor Function Design
+
 ```javascript
 // Bad: unclear name, no validation, no documentation
 function calc(x, y) {
@@ -92,11 +94,12 @@ function calc(x, y) {
 ```
 
 ### ✅ Good Error Handling
+
 ```javascript
 async function getUserById(userId) {
   try {
     if (!userId) {
-      throw new ValidationError("User ID is required");
+      throw new ValidationError('User ID is required');
     }
 
     const user = await userRepository.findById(userId);
@@ -107,9 +110,9 @@ async function getUserById(userId) {
 
     return user;
   } catch (error) {
-    logger.error("Failed to retrieve user", {
+    logger.error('Failed to retrieve user', {
       userId,
-      error: error.message
+      error: error.message,
     });
     throw error; // Re-throw to let caller handle
   }
@@ -117,6 +120,7 @@ async function getUserById(userId) {
 ```
 
 ### ❌ Poor Error Handling
+
 ```javascript
 // Bad: silent failure, no logging, unclear errors
 async function getUser(id) {

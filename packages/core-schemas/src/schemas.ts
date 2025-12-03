@@ -12,9 +12,15 @@ const __dirname = dirname(__filename);
 const schemasDir = join(__dirname, '..', 'schemas');
 
 // Load and export schemas
-export const MANIFEST_SCHEMA = JSON.parse(readFileSync(join(schemasDir, 'manifest.json'), 'utf8'));
-export const PARTIAL_SCHEMA = JSON.parse(readFileSync(join(schemasDir, 'partial.json'), 'utf8'));
-export const PACKAGE_SCHEMA = JSON.parse(readFileSync(join(schemasDir, 'package.json'), 'utf8'));
+export const MANIFEST_SCHEMA = JSON.parse(
+  readFileSync(join(schemasDir, 'manifest.json'), 'utf8')
+);
+export const PARTIAL_SCHEMA = JSON.parse(
+  readFileSync(join(schemasDir, 'partial.json'), 'utf8')
+);
+export const PACKAGE_SCHEMA = JSON.parse(
+  readFileSync(join(schemasDir, 'package.json'), 'utf8')
+);
 
 /**
  * Schema URLs for external reference

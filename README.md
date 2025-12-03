@@ -37,14 +37,15 @@ That's it! Your `.cursorrules` and `.copilot/instructions.md` files are now gene
 
 ## 🎯 Supported IDEs
 
-| IDE | Configuration File | Features |
-|-----|-------------------|----------|
-| **Cursor** | `.cursorrules` | Rules, patterns, examples, anti-patterns |
+| IDE                | Configuration File         | Features                                       |
+| ------------------ | -------------------------- | ---------------------------------------------- |
+| **Cursor**         | `.cursorrules`             | Rules, patterns, examples, anti-patterns       |
 | **GitHub Copilot** | `.copilot/instructions.md` | Instructions, examples, constraints, templates |
 
 ## 📖 Core Concepts
 
 ### Policy Partials
+
 Markdown files with YAML frontmatter that define specific rules:
 
 ```markdown
@@ -65,6 +66,7 @@ owner: frontend-team
 ```
 
 ### Policy Packages
+
 Collections of partials with versioning:
 
 ```json
@@ -81,12 +83,13 @@ Collections of partials with versioning:
 ```
 
 ### Manifest Configuration
+
 Project-level configuration in `.ai-policies.yaml`:
 
 ```yaml
 requires:
-  "@ai-policies/core": "^1.0.0"
-  "@ai-policies/frontend-react": "^1.0.0"
+  '@ai-policies/core': '^1.0.0'
+  '@ai-policies/frontend-react': '^1.0.0'
 
 output:
   cursor: ./.cursorrules
@@ -129,26 +132,30 @@ examples/
 
 ## 🔧 CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `ai-policies init` | Initialize AI Policies in current directory |
-| `ai-policies sync` | Generate IDE configuration files |
-| `ai-policies diff` | Show differences between current and generated configs |
-| `ai-policies update` | Update policy packages to latest versions |
-| `ai-policies doctor` | Check for common issues and problems |
-| `ai-policies validate` | Validate configuration and schema compliance |
+| Command                | Description                                            |
+| ---------------------- | ------------------------------------------------------ |
+| `ai-policies init`     | Initialize AI Policies in current directory            |
+| `ai-policies sync`     | Generate IDE configuration files                       |
+| `ai-policies diff`     | Show differences between current and generated configs |
+| `ai-policies update`   | Update policy packages to latest versions              |
+| `ai-policies doctor`   | Check for common issues and problems                   |
+| `ai-policies validate` | Validate configuration and schema compliance           |
 
 ## 📦 Built-in Policy Packages
 
 ### @ai-policies/core
+
 Essential safety and security rules for all projects:
+
 - Security fundamentals (no hardcoded secrets, input validation)
 - Privacy protection (no PII logging, data minimization)
 - Error handling best practices
 - Code quality standards
 
 ### @ai-policies/frontend-react
+
 React development patterns and best practices:
+
 - Component architecture guidelines
 - Hooks usage patterns
 - State management recommendations
@@ -156,7 +163,9 @@ React development patterns and best practices:
 - Accessibility requirements
 
 ### @ai-policies/workflows-jira
+
 Jira integration and workflow management:
+
 - Commit message conventions with ticket references
 - Branch naming patterns
 - Pull request templates
@@ -185,9 +194,9 @@ Edit `.ai-policies.yaml` to add or remove policy packages:
 
 ```yaml
 requires:
-  "@ai-policies/core": "^1.0.0"
-  "@ai-policies/frontend-react": "^1.0.0"  # Add for React projects
-  "@ai-policies/workflows-jira": "~1.0.0"  # Add for Jira integration
+  '@ai-policies/core': '^1.0.0'
+  '@ai-policies/frontend-react': '^1.0.0' # Add for React projects
+  '@ai-policies/workflows-jira': '~1.0.0' # Add for Jira integration
 
 # Add team-specific customizations
 overrides:
@@ -205,6 +214,7 @@ ai-policies sync
 ```
 
 This generates:
+
 - `.cursorrules` for Cursor IDE
 - `.copilot/instructions.md` for GitHub Copilot
 
@@ -217,7 +227,7 @@ Add the GitHub Action to automatically update policies across repositories:
 name: AI Policies Update
 on:
   schedule:
-    - cron: '0 9 * * 1'  # Weekly on Mondays
+    - cron: '0 9 * * 1' # Weekly on Mondays
 
 jobs:
   update:

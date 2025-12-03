@@ -2,7 +2,12 @@
   "name": "@ai-policies/workflows-jira",
   "version": "1.0.0",
   "description": "Jira and workflow management policies for AI code generation",
-  "keywords": ["ai-policies", "jira", "workflow", "project-management"],
+  "keywords": [
+    "ai-policies",
+    "jira",
+    "workflow",
+    "project-management"
+  ],
   "license": "MIT",
   "author": "AI Policies Team",
   "homepage": "https://github.com/ai-policies/ai-policies",
@@ -15,6 +20,11 @@
       "cursor": "cursor/partials",
       "copilot": "copilot/partials"
     },
-    "tags": ["jira", "workflow", "project-management", "tickets"]
+    "tags": [
+      "jira",
+      "workflow",
+      "project-management",
+      "tickets"
+    ]
   }
 }

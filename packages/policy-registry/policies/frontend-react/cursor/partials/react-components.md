@@ -13,12 +13,14 @@ description: React component development guidelines and patterns
 ## Component Architecture
 
 ### Functional Components
+
 - **Always use functional components** with hooks instead of class components
 - **Implement proper TypeScript interfaces** for component props
 - **Use custom hooks** to extract and reuse stateful logic
 - **Keep components small and focused** on a single responsibility
 
 ### Component Structure
+
 ```tsx
 // ✅ Good: Well-structured functional component
 interface UserCardProps {
@@ -30,7 +32,7 @@ interface UserCardProps {
 export const UserCard: React.FC<UserCardProps> = ({
   user,
   onEdit,
-  className
+  className,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -38,15 +40,16 @@ export const UserCard: React.FC<UserCardProps> = ({
     setIsEditing(true);
   }, []);
 
-  const handleSave = useCallback((updatedUser: User) => {
-    onEdit?.(updatedUser);
-    setIsEditing(false);
-  }, [onEdit]);
+  const handleSave = useCallback(
+    (updatedUser: User) => {
+      onEdit?.(updatedUser);
+      setIsEditing(false);
+    },
+    [onEdit]
+  );
 
   return (
-    <div className={cn("user-card", className)}>
-      {/* Component content */}
-    </div>
+    <div className={cn('user-card', className)}>{/* Component content */}</div>
   );
 };
 ```
@@ -54,12 +57,14 @@ export const UserCard: React.FC<UserCardProps> = ({
 ## State Management
 
 ### Local State
+
 - **Use useState** for simple component state
 - **Use useReducer** for complex state logic
 - **Initialize state properly** to avoid undefined values
 - **Batch state updates** when updating multiple state variables
 
 ### State Updates
+
 ```tsx
 // ✅ Good: Proper state updates
 const [count, setCount] = useState(0);
@@ -73,6 +78,7 @@ const updateUser = (user: User) => dispatch({ type: 'UPDATE_USER', user });
 ```
 
 ### Global State
+
 - **Use Context API** for sharing state between components
 - **Consider state management libraries** (Redux, Zustand) for complex apps
 - **Avoid prop drilling** by using context when appropriate
@@ -81,6 +87,7 @@ const updateUser = (user: User) => dispatch({ type: 'UPDATE_USER', user });
 ## Hooks Best Practices
 
 ### useEffect
+
 - **Include all dependencies** in the dependency array
 - **Clean up effects** that create subscriptions or timers
 - **Use multiple useEffect hooks** for different concerns
@@ -89,7 +96,7 @@ const updateUser = (user: User) => dispatch({ type: 'UPDATE_USER', user });
 ```tsx
 // ✅ Good: Proper useEffect usage
 useEffect(() => {
-  const subscription = subscribeToData(userId, (data) => {
+  const subscription = subscribeToData(userId, data => {
     setData(data);
   });
 
@@ -100,6 +107,7 @@ useEffect(() => {
 ```
 
 ### Performance Hooks
+
 - **Use useMemo** for expensive calculations
 - **Use useCallback** for function references passed to children
 - **Use React.memo** for components that render frequently with same props
@@ -108,6 +116,7 @@ useEffect(() => {
 ## Event Handling
 
 ### Event Handlers
+
 - **Use useCallback** for event handlers to prevent unnecessary re-renders
 - **Handle errors** in event handlers gracefully
 - **Prevent default behavior** when necessary
@@ -115,28 +124,33 @@ useEffect(() => {
 
 ```tsx
 // ✅ Good: Proper event handling
-const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
+const handleSubmit = useCallback(
+  (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  try {
-    const formData = new FormData(event.currentTarget);
-    onSubmit(formData);
-  } catch (error) {
-    console.error('Form submission failed:', error);
-    setError('Submission failed. Please try again.');
-  }
-}, [onSubmit]);
+    try {
+      const formData = new FormData(event.currentTarget);
+      onSubmit(formData);
+    } catch (error) {
+      console.error('Form submission failed:', error);
+      setError('Submission failed. Please try again.');
+    }
+  },
+  [onSubmit]
+);
 ```
 
 ## Accessibility (a11y)
 
 ### Semantic HTML
+
 - **Use semantic HTML elements** (button, input, nav, main, etc.)
 - **Provide proper ARIA labels** for screen readers
 - **Include alt text** for images
 - **Ensure keyboard navigation** works properly
 
 ### Focus Management
+
 - **Manage focus** for modals and dynamic content
 - **Provide visible focus indicators** for interactive elements
 - **Use proper tab order** for navigation
@@ -171,9 +185,11 @@ return (
 );
 
 // BAD: Not using keys properly
-{items.map((item, index) => (
-  <Item key={index} data={item} /> // Using index as key
-))}
+{
+  items.map((item, index) => (
+    <Item key={index} data={item} /> // Using index as key
+  ));
+}
 
 // BAD: Side effects in render
 function MyComponent() {
@@ -193,14 +209,12 @@ state.items.push(newItem); // Mutating state
 const style = useMemo(() => ({ marginTop: 10 }), []);
 const itemNames = useMemo(() => items.map(item => item.name), [items]);
 
-return (
-  <MyComponent style={style} data={itemNames} />
-);
+return <MyComponent style={style} data={itemNames} />;
 
 // GOOD: Proper keys
-{items.map(item => (
-  <Item key={item.id} data={item} />
-))}
+{
+  items.map(item => <Item key={item.id} data={item} />);
+}
 
 // GOOD: Side effects in useEffect
 useEffect(() => {

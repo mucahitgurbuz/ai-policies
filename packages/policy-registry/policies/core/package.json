@@ -2,7 +2,12 @@
   "name": "@ai-policies/core",
   "version": "1.0.0",
   "description": "Core AI policies for safety, security, and quality",
-  "keywords": ["ai-policies", "security", "safety", "core"],
+  "keywords": [
+    "ai-policies",
+    "security",
+    "safety",
+    "core"
+  ],
   "license": "MIT",
   "author": "AI Policies Team",
   "homepage": "https://github.com/ai-policies/ai-policies",
@@ -15,6 +20,11 @@
       "cursor": "cursor/partials",
       "copilot": "copilot/partials"
     },
-    "tags": ["security", "safety", "core", "fundamental"]
+    "tags": [
+      "security",
+      "safety",
+      "core",
+      "fundamental"
+    ]
   }
 }

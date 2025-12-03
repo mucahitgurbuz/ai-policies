@@ -5,6 +5,7 @@ This is an example Ruby web service demonstrating how to use AI Policies to mana
 ## Overview
 
 This Ruby service uses AI Policies to:
+
 - Enforce security and safety guidelines for AI-generated code
 - Apply Ruby-specific development patterns and best practices
 - Maintain consistent code quality across the team
@@ -33,16 +34,19 @@ This Ruby service uses AI Policies to:
 ### Installation
 
 1. Install Ruby dependencies:
+
 ```bash
 bundle install
 ```
 
 2. Install AI Policies CLI:
+
 ```bash
 npm install -g @ai-policies/cli
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
@@ -51,21 +55,25 @@ cp .env.example .env
 ### Development
 
 1. Start the server:
+
 ```bash
 bundle exec ruby app.rb
 ```
 
 2. To update AI Policies configurations:
+
 ```bash
 ai-policies sync
 ```
 
 3. To check for policy changes:
+
 ```bash
 ai-policies diff
 ```
 
 4. To validate your setup:
+
 ```bash
 ai-policies doctor
 ```
@@ -73,6 +81,7 @@ ai-policies doctor
 ### Testing
 
 Run the test suite:
+
 ```bash
 bundle exec rspec
 ```
@@ -80,18 +89,21 @@ bundle exec rspec
 ## AI Policies Features Demonstrated
 
 ### Security Guidelines
+
 - Environment variable usage for sensitive configuration
 - Parameterized queries to prevent SQL injection
 - Secure error handling that doesn't expose internal details
 - Proper logging without sensitive information
 
 ### Ruby Best Practices
+
 - Clear method naming and structure
 - Proper error handling with custom exception types
 - Database transaction patterns
 - RESTful API design
 
 ### Team Customizations
+
 - RuboCop configuration adherence
 - Sequel ORM usage patterns
 - RSpec testing standards
@@ -238,14 +250,18 @@ Add AI Policies validation to your CI pipeline:
 ## Working with AI Assistants
 
 ### Cursor IDE
+
 With the generated `.cursorrules` file, Cursor will:
+
 - Suggest secure database query patterns
 - Recommend proper error handling
 - Enforce input validation practices
 - Apply Ruby idioms consistently
 
 ### GitHub Copilot
+
 The `.copilot/instructions.md` file helps Copilot:
+
 - Generate secure API endpoints
 - Follow team testing patterns
 - Apply proper logging practices
