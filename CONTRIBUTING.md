@@ -25,10 +25,20 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 
 ### Development Setup
 
+**Prerequisites:**
+- Node.js 18+
+- pnpm 8+ (install with `npm install -g pnpm` or use `corepack enable`)
+
 ```bash
 # Clone your fork
 git clone https://github.com/your-username/ai-policies.git
 cd ai-policies
+
+# Install pnpm (if not already installed)
+npm install -g pnpm
+# OR use corepack (comes with Node.js 16.9+)
+corepack enable
+corepack prepare pnpm@8.15.1 --activate
 
 # Install dependencies
 pnpm install

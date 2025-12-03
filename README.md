@@ -236,10 +236,20 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ### Development Setup
 
+**Prerequisites:**
+- Node.js 18+ 
+- pnpm 8+ (install with `npm install -g pnpm` or `corepack enable`)
+
 ```bash
 # Clone the repository
 git clone https://github.com/ai-policies/ai-policies.git
 cd ai-policies
+
+# Install pnpm (if not already installed)
+npm install -g pnpm
+# OR use corepack (comes with Node.js 16.9+)
+corepack enable
+corepack prepare pnpm@8.15.1 --activate
 
 # Install dependencies
 pnpm install
