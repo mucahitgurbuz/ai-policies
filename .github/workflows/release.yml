@@ -3,6 +3,9 @@ name: Release
 on:
   push:
     branches: [main]
+    paths:
+      - '.changeset/**'
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -10,6 +13,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    # Only run if NPM_TOKEN is configured
+    if: ${{ vars.ENABLE_NPM_PUBLISH == 'true' }}
     permissions:
       contents: write
       issues: write
@@ -54,3 +59,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # This job always runs to show status
+  release-status:
+    name: Release Status
+    runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_NPM_PUBLISH != 'true' }}
+    steps:
+      - name: Publishing disabled
+        run: |
+          echo "### 📦 npm Publishing Disabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "npm publishing is not enabled. To enable publishing:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Add \`NPM_TOKEN\` secret to your repository" >> $GITHUB_STEP_SUMMARY
+          echo "2. Add repository variable \`ENABLE_NPM_PUBLISH\` with value \`true\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Until then, packages will not be published to npm." >> $GITHUB_STEP_SUMMARY
