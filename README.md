@@ -100,12 +100,13 @@ compose:
 
 ## 📚 Documentation
 
-- [Getting Started Guide](docs/getting-started.md)
-- [Configuration Reference](docs/configuration.md)
-- [Creating Policy Packages](docs/creating-packages.md)
-- [CLI Commands](docs/cli-reference.md)
-- [GitHub Actions Setup](docs/github-actions.md)
-- [Examples](examples/)
+The main documentation is in this README. For more details:
+
+- **Getting Started**: See the [Quick Start](#-quick-start) section above
+- **Configuration**: See the [Manifest Configuration](#manifest-configuration) section
+- **CLI Commands**: See the [CLI Commands](#-cli-commands) section below
+- **Examples**: See the [examples/](examples/) directory for sample configurations
+- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines
 
 ## 🏗️ Architecture
 
@@ -263,12 +264,30 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Built with modern tooling: TypeScript, pnpm workspaces, Changesets
 - Thanks to all contributors and the open-source community
 
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**No policy partials found after sync:**
+- Verify your `.ai-policies.yaml` has correct package names in `requires`
+- Check that policy packages are properly installed
+- Run `ai-policies doctor` to diagnose issues
+
+**Generated files are empty:**
+- Ensure at least one output target (cursor or copilot) is specified
+- Check that policy packages contain partials for your selected provider
+- Run `ai-policies validate` to check configuration
+
+**Type errors or build failures:**
+- Run `pnpm install` to ensure all dependencies are installed
+- Run `pnpm build` to build all packages
+- Check TypeScript configuration with `pnpm typecheck`
+
 ## 📞 Support
 
-- 📖 [Documentation](https://github.com/ai-policies/ai-policies/tree/main/docs)
 - 🐛 [Report Issues](https://github.com/ai-policies/ai-policies/issues)
 - 💬 [Discussions](https://github.com/ai-policies/ai-policies/discussions)
-- 📧 [Email Support](mailto:support@ai-policies.dev)
+- 📖 [Contributing Guide](CONTRIBUTING.md)
 
 ---
 

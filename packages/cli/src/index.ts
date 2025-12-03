@@ -28,7 +28,8 @@ export async function main() {
     .parse();
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Check if this file is being run directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('index.js')) {
   main().catch(error => {
     console.error(error);
     process.exit(1);

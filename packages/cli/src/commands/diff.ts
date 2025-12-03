@@ -5,6 +5,9 @@ import chalk from 'chalk';
 
 import { findManifest, loadManifest } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
+import { getPartials } from '@ai-policies/policy-registry';
+import { composePartials } from '@ai-policies/compose-engine';
+import type { Provider } from '@ai-policies/core-schemas';
 
 interface DiffOptions {
   output?: 'cursor' | 'copilot';
@@ -37,7 +40,7 @@ export const diffCommand: CommandModule<{}, DiffOptions> = {
         const cursorPath = path.resolve(projectRoot, config.output.cursor);
         const diff = await compareFiles(cursorPath, 'cursor');
         if (diff) {
-          logger.info(chalk.bold(\`\\n📄 \${path.relative(projectRoot, cursorPath)}:\`));
+          logger.info(chalk.bold(\`\n📄 \${path.relative(projectRoot, cursorPath)}:\`));
           console.log(diff);
           hasDifferences = true;
         }
@@ -48,7 +51,7 @@ export const diffCommand: CommandModule<{}, DiffOptions> = {
         const copilotPath = path.resolve(projectRoot, config.output.copilot);
         const diff = await compareFiles(copilotPath, 'copilot');
         if (diff) {
-          logger.info(chalk.bold(\`\\n📄 \${path.relative(projectRoot, copilotPath)}:\`));
+          logger.info(chalk.bold(\`\n📄 \${path.relative(projectRoot, copilotPath)}:\`));
           console.log(diff);
           hasDifferences = true;
         }
@@ -57,7 +60,7 @@ export const diffCommand: CommandModule<{}, DiffOptions> = {
       if (!hasDifferences) {
         logger.success('No differences found. Configurations are up to date.');
       } else {
-        logger.info('\\nRun "ai-policies sync" to update your configurations.');
+        logger.info('\nRun "ai-policies sync" to update your configurations.');
       }
     } catch (error) {
       logger.error(\`Failed to show diff: \${error instanceof Error ? error.message : String(error)}\`);
@@ -73,64 +76,33 @@ async function compareFiles(filePath: string, type: 'cursor' | 'copilot'): Promi
     currentContent = await fs.readFile(filePath, 'utf8');
   }
 
-  // Generate new content (placeholder for now)
-  const metadata = {
-    packages: { '@ai-policies/core': '^1.0.0' },
-    contentHash: 'placeholder-hash',
-    generatedAt: new Date().toISOString(),
-  };
-
-  const metaHeader = createMetaHeader(metadata);
-  const placeholderContent = 'AI Policies content will be generated here';
-
-  let newContent: string;
-  if (type === 'cursor') {
-    newContent = \`\${metaHeader}
-
-# Cursor AI Rules
-
-\${placeholderContent}
-
-## Core Safety Rules
-
-- Never expose API keys or sensitive data
-- Always validate user input
-- Follow security best practices
-- Respect user privacy
-\`;
-  } else {
-    newContent = \`\${metaHeader}
-
-# GitHub Copilot Instructions
-
-\${placeholderContent}
-
-## Coding Guidelines
-
-### Security
-- Never include hardcoded secrets, API keys, or passwords
-- Always validate and sanitize user inputs
-- Use parameterized queries for database operations
-
-### Code Quality
-- Write clean, readable, and maintainable code
-- Follow established coding conventions and patterns
-- Include appropriate error handling
-
-### Documentation
-- Add clear comments for complex logic
-- Document public APIs and interfaces
-- Keep documentation up to date
-\`;
+  // Generate new content using actual composition
+  const manifestPath = await findManifest();
+  if (!manifestPath) {
+    return null;
   }
+
+  const config = await loadManifest(manifestPath);
+  const partials = await getPartials(config.requires);
+  const result = await composePartials(
+    partials,
+    config,
+    type as Provider,
+    {
+      teamAppendContent: config.overrides?.teamAppendContent,
+      excludePartials: config.overrides?.excludePartials,
+    }
+  );
+
+  const newContent = result.content;
 
   // Simple diff implementation
   if (currentContent.trim() === newContent.trim()) {
     return null;
   }
 
-  const currentLines = currentContent.split('\\n');
-  const newLines = newContent.split('\\n');
+  const currentLines = currentContent.split('\n');
+  const newLines = newContent.split('\n');
   const maxLines = Math.max(currentLines.length, newLines.length);
 
   const diffLines: string[] = [];
@@ -148,14 +120,5 @@ async function compareFiles(filePath: string, type: 'cursor' | 'copilot'): Promi
     }
   }
 
-  return diffLines.length > 0 ? diffLines.join('\\n') : null;
-}
-
-function createMetaHeader(metadata: { packages: Record<string, string>; contentHash: string; generatedAt: string }): string {
-  const metaJson = JSON.stringify(metadata, null, 2);
-  return \`<!--
-AI-POLICIES-META: \${Buffer.from(metaJson).toString('base64')}
-Generated at: \${metadata.generatedAt}
-Packages: \${Object.entries(metadata.packages).map(([name, version]) => \`\${name}@\${version}\`).join(', ')}
--->\`;
+  return diffLines.length > 0 ? diffLines.join('\n') : null;
 }

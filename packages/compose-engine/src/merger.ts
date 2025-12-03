@@ -34,7 +34,7 @@ export async function mergePartials(
     const layerPartials = layerSections.get(layer);
 
     if (!layerPartials) {
-      console.warn(\`Skipping partial \${partial.frontmatter.id} with unknown layer: \${layer}\`);
+      // Skip partials with unknown layers (could log in debug mode)
       continue;
     }
 
@@ -56,7 +56,7 @@ export async function mergePartials(
     // Add section header if content is not empty
     if (content.trim()) {
       const sectionHeader = createSectionHeader(partial);
-      layerPartials.push(\`\${sectionHeader}\\n\${content}\`);
+      layerPartials.push(\`\${sectionHeader}\n\${content}\`);
     }
   }
 
@@ -66,7 +66,7 @@ export async function mergePartials(
 
     if (layerPartials.length > 0) {
       const layerHeader = createLayerHeader(layer);
-      sections.push(\`\${layerHeader}\\n\${layerPartials.join('\\n\\n')}\`);
+      sections.push(\`\${layerHeader}\n\${layerPartials.join('\n\n')}\`);
     }
   }
 
@@ -76,7 +76,7 @@ export async function mergePartials(
     sections.push(teamAppendSection);
   }
 
-  return sections.join('\\n\\n');
+  return sections.join('\n\n');
 }
 
 /**
@@ -126,10 +126,10 @@ export function mergeWithConflictResolution(
       return newContent;
 
     case 'append':
-      return baseContent ? \`\${baseContent}\\n\\n\${newContent}\` : newContent;
+      return baseContent ? \`\${baseContent}\n\n\${newContent}\` : newContent;
 
     case 'prepend':
-      return baseContent ? \`\${newContent}\\n\\n\${baseContent}\` : newContent;
+      return baseContent ? \`\${newContent}\n\n\${baseContent}\` : newContent;
 
     case 'preserve':
       return baseContent || newContent;
@@ -144,7 +144,7 @@ export function mergeWithConflictResolution(
  */
 export function extractSections(content: string): Map<string, string> {
   const sections = new Map<string, string>();
-  const lines = content.split('\\n');
+  const lines = content.split('\n');
 
   let currentSection = '';
   let currentContent: string[] = [];
@@ -156,7 +156,7 @@ export function extractSections(content: string): Map<string, string> {
     if (headerMatch) {
       // Save previous section
       if (currentSection && currentContent.length > 0) {
-        sections.set(currentSection, currentContent.join('\\n').trim());
+        sections.set(currentSection, currentContent.join('\n').trim());
       }
 
       // Start new section
@@ -169,7 +169,7 @@ export function extractSections(content: string): Map<string, string> {
 
   // Save last section
   if (currentSection && currentContent.length > 0) {
-    sections.set(currentSection, currentContent.join('\\n').trim());
+    sections.set(currentSection, currentContent.join('\n').trim());
   }
 
   return sections;
@@ -181,11 +181,11 @@ export function extractSections(content: string): Map<string, string> {
 export function normalizeWhitespace(content: string): string {
   return content
     // Remove trailing whitespace from lines
-    .replace(/[ \\t]+$/gm, '')
+    .replace(/[ \t]+$/gm, '')
     // Normalize multiple blank lines to single blank line
-    .replace(/\\n\\s*\\n\\s*\\n/g, '\\n\\n')
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
     // Ensure content ends with single newline
-    .replace(/\\n*$/, '\\n');
+    .replace(/\n*$/, '\n');
 }
 
 /**
@@ -196,7 +196,7 @@ export function removeDuplicateSections(content: string): string {
   const seenHeaders = new Set<string>();
   const uniqueSections: string[] = [];
 
-  const lines = content.split('\\n');
+  const lines = content.split('\n');
   let currentContent: string[] = [];
   let currentHeader = '';
 
@@ -206,7 +206,7 @@ export function removeDuplicateSections(content: string): string {
     if (headerMatch) {
       // Save previous section if unique
       if (currentHeader && !seenHeaders.has(currentHeader)) {
-        uniqueSections.push([line, ...currentContent].join('\\n'));
+        uniqueSections.push([line, ...currentContent].join('\n'));
         seenHeaders.add(currentHeader);
       }
 
@@ -219,8 +219,8 @@ export function removeDuplicateSections(content: string): string {
 
   // Save last section if unique
   if (currentHeader && !seenHeaders.has(currentHeader)) {
-    uniqueSections.push(currentContent.join('\\n'));
+    uniqueSections.push(currentContent.join('\n'));
   }
 
-  return uniqueSections.join('\\n\\n');
+  return uniqueSections.join('\n\n');
 }

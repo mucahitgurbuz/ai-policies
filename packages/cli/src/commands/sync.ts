@@ -4,6 +4,10 @@ import fs from 'fs-extra';
 
 import { findManifest, loadManifest } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
+import { getPartials } from '@ai-policies/policy-registry';
+import { composePartials } from '@ai-policies/compose-engine';
+import type { Provider } from '@ai-policies/core-schemas';
+import { generateMetadataHeader } from '@ai-policies/core-schemas';
 
 interface SyncOptions {
   dry?: boolean;
@@ -42,81 +46,44 @@ export const syncCommand: CommandModule<{}, SyncOptions> = {
 
       logger.info('Loading policy packages...');
 
-      // TODO: Implement actual package resolution and composition
-      // For now, create placeholder outputs
-      const metadata = {
-        packages: config.requires,
-        contentHash: 'placeholder-hash',
-        generatedAt: new Date().toISOString(),
-      };
+      // Load partials from required packages
+      let partials;
+      try {
+        partials = await getPartials(config.requires);
+        logger.info(\`Loaded \${partials.length} policy partials from \${Object.keys(config.requires).length} packages\`);
 
-      const metaHeader = createMetaHeader(metadata);
-      const placeholderContent = 'AI Policies content will be generated here';
+        if (partials.length === 0) {
+          logger.warn('No policy partials found. Check your package requirements.');
+        }
+      } catch (error) {
+        logger.error(\`Failed to load policy packages: \${error instanceof Error ? error.message : String(error)}\`);
+        throw error;
+      }
 
       // Generate Cursor rules
       if (config.output.cursor) {
-        const cursorPath = path.resolve(projectRoot, config.output.cursor);
-        const cursorContent = \`\${metaHeader}
-
-# Cursor AI Rules
-
-\${placeholderContent}
-
-## Core Safety Rules
-
-- Never expose API keys or sensitive data
-- Always validate user input
-- Follow security best practices
-- Respect user privacy
-\`;
-
-        if (argv.dry) {
-          logger.info(\`Would write Cursor rules to: \${path.relative(process.cwd(), cursorPath)}\`);
-          logger.debug('Content preview:');
-          logger.debug(cursorContent.split('\\n').slice(0, 10).join('\\n') + '...');
-        } else {
-          await fs.ensureDir(path.dirname(cursorPath));
-          await fs.writeFile(cursorPath, cursorContent, 'utf8');
-          logger.success(\`Generated \${path.relative(projectRoot, cursorPath)}\`);
-        }
+        await generateOutput(
+          'cursor',
+          config,
+          partials,
+          projectRoot,
+          config.output.cursor,
+          argv.dry,
+          argv.verbose
+        );
       }
 
       // Generate Copilot instructions
       if (config.output.copilot) {
-        const copilotPath = path.resolve(projectRoot, config.output.copilot);
-        const copilotContent = \`\${metaHeader}
-
-# GitHub Copilot Instructions
-
-\${placeholderContent}
-
-## Coding Guidelines
-
-### Security
-- Never include hardcoded secrets, API keys, or passwords
-- Always validate and sanitize user inputs
-- Use parameterized queries for database operations
-
-### Code Quality
-- Write clean, readable, and maintainable code
-- Follow established coding conventions and patterns
-- Include appropriate error handling
-
-### Documentation
-- Add clear comments for complex logic
-- Document public APIs and interfaces
-- Keep documentation up to date
-\`;
-
-        if (argv.dry) {
-          logger.info(\`Would write Copilot instructions to: \${path.relative(process.cwd(), copilotPath)}\`);
-          logger.debug('Content preview:');
-          logger.debug(copilotContent.split('\\n').slice(0, 10).join('\\n') + '...');
-        } else {
-          await fs.ensureDir(path.dirname(copilotPath));
-          await fs.writeFile(copilotPath, copilotContent, 'utf8');
-          logger.success(\`Generated \${path.relative(projectRoot, copilotPath)}\`);
-        }
+        await generateOutput(
+          'copilot',
+          config,
+          partials,
+          projectRoot,
+          config.output.copilot,
+          argv.dry,
+          argv.verbose
+        );
       }
 
       if (!argv.dry) {
@@ -131,11 +98,50 @@ export const syncCommand: CommandModule<{}, SyncOptions> = {
   },
 };
 
-function createMetaHeader(metadata: { packages: Record<string, string>; contentHash: string; generatedAt: string }): string {
-  const metaJson = JSON.stringify(metadata, null, 2);
-  return \`<!--
-AI-POLICIES-META: \${Buffer.from(metaJson).toString('base64')}
-Generated at: \${metadata.generatedAt}
-Packages: \${Object.entries(metadata.packages).map(([name, version]) => \`\${name}@\${version}\`).join(', ')}
--->\`;
+async function generateOutput(
+  provider: Provider,
+  config: Awaited<ReturnType<typeof loadManifest>>,
+  partials: Awaited<ReturnType<typeof getPartials>>,
+  projectRoot: string,
+  outputPath: string,
+  dry: boolean,
+  verbose: boolean
+): Promise<void> {
+  try {
+    logger.info(\`Composing policies for \${provider}...\`);
+
+    // Compose partials
+    const result = await composePartials(
+      partials,
+      config,
+      provider,
+      {
+        teamAppendContent: config.overrides?.teamAppendContent,
+        excludePartials: config.overrides?.excludePartials,
+        debug: verbose,
+      }
+    );
+
+    const fullPath = path.resolve(projectRoot, outputPath);
+
+    if (dry) {
+      logger.info(\`Would write \${provider} output to: \${path.relative(process.cwd(), fullPath)}\`);
+      if (verbose) {
+        logger.debug('Content preview:');
+        logger.debug(result.content.split('\n').slice(0, 20).join('\n') + '...');
+      }
+    } else {
+      await fs.ensureDir(path.dirname(fullPath));
+      await fs.writeFile(fullPath, result.content, 'utf8');
+      logger.success(\`Generated \${path.relative(projectRoot, fullPath)}\`);
+      
+      if (verbose) {
+        logger.debug(\`Included \${result.metadata.partials.length} partials\`);
+        logger.debug(\`Content hash: \${result.metadata.contentHash}\`);
+      }
+    }
+  } catch (error) {
+    logger.error(\`Failed to generate \${provider} output: \${error instanceof Error ? error.message : String(error)}\`);
+    throw error;
+  }
 }

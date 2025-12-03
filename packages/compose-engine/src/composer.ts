@@ -31,7 +31,7 @@ export class PolicyComposer {
     this.addTransformer({
       name: 'remove-empty-lines',
       priority: 100,
-      transform: (content) => content.replace(/\n\s*\n\s*\n/g, '\\n\\n'),
+      transform: (content) => content.replace(/\n\s*\n\s*\n/g, '\n\n'),
     });
   }
 
@@ -69,9 +69,11 @@ export class PolicyComposer {
         includedPartials
       );
 
-      // Log conflicts as warnings
-      for (const conflict of conflicts) {
-        console.warn(\`Conflict resolved: Using \${conflict.winner.frontmatter.id} from \${conflict.winner.packageName} over \${conflict.losers.map(l => l.packageName).join(', ')}\`);
+      // Log conflicts as warnings (use proper logger if available)
+      if (conflicts.length > 0 && options.debug) {
+        for (const conflict of conflicts) {
+          console.warn(\`Conflict resolved: Using \${conflict.winner.frontmatter.id} from \${conflict.winner.packageName} over \${conflict.losers.map(l => l.packageName).join(', ')}\`);
+        }
       }
 
       // Step 4: Resolve dependencies

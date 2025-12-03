@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
-import { ManifestConfig } from '../types/index.js';
+import type { ManifestConfig } from '@ai-policies/core-schemas';
 
 export const MANIFEST_FILE = '.ai-policies.yaml';
 export const LOCK_FILE = '.ai-policies.lock';
@@ -24,16 +24,13 @@ export async function loadManifest(manifestPath: string): Promise<ManifestConfig
   const content = await fs.readFile(manifestPath, 'utf8');
   const config = yaml.load(content) as ManifestConfig;
 
-  if (!config.requires) {
-    throw new Error('Invalid manifest: missing "requires" section');
-  }
+  // Validate using schema validator
+  const { validateManifestConfig } = await import('@ai-policies/core-schemas');
+  const validation = validateManifestConfig(config);
 
-  if (!config.output) {
-    throw new Error('Invalid manifest: missing "output" section');
-  }
-
-  if (!config.compose) {
-    throw new Error('Invalid manifest: missing "compose" section');
+  if (!validation.valid) {
+    const errors = validation.errors.map(e => `${e.path ? e.path + ': ' : ''}${e.message}`).join(', ');
+    throw new Error(`Invalid manifest: ${errors}`);
   }
 
   return config;

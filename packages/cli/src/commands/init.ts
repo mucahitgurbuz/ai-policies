@@ -5,6 +5,7 @@ import inquirer from 'inquirer';
 
 import { getDefaultManifest, saveManifest, MANIFEST_FILE } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
+import type { ManifestConfig } from '@ai-policies/core-schemas';
 
 interface InitOptions {
   force?: boolean;
@@ -82,7 +83,7 @@ export const initCommand: CommandModule<{}, InitOptions> = {
   },
 };
 
-function getPresetConfig(preset: string) {
+function getPresetConfig(preset: string): ManifestConfig {
   const base = getDefaultManifest();
 
   switch (preset) {
@@ -118,7 +119,7 @@ function getPresetConfig(preset: string) {
   }
 }
 
-async function promptForConfiguration() {
+async function promptForConfiguration(): Promise<ManifestConfig> {
   const { projectType, includeWorkflows, outputPaths } = await inquirer.prompt([
     {
       type: 'list',

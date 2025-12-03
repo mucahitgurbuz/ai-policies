@@ -119,7 +119,7 @@ export function validateProtectedBlocks(content: string): Array<{ message: strin
  */
 function insertProtectedBlock(content: string, block: ProtectedBlock): string {
   // Try to find a good insertion point based on content structure
-  const lines = content.split('\\n');
+  const lines = content.split('\n');
 
   // Look for section headers that might relate to this block
   for (let i = 0; i < lines.length; i++) {
@@ -128,12 +128,12 @@ function insertProtectedBlock(content: string, block: ProtectedBlock): string {
     if (line.startsWith('#') && line.toLowerCase().includes(block.id.toLowerCase())) {
       // Insert after this header
       lines.splice(i + 1, 0, '', block.content, '');
-      return lines.join('\\n');
+      return lines.join('\n');
     }
   }
 
   // If no good location found, append at the end
-  return \`\${content}\\n\\n\${block.content}\`;
+  return \`\${content}\n\n\${block.content}\`;
 }
 
 /**
@@ -170,8 +170,8 @@ export function extractProtectedContentFromPartial(partial: PolicyPartial): Prot
  * Remove protected blocks from content
  */
 export function removeProtectedBlocks(content: string): string {
-  const protectedRegex = /<!--\\s*BEGIN\\s+PROTECTED:[^\\s]+\\s*-->[\\s\\S]*?<!--\\s*END\\s+PROTECTED\\s*-->/g;
-  return content.replace(protectedRegex, '').replace(/\\n\\s*\\n\\s*\\n/g, '\\n\\n');
+  const protectedRegex = /<!--\s*BEGIN\s+PROTECTED:[^\s]+\s*-->[\s\S]*?<!--\s*END\s+PROTECTED\s*-->/g;
+  return content.replace(protectedRegex, '').replace(/\n\s*\n\s*\n/g, '\n\n');
 }
 
 /**

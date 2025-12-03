@@ -297,5 +297,5 @@ export function createCompositionSummary(
     }
   }
 
-  return lines.join('\\n');
+  return lines.join('\n');
 }
