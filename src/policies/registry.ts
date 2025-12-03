@@ -4,19 +4,34 @@ import { fileURLToPath } from 'url';
 import { glob } from 'glob';
 import matter from 'gray-matter';
 
-import type {
-  PolicyPackage,
-  PolicyPartial,
-  PolicyPackageConfig,
-} from '../schemas/types.js';
-import {
-  validatePartialFrontmatter,
-  validatePackageConfig,
-} from '../schemas/validator.js';
+import type { PolicyPackage, PolicyPartial } from '../schemas/types.js';
+import { validatePartialFrontmatter } from '../schemas/validator.js';
 
 // Get current directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Built-in policy package metadata
+const BUILTIN_POLICIES: Record<
+  string,
+  { name: string; version: string; description: string }
+> = {
+  core: {
+    name: '@ai-policies/core',
+    version: '1.0.0',
+    description: 'Core AI policies for safety, security, and quality',
+  },
+  'frontend-react': {
+    name: '@ai-policies/frontend-react',
+    version: '1.0.0',
+    description: 'React and frontend development best practices',
+  },
+  'workflows-jira': {
+    name: '@ai-policies/workflows-jira',
+    version: '1.0.0',
+    description: 'Jira integration and workflow guidelines',
+  },
+};
 
 /**
  * Registry for built-in policy packages
@@ -31,22 +46,25 @@ export class PolicyRegistry {
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    const policiesDir = path.join(__dirname, '..', 'policies');
-    const packageDirs = await fs.readdir(policiesDir);
+    const policiesDir = __dirname;
 
-    for (const packageDir of packageDirs) {
-      const packagePath = path.join(policiesDir, packageDir);
-      const stat = await fs.stat(packagePath);
+    for (const [dirName, metadata] of Object.entries(BUILTIN_POLICIES)) {
+      const packagePath = path.join(policiesDir, dirName);
 
-      if (stat.isDirectory()) {
+      if (await fs.pathExists(packagePath)) {
         try {
-          const policyPackage = await this.loadPolicyPackage(packagePath);
-          this.packages.set(policyPackage.config.name, policyPackage);
+          const partials = await this.loadPartials(packagePath, metadata.name);
+          this.packages.set(metadata.name, {
+            config: {
+              name: metadata.name,
+              version: metadata.version,
+              description: metadata.description,
+            },
+            partials,
+            rootPath: packagePath,
+          });
         } catch (error) {
-          console.warn(
-            'Failed to load policy package from ' + packagePath + ':',
-            error
-          );
+          console.warn(`Failed to load policy package ${dirName}:`, error);
         }
       }
     }
@@ -79,13 +97,12 @@ export class PolicyRegistry {
     await this.initialize();
     const resolved: PolicyPackage[] = [];
 
-    for (const [packageName, _versionRange] of Object.entries(requirements)) {
+    for (const packageName of Object.keys(requirements)) {
       const pkg = this.packages.get(packageName);
       if (pkg) {
-        // In a real implementation, this would do proper semver resolution
         resolved.push(pkg);
       } else {
-        console.warn('Package not found in registry: ' + packageName);
+        console.warn(`Package not found in registry: ${packageName}`);
       }
     }
 
@@ -109,62 +126,34 @@ export class PolicyRegistry {
   }
 
   /**
-   * Load a policy package from a directory
-   */
-  private async loadPolicyPackage(packagePath: string): Promise<PolicyPackage> {
-    // Load package.json
-    const packageJsonPath = path.join(packagePath, 'package.json');
-    const packageJson = (await fs.readJson(
-      packageJsonPath
-    )) as PolicyPackageConfig;
-
-    // Validate package configuration
-    const validation = validatePackageConfig(packageJson);
-    if (!validation.valid) {
-      throw new Error(
-        'Invalid package configuration: ' +
-          validation.errors.map(e => e.message).join(', ')
-      );
-    }
-
-    // Load partials
-    const partials = await this.loadPartials(packagePath, packageJson);
-
-    return {
-      config: packageJson,
-      partials,
-      rootPath: packagePath,
-    };
-  }
-
-  /**
    * Load all partials from a package directory
    */
   private async loadPartials(
     packagePath: string,
-    config: PolicyPackageConfig
+    packageName: string
   ): Promise<PolicyPartial[]> {
     const partials: PolicyPartial[] = [];
-    const aiPoliciesConfig = config['ai-policies'];
 
-    if (!aiPoliciesConfig?.partials) {
-      return partials;
+    // Load cursor partials
+    const cursorDir = path.join(packagePath, 'cursor', 'partials');
+    if (await fs.pathExists(cursorDir)) {
+      const cursorPartials = await this.loadPartialsFromDirectory(
+        cursorDir,
+        packageName,
+        'cursor'
+      );
+      partials.push(...cursorPartials);
     }
 
-    // Load partials for each provider
-    for (const [provider, partialsDir] of Object.entries(
-      aiPoliciesConfig.partials
-    )) {
-      const fullPartialsPath = path.join(packagePath, partialsDir);
-
-      if (await fs.pathExists(fullPartialsPath)) {
-        const providerPartials = await this.loadPartialsFromDirectory(
-          fullPartialsPath,
-          config,
-          provider as 'cursor' | 'copilot'
-        );
-        partials.push(...providerPartials);
-      }
+    // Load copilot partials
+    const copilotDir = path.join(packagePath, 'copilot', 'partials');
+    if (await fs.pathExists(copilotDir)) {
+      const copilotPartials = await this.loadPartialsFromDirectory(
+        copilotDir,
+        packageName,
+        'copilot'
+      );
+      partials.push(...copilotPartials);
     }
 
     return partials;
@@ -175,7 +164,7 @@ export class PolicyRegistry {
    */
   private async loadPartialsFromDirectory(
     directory: string,
-    config: PolicyPackageConfig,
+    packageName: string,
     provider: 'cursor' | 'copilot'
   ): Promise<PolicyPartial[]> {
     const partials: PolicyPartial[] = [];
@@ -190,10 +179,7 @@ export class PolicyRegistry {
         // Validate frontmatter
         const validation = validatePartialFrontmatter(parsed.data);
         if (!validation.valid) {
-          console.warn(
-            'Invalid frontmatter in ' + filePath + ':',
-            validation.errors
-          );
+          console.warn(`Invalid frontmatter in ${filePath}:`, validation.errors);
           continue;
         }
 
@@ -202,8 +188,8 @@ export class PolicyRegistry {
           frontmatter: parsed.data as PolicyPartial['frontmatter'],
           content: parsed.content,
           filePath: path.relative(directory, filePath),
-          packageName: config.name,
-          packageVersion: config.version,
+          packageName,
+          packageVersion: '1.0.0',
         };
 
         // Add provider filter if not specified
@@ -213,7 +199,7 @@ export class PolicyRegistry {
 
         partials.push(partial);
       } catch (error) {
-        console.warn('Failed to load partial from ' + filePath + ':', error);
+        console.warn(`Failed to load partial from ${filePath}:`, error);
       }
     }
 

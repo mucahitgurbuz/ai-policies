@@ -25,7 +25,7 @@ const partialSchema = JSON.parse(
   readFileSync(join(schemasDir, 'partial.json'), 'utf8')
 );
 const packageSchema = JSON.parse(
-  readFileSync(join(schemasDir, 'package.json'), 'utf8')
+  readFileSync(join(schemasDir, 'policy-package.schema.json'), 'utf8')
 );
 
 // Create AJV instance with formats support

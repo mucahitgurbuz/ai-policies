@@ -19,7 +19,7 @@ export const PARTIAL_SCHEMA = JSON.parse(
   readFileSync(join(schemasDir, 'partial.json'), 'utf8')
 );
 export const PACKAGE_SCHEMA = JSON.parse(
-  readFileSync(join(schemasDir, 'package.json'), 'utf8')
+  readFileSync(join(schemasDir, 'policy-package.schema.json'), 'utf8')
 );
 
 /**
