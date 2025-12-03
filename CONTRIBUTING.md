@@ -40,8 +40,10 @@ npm install -g pnpm
 corepack enable
 corepack prepare pnpm@8.15.1 --activate
 
-# Install dependencies
+# Install dependencies (this will generate pnpm-lock.yaml if it doesn't exist)
 pnpm install
+
+# Note: After first install, commit pnpm-lock.yaml to ensure reproducible builds
 
 # Build all packages
 pnpm build
