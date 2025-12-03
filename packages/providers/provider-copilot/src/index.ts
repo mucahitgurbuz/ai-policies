@@ -1,3 +1,2 @@
-export * from './copilot-provider.js';
-export * from './formatter.js';
-export * from './templates.js';
+export { CopilotProvider, renderCopilotInstructions, validateCopilotInstructions } from './copilot-provider.js';
+export type { CopilotRenderOptions } from './copilot-provider.js';

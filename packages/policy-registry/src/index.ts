@@ -36,7 +36,7 @@ export class PolicyRegistry {
           const policyPackage = await this.loadPolicyPackage(packagePath);
           this.packages.set(policyPackage.config.name, policyPackage);
         } catch (error) {
-          console.warn(\`Failed to load policy package from \${packagePath}:\`, error);
+          console.warn('Failed to load policy package from ' + packagePath + ':', error);
         }
       }
     }
@@ -67,13 +67,13 @@ export class PolicyRegistry {
     await this.initialize();
     const resolved: PolicyPackage[] = [];
 
-    for (const [packageName, versionRange] of Object.entries(requirements)) {
+    for (const [packageName, _versionRange] of Object.entries(requirements)) {
       const pkg = this.packages.get(packageName);
       if (pkg) {
         // In a real implementation, this would do proper semver resolution
         resolved.push(pkg);
       } else {
-        console.warn(\`Package not found in registry: \${packageName}\`);
+        console.warn('Package not found in registry: ' + packageName);
       }
     }
 
@@ -105,7 +105,7 @@ export class PolicyRegistry {
     // Validate package configuration
     const validation = validatePackageConfig(packageJson);
     if (!validation.valid) {
-      throw new Error(\`Invalid package configuration: \${validation.errors.map(e => e.message).join(', ')}\`);
+      throw new Error('Invalid package configuration: ' + validation.errors.map(e => e.message).join(', '));
     }
 
     // Load partials
@@ -166,13 +166,13 @@ export class PolicyRegistry {
         // Validate frontmatter
         const validation = validatePartialFrontmatter(parsed.data);
         if (!validation.valid) {
-          console.warn(\`Invalid frontmatter in \${filePath}:\`, validation.errors);
+          console.warn('Invalid frontmatter in ' + filePath + ':', validation.errors);
           continue;
         }
 
         // Create partial
         const partial: PolicyPartial = {
-          frontmatter: parsed.data as any,
+          frontmatter: parsed.data as PolicyPartial['frontmatter'],
           content: parsed.content,
           filePath: path.relative(directory, filePath),
           packageName: config.name,
@@ -186,7 +186,7 @@ export class PolicyRegistry {
 
         partials.push(partial);
       } catch (error) {
-        console.warn(\`Failed to load partial from \${filePath}:\`, error);
+        console.warn('Failed to load partial from ' + filePath + ':', error);
       }
     }
 

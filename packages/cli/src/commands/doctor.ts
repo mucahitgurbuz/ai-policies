@@ -24,19 +24,19 @@ export const doctorCommand: CommandModule<{}, DoctorOptions> = {
     try {
       logger.info('🩺 Running AI Policies health check...\n');
 
-      const issues = await runHealthChecks(argv.fix);
+      const issues = await runHealthChecks(argv.fix ?? false);
 
       if (issues.length === 0) {
         logger.success('✨ All checks passed! Your AI Policies setup looks healthy.');
         return;
       }
 
-      logger.warn(\`Found \${issues.length} issue(s):\n\`);
+      logger.warn(`Found ${issues.length} issue(s):\n`);
 
       for (const issue of issues) {
-        logger.error(\`❌ \${issue.message}\`);
+        logger.error(`❌ ${issue.message}`);
         if (issue.fix) {
-          logger.info(\`   💡 Fix: \${issue.fix}\`);
+          logger.info(`   💡 Fix: ${issue.fix}`);
         }
         logger.log('');
       }
@@ -49,7 +49,7 @@ export const doctorCommand: CommandModule<{}, DoctorOptions> = {
 
       process.exit(1);
     } catch (error) {
-      logger.error(\`Doctor check failed: \${error instanceof Error ? error.message : String(error)}\`);
+      logger.error(`Doctor check failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   },
@@ -88,8 +88,8 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
 
       if (!await fs.pathExists(cursorDir)) {
         issues.push({
-          message: \`Cursor output directory does not exist: \${path.relative(projectRoot, cursorDir)}\`,
-          fix: autoFix ? 'Creating directory...' : \`Create directory: mkdir -p \${path.relative(projectRoot, cursorDir)}\`,
+          message: `Cursor output directory does not exist: ${path.relative(projectRoot, cursorDir)}`,
+          fix: autoFix ? 'Creating directory...' : `Create directory: mkdir -p ${path.relative(projectRoot, cursorDir)}`,
           severity: 'warning',
         });
 
@@ -105,8 +105,8 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
 
       if (!await fs.pathExists(copilotDir)) {
         issues.push({
-          message: \`Copilot output directory does not exist: \${path.relative(projectRoot, copilotDir)}\`,
-          fix: autoFix ? 'Creating directory...' : \`Create directory: mkdir -p \${path.relative(projectRoot, copilotDir)}\`,
+          message: `Copilot output directory does not exist: ${path.relative(projectRoot, copilotDir)}`,
+          fix: autoFix ? 'Creating directory...' : `Create directory: mkdir -p ${path.relative(projectRoot, copilotDir)}`,
           severity: 'warning',
         });
 
@@ -136,7 +136,7 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
     const duplicates = packageNames.filter((name, index) => packageNames.indexOf(name) !== index);
     if (duplicates.length > 0) {
       issues.push({
-        message: \`Duplicate packages found: \${duplicates.join(', ')}\`,
+        message: `Duplicate packages found: ${duplicates.join(', ')}`,
         fix: 'Remove duplicate entries from requires section',
         severity: 'error',
       });
@@ -147,7 +147,7 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
 
   } catch (error) {
     issues.push({
-      message: \`Invalid manifest file: \${error instanceof Error ? error.message : String(error)}\`,
+      message: `Invalid manifest file: ${error instanceof Error ? error.message : String(error)}`,
       fix: 'Fix the YAML syntax in .ai-policies.yaml or run "ai-policies init" to recreate',
       severity: 'error',
     });
@@ -172,7 +172,7 @@ async function checkForEmptySections(config: any, projectRoot: string, issues: H
 
       if (contentWithoutComments.length < 100) {
         issues.push({
-          message: \`\${output.type} output file appears to be mostly empty\`,
+          message: `${output.type} output file appears to be mostly empty`,
           fix: 'Run "ai-policies sync" to regenerate content',
           severity: 'warning',
         });
@@ -196,7 +196,7 @@ async function checkGeneratedFileMetadata(config: any, projectRoot: string, issu
 
       if (!content.includes('AI-POLICIES-META:')) {
         issues.push({
-          message: \`\${output.type} output file is missing metadata header\`,
+          message: `${output.type} output file is missing metadata header`,
           fix: 'Run "ai-policies sync" to regenerate with proper metadata',
           severity: 'info',
         });

@@ -31,7 +31,7 @@ export class PolicyComposer {
     this.addTransformer({
       name: 'remove-empty-lines',
       priority: 100,
-      transform: (content) => content.replace(/\n\s*\n\s*\n/g, '\\n\\n'),
+      transform: (content) => content.replace(/\n\s*\n\s*\n/g, '\n\n'),
     });
   }
 
@@ -71,7 +71,7 @@ export class PolicyComposer {
 
       // Log conflicts as warnings
       for (const conflict of conflicts) {
-        console.warn(\`Conflict resolved: Using \${conflict.winner.frontmatter.id} from \${conflict.winner.packageName} over \${conflict.losers.map(l => l.packageName).join(', ')}\`);
+        console.warn(`Conflict resolved: Using ${conflict.winner.frontmatter.id} from ${conflict.winner.packageName} over ${conflict.losers.map(l => l.packageName).join(', ')}`);
       }
 
       // Step 4: Resolve dependencies
@@ -79,7 +79,7 @@ export class PolicyComposer {
 
       if (dependencyResult.circular.length > 0) {
         errors.push({
-          message: \`Circular dependencies detected: \${dependencyResult.circular.map(c => c.join(' -> ')).join(', ')}\`,
+          message: `Circular dependencies detected: ${dependencyResult.circular.map(c => c.join(' -> ')).join(', ')}`,
           type: 'circular',
         });
       }
@@ -87,7 +87,7 @@ export class PolicyComposer {
       if (dependencyResult.missing.length > 0) {
         for (const missing of dependencyResult.missing) {
           errors.push({
-            message: \`Missing dependencies for \${missing.partialId}: \${missing.missingDeps.join(', ')}\`,
+            message: `Missing dependencies for ${missing.partialId}: ${missing.missingDeps.join(', ')}`,
             type: 'dependency',
             partialId: missing.partialId,
           });
@@ -95,7 +95,7 @@ export class PolicyComposer {
       }
 
       if (errors.length > 0 && !options.debug) {
-        throw new Error(\`Composition failed: \${errors.map(e => e.message).join('; ')}\`);
+        throw new Error(`Composition failed: ${errors.map(e => e.message).join('; ')}`);
       }
 
       // Step 5: Sort partials by composition rules
@@ -137,9 +137,9 @@ export class PolicyComposer {
 
       // Step 10: Generate final output with metadata header
       const metadataHeader = generateMetadataHeader(metadata);
-      const output = \`\${metadataHeader}
+      const output = `${metadataHeader}
 
-\${finalContent}\`;
+${finalContent}`;
 
       return {
         content: output,
@@ -147,7 +147,7 @@ export class PolicyComposer {
       };
 
     } catch (error) {
-      throw new Error(\`Composition failed: \${error instanceof Error ? error.message : String(error)}\`);
+      throw new Error(`Composition failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -171,7 +171,7 @@ export class PolicyComposer {
       const packageIds = idsPerPackage.get(partial.packageName)!;
       if (packageIds.has(partial.frontmatter.id)) {
         errors.push({
-          message: \`Duplicate partial ID '\${partial.frontmatter.id}' in package \${partial.packageName}\`,
+          message: `Duplicate partial ID '${partial.frontmatter.id}' in package ${partial.packageName}`,
           type: 'conflict',
           partialId: partial.frontmatter.id,
         });
@@ -185,7 +185,7 @@ export class PolicyComposer {
     for (const partial of partials) {
       if (!orderSet.has(partial.frontmatter.layer)) {
         errors.push({
-          message: \`Partial '\${partial.frontmatter.id}' has layer '\${partial.frontmatter.layer}' which is not in compose.order\`,
+          message: `Partial '${partial.frontmatter.id}' has layer '${partial.frontmatter.layer}' which is not in compose.order`,
           type: 'validation',
           partialId: partial.frontmatter.id,
         });

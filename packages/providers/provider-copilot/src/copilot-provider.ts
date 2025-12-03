@@ -1,167 +1,91 @@
-import type { PolicyPartial, CompositionResult } from '@ai-policies/core-schemas';
-import { formatCopilotInstructions } from './formatter.js';
-import { generateCopilotTemplate } from './templates.js';
+import type { CompositionResult } from '@ai-policies/core-schemas';
 
-export interface CopilotProviderOptions {
-  /** Include safety constraints section */
+export interface CopilotRenderOptions {
   includeSafetyConstraints?: boolean;
-
-  /** Include prompt templates */
   includePromptTemplates?: boolean;
-
-  /** Include code examples */
   includeCodeExamples?: boolean;
-
-  /** Custom template variables */
-  templateVariables?: Record<string, string>;
-
-  /** Organization-specific guidelines */
-  organizationGuidelines?: string[];
 }
 
 /**
- * GitHub Copilot provider for rendering instructions.md files
- */
-export class CopilotProvider {
-  private options: Required<CopilotProviderOptions>;
-
-  constructor(options: CopilotProviderOptions = {}) {
-    this.options = {
-      includeSafetyConstraints: true,
-      includePromptTemplates: true,
-      includeCodeExamples: true,
-      templateVariables: {},
-      organizationGuidelines: [],
-      ...options,
-    };
-  }
-
-  /**
-   * Render composition result to Copilot instructions format
-   */
-  render(compositionResult: CompositionResult): string {
-    const { content, metadata } = compositionResult;
-
-    // Apply Copilot-specific formatting
-    const formattedContent = formatCopilotInstructions(content, {
-      includeSafetyConstraints: this.options.includeSafetyConstraints,
-      includePromptTemplates: this.options.includePromptTemplates,
-    });
-
-    // Generate using template
-    const copilotInstructions = generateCopilotTemplate({
-      content: formattedContent,
-      metadata,
-      options: this.options,
-    });
-
-    return copilotInstructions;
-  }
-
-  /**
-   * Validate that content is suitable for Copilot
-   */
-  validate(content: string): Array<{ message: string; severity: 'error' | 'warning' }> {
-    const issues: Array<{ message: string; severity: 'error' | 'warning' }> = [];
-
-    // Check file size (GitHub has limits)
-    if (content.length > 500000) {
-      issues.push({
-        message: 'Copilot instructions file is very large (>500KB). GitHub may not process it correctly.',
-        severity: 'error',
-      });
-    }
-
-    // Check for required sections
-    if (!content.includes('# ') && !content.includes('## ')) {
-      issues.push({
-        message: 'No section headers found. Copilot works better with structured content.',
-        severity: 'warning',
-      });
-    }
-
-    // Check for potentially sensitive information
-    const sensitivePatterns = [
-      /api[_-]?key/i,
-      /password/i,
-      /secret/i,
-      /token/i,
-      /credential/i,
-    ];
-
-    for (const pattern of sensitivePatterns) {
-      if (pattern.test(content)) {
-        issues.push({
-          message: \`Content may contain sensitive information: \${pattern.source}\`,
-          severity: 'warning',
-        });
-      }
-    }
-
-    // Check for proper markdown formatting
-    if (content.includes('```') && (content.match(/```/g)?.length || 0) % 2 !== 0) {
-      issues.push({
-        message: 'Unmatched code block markers (```) detected.',
-        severity: 'error',
-      });
-    }
-
-    // Check for GitHub-specific features
-    if (content.includes('@') && !content.includes('@{')) {
-      issues.push({
-        message: 'Raw @ symbols detected. Consider using @{username} syntax for GitHub mentions.',
-        severity: 'warning',
-      });
-    }
-
-    return issues;
-  }
-
-  /**
-   * Get recommended file path
-   */
-  getFilePath(): string {
-    return '.copilot/instructions.md';
-  }
-
-  /**
-   * Get provider-specific metadata
-   */
-  getProviderMetadata() {
-    return {
-      name: 'copilot',
-      displayName: 'GitHub Copilot',
-      filePattern: '.copilot/instructions.md',
-      supportedFeatures: [
-        'instructions',
-        'examples',
-        'constraints',
-        'prompt-templates',
-        'organization-policies',
-      ],
-      limitations: [
-        'File size should be under 500KB',
-        'Works best with structured markdown',
-        'Limited support for complex formatting',
-      ],
-    };
-  }
-}
-
-/**
- * Create a new Copilot provider instance
- */
-export function createCopilotProvider(options?: CopilotProviderOptions): CopilotProvider {
-  return new CopilotProvider(options);
-}
-
-/**
- * Convenience function to render Copilot instructions
+ * Render Copilot instructions from composition result
  */
 export function renderCopilotInstructions(
-  compositionResult: CompositionResult,
-  options?: CopilotProviderOptions
+  result: CompositionResult,
+  options: CopilotRenderOptions = {}
 ): string {
-  const provider = createCopilotProvider(options);
-  return provider.render(compositionResult);
+  let output = '# GitHub Copilot Instructions\n\n';
+  output += 'This document provides guidelines and instructions for GitHub Copilot ';
+  output += 'to assist with code generation and suggestions in this project.\n\n';
+
+  // Add main content
+  output += result.content;
+
+  // Add safety constraints section if requested
+  if (options.includeSafetyConstraints) {
+    output += '\n\n## Safety Constraints\n\n';
+    output += '### Data Protection\n';
+    output += '- 🚫 **Never** include real API keys, passwords, or secrets in code\n';
+    output += '- 🚫 **Never** log sensitive user information\n';
+    output += '- ✅ **Always** validate and sanitize user input\n';
+    output += '- ✅ **Always** use environment variables for configuration\n';
+  }
+
+  // Add prompt templates if requested
+  if (options.includePromptTemplates) {
+    output += '\n\n## Prompt Templates\n\n';
+    output += '### Code Generation Request\n';
+    output += 'When generating code, please:\n';
+    output += '1. Follow the established patterns in this codebase\n';
+    output += '2. Include appropriate error handling\n';
+    output += '3. Add relevant comments for complex logic\n';
+    output += '4. Ensure security best practices are followed\n';
+  }
+
+  // Add attribution footer
+  const packageList = Object.entries(result.metadata.packages)
+    .map(([name, version]) => `- ${name}@${version}`)
+    .join('\n');
+
+  output += '\n\n---\n\n';
+  output += '## Document Information\n\n';
+  output += '**Generated by**: AI Policies\n';
+  output += `**Content hash**: \`${result.metadata.contentHash}\`\n\n`;
+  output += '### Policy Packages Used\n';
+  output += packageList;
+  output += '\n\n> This file is automatically generated. To modify these instructions, ';
+  output += 'update your policy packages and run `ai-policies sync`.';
+
+  return output;
+}
+
+/**
+ * Validate Copilot instructions content
+ */
+export function validateCopilotInstructions(content: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Check for minimum content
+  if (content.length < 100) {
+    errors.push('Content is too short for meaningful instructions');
+  }
+
+  // Check for proper structure
+  if (!content.includes('#')) {
+    errors.push('Missing headers - consider adding section headers');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+export class CopilotProvider {
+  render(result: CompositionResult, options: CopilotRenderOptions = {}): string {
+    return renderCopilotInstructions(result, options);
+  }
+
+  validate(content: string): { valid: boolean; errors: string[] } {
+    return validateCopilotInstructions(content);
+  }
 }

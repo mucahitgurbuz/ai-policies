@@ -53,12 +53,12 @@ export async function runUpdateBot(): Promise<void> {
   try {
     // Get target repositories
     const targetRepos = await getTargetRepositories(github, inputs);
-    core.info(\`Found \${targetRepos.length} target repositories\`);
+    core.info(`Found ${targetRepos.length} target repositories`);
 
     // Process each repository
     for (const repo of targetRepos) {
       try {
-        core.info(\`Processing repository: \${repo}\`);
+        core.info(`Processing repository: ${repo}`);
 
         const updateResult = await processRepository(
           github,
@@ -77,8 +77,8 @@ export async function runUpdateBot(): Promise<void> {
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        core.error(\`Failed to process \${repo}: \${message}\`);
-        results.errors.push(\`\${repo}: \${message}\`);
+        core.error(`Failed to process ${repo}: ${message}`);
+        results.errors.push(`${repo}: ${message}`);
       }
     }
 
@@ -89,15 +89,15 @@ export async function runUpdateBot(): Promise<void> {
     core.setOutput('errors', results.errors.join('\\n'));
 
     // Summary
-    core.info(\`✅ Update bot completed:\`);
-    core.info(\`  - Repositories updated: \${results.repositoriesUpdated}\`);
-    core.info(\`  - Pull requests created: \${results.pullRequestsCreated.length}\`);
-    core.info(\`  - Repositories skipped: \${results.repositoriesSkipped.length}\`);
-    core.info(\`  - Errors: \${results.errors.length}\`);
+    core.info(`✅ Update bot completed:`);
+    core.info(`  - Repositories updated: ${results.repositoriesUpdated}`);
+    core.info(`  - Pull requests created: ${results.pullRequestsCreated.length}`);
+    core.info(`  - Repositories skipped: ${results.repositoriesSkipped.length}`);
+    core.info(`  - Errors: ${results.errors.length}`);
 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    core.setFailed(\`Update bot failed: \${message}\`);
+    core.setFailed(`Update bot failed: ${message}`);
     throw error;
   }
 }
@@ -140,8 +140,8 @@ async function getTargetRepositories(
   }
 
   // Fallback to current repository
-  const currentRepo = \`\${context.repo.owner}/\${context.repo.repo}\`;
-  core.warning(\`No repositories or organization specified, using current repo: \${currentRepo}\`);
+  const currentRepo = `${context.repo.owner}/${context.repo.repo}`;
+  core.warning(`No repositories or organization specified, using current repo: ${currentRepo}`);
   return [currentRepo];
 }
 
@@ -159,19 +159,19 @@ async function processRepository(
   // Check if repository has AI Policies configuration
   const hasConfig = await github.hasAIPoliciesConfig(owner, repo);
   if (!hasConfig) {
-    core.info(\`Skipping \${repository} - no AI Policies configuration found\`);
+    core.info(`Skipping ${repository} - no AI Policies configuration found`);
     return { updated: false };
   }
 
   // Check if update branch already exists
   const branchExists = await github.branchExists(owner, repo, inputs.branchName);
   if (branchExists) {
-    core.info(\`Skipping \${repository} - update branch already exists\`);
+    core.info(`Skipping ${repository} - update branch already exists`);
     return { updated: false };
   }
 
   if (inputs.dryRun) {
-    core.info(\`[DRY RUN] Would update repository: \${repository}\`);
+    core.info(`[DRY RUN] Would update repository: ${repository}`);
     return { updated: true };
   }
 
@@ -186,7 +186,7 @@ async function processRepository(
     const hasChanges = await git.runAIPoliciesSync(workingDir);
 
     if (!hasChanges) {
-      core.info(\`No changes needed for \${repository}\`);
+      core.info(`No changes needed for ${repository}`);
       return { updated: false };
     }
 
@@ -231,7 +231,7 @@ async function processRepository(
       await github.enableAutoMerge(owner, repo, pullRequest.number);
     }
 
-    core.info(\`✅ Created pull request for \${repository}: \${pullRequest.html_url}\`);
+    core.info(`✅ Created pull request for ${repository}: ${pullRequest.html_url}`);
 
     return {
       updated: true,

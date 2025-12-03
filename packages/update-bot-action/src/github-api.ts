@@ -77,11 +77,11 @@ export class GitHubClient {
         try {
           const hasConfig = await this.hasAIPoliciesConfig(organization, repo.name);
           if (hasConfig) {
-            repositories.push(\`\${organization}/\${repo.name}\`);
+            repositories.push(`${organization}/${repo.name}`);
           }
         } catch (error) {
           // Skip repositories we can't access
-          console.warn(\`Could not check \${repo.name} for AI Policies config:\`, error);
+          console.warn(`Could not check ${repo.name} for AI Policies config:`, error);
         }
       }
 
@@ -168,7 +168,7 @@ export class GitHubClient {
   ): Promise<void> {
     try {
       // Note: This requires the GraphQL API
-      await this.octokit.graphql(\`
+      await this.octokit.graphql(`
         mutation(\$pullRequestId: ID!) {
           enablePullRequestAutoMerge(input: {
             pullRequestId: \$pullRequestId
@@ -179,7 +179,7 @@ export class GitHubClient {
             }
           }
         }
-      \`, {
+      `, {
         pullRequestId: await this.getPullRequestNodeId(owner, repo, pullNumber),
       });
     } catch (error) {
@@ -209,7 +209,7 @@ export class GitHubClient {
    * Get repository clone URL with authentication
    */
   getRepositoryUrl(owner: string, repo: string, token: string): string {
-    return \`https://x-access-token:\${token}@github.com/\${owner}/\${repo}.git\`;
+    return `https://x-access-token:${token}@github.com/${owner}/${repo}.git`;
   }
 
   /**

@@ -9,12 +9,12 @@ async function run(): Promise<void> {
     await runUpdateBot();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    core.setFailed(\`Action failed: \${message}\`);
+    core.setFailed(`Action failed: ${message}`);
   }
 }
 
 // Only run if this file is executed directly (not imported)
-if (import.meta.url === \`file://\${process.argv[1]}\`) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   run().catch(error => {
     console.error('Unhandled error:', error);
     process.exit(1);

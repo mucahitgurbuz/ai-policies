@@ -1,3 +1,2 @@
-export * from './cursor-provider.js';
-export * from './formatter.js';
-export * from './templates.js';
+export { CursorProvider, renderCursorRules, validateCursorRules } from './cursor-provider.js';
+export type { CursorRenderOptions } from './cursor-provider.js';

@@ -17,7 +17,7 @@ export function parseRepositoryList(input: string): string[] {
       // Validate repository format (owner/repo)
       const parts = repo.split('/');
       if (parts.length !== 2) {
-        throw new Error(\`Invalid repository format: '\${repo}'. Expected format: 'owner/repo'\`);
+        throw new Error(`Invalid repository format: '${repo}'. Expected format: 'owner/repo'`);
       }
 
       return true;
@@ -42,20 +42,20 @@ export function validateInputs(inputs: ActionInputs): void {
 
   // Validate branch name
   if (!/^[a-zA-Z0-9/_-]+$/.test(inputs.branchName)) {
-    throw new Error(\`Invalid branch name: '\${inputs.branchName}'\`);
+    throw new Error(`Invalid branch name: '${inputs.branchName}'`);
   }
 
   // Validate reviewers (GitHub usernames)
   for (const reviewer of inputs.reviewers) {
     if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(reviewer)) {
-      throw new Error(\`Invalid GitHub username: '\${reviewer}'\`);
+      throw new Error(`Invalid GitHub username: '${reviewer}'`);
     }
   }
 
   // Validate team reviewers
   for (const team of inputs.teamReviewers) {
     if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(team)) {
-      throw new Error(\`Invalid team name: '\${team}'\`);
+      throw new Error(`Invalid team name: '${team}'`);
     }
   }
 }
@@ -96,7 +96,7 @@ export function createChangesSummary(changes: {
   if (changes.added.length > 0) {
     lines.push('### ✅ Files Added');
     for (const file of changes.added) {
-      lines.push(\`- \${file}\`);
+      lines.push(`- ${file}`);
     }
     lines.push('');
   }
@@ -104,7 +104,7 @@ export function createChangesSummary(changes: {
   if (changes.modified.length > 0) {
     lines.push('### 📝 Files Modified');
     for (const file of changes.modified) {
-      lines.push(\`- \${file}\`);
+      lines.push(`- ${file}`);
     }
     lines.push('');
   }
@@ -112,7 +112,7 @@ export function createChangesSummary(changes: {
   if (changes.deleted.length > 0) {
     lines.push('### ❌ Files Deleted');
     for (const file of changes.deleted) {
-      lines.push(\`- \${file}\`);
+      lines.push(`- ${file}`);
     }
     lines.push('');
   }
@@ -152,7 +152,7 @@ export async function retry<T>(
       // Calculate delay with exponential backoff
       const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
 
-      console.warn(\`Attempt \${attempt} failed, retrying in \${delay}ms:\`, lastError.message);
+      console.warn(`Attempt ${attempt} failed, retrying in ${delay}ms:`, lastError.message);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -189,7 +189,7 @@ export function isValidRepositoryIdentifier(repo: string): boolean {
  */
 export function generateBranchName(baseName: string): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  return \`\${baseName}-\${timestamp}\`;
+  return `${baseName}-${timestamp}`;
 }
 
 /**

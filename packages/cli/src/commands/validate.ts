@@ -56,16 +56,16 @@ export const validateCommand: CommandModule<{}, ValidateOptions> = {
       if (errors.length === 0) {
         logger.success('✅ All validation checks passed!');
       } else {
-        logger.error(\`❌ Found \${errors.length} validation error(s):\n\`);
+        logger.error(`❌ Found ${errors.length} validation error(s):\n`);
 
         for (const error of errors) {
-          logger.error(\`  • \${error}\`);
+          logger.error(`  • ${error}`);
         }
 
         process.exit(1);
       }
     } catch (error) {
-      logger.error(\`Validation failed: \${error instanceof Error ? error.message : String(error)}\`);
+      logger.error(`Validation failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   },
@@ -106,7 +106,7 @@ async function validateManifestSchema(manifestPath: string): Promise<string[]> {
     if (!result.success) {
       for (const issue of result.error.issues) {
         const path = issue.path.join('.');
-        errors.push(\`Manifest schema error at '\${path}': \${issue.message}\`);
+        errors.push(`Manifest schema error at '${path}': ${issue.message}`);
       }
     } else {
       // Additional semantic validation
@@ -121,26 +121,26 @@ async function validateManifestSchema(manifestPath: string): Promise<string[]> {
       const validLayers = ['core', 'domain', 'stack', 'team'];
       for (const layer of manifest.compose.order) {
         if (!validLayers.includes(layer)) {
-          errors.push(\`Invalid layer in compose.order: '\${layer}'. Valid layers: \${validLayers.join(', ')}\`);
+          errors.push(`Invalid layer in compose.order: '${layer}'. Valid layers: ${validLayers.join(', ')}`);
         }
       }
 
       // Check that protectedLayers are in compose.order
       for (const layer of manifest.compose.protectedLayers) {
         if (!manifest.compose.order.includes(layer)) {
-          errors.push(\`Protected layer '\${layer}' must be included in compose.order\`);
+          errors.push(`Protected layer '${layer}' must be included in compose.order`);
         }
       }
 
       // Validate package names format
       for (const packageName of Object.keys(manifest.requires)) {
         if (!packageName.startsWith('@') || !packageName.includes('/')) {
-          errors.push(\`Invalid package name format: '\${packageName}'. Expected format: @scope/name\`);
+          errors.push(`Invalid package name format: '${packageName}'. Expected format: @scope/name`);
         }
       }
     }
   } catch (yamlError) {
-    errors.push(\`Invalid YAML syntax: \${yamlError instanceof Error ? yamlError.message : String(yamlError)}\`);
+    errors.push(`Invalid YAML syntax: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`);
   }
 
   return errors;

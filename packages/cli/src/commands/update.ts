@@ -45,9 +45,9 @@ export const updateCommand: CommandModule<{}, UpdateOptions> = {
       const projectRoot = path.dirname(manifestPath);
 
       if (argv.package) {
-        await updateSpecificPackage(config, argv.package, argv.dry);
+        await updateSpecificPackage(config, argv.package, argv.dry ?? false);
       } else if (argv.all) {
-        await updateAllPackages(config, argv.dry);
+        await updateAllPackages(config, argv.dry ?? false);
       } else {
         logger.error('Specify either --all or provide a package name');
         process.exit(1);
@@ -59,7 +59,7 @@ export const updateCommand: CommandModule<{}, UpdateOptions> = {
         logger.info('Run "ai-policies sync" to apply the changes');
       }
     } catch (error) {
-      logger.error(\`Failed to update: \${error instanceof Error ? error.message : String(error)}\`);
+      logger.error(`Failed to update: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   },
@@ -73,7 +73,7 @@ async function updateSpecificPackage(config: any, packageSpec: string, dry: bool
   }
 
   if (!config.requires[packageName]) {
-    throw new Error(\`Package "\${packageName}" not found in manifest\`);
+    throw new Error(`Package "${packageName}" not found in manifest`);
   }
 
   const currentVersion = config.requires[packageName];
@@ -82,10 +82,10 @@ async function updateSpecificPackage(config: any, packageSpec: string, dry: bool
   const latestCompatible = resolveLatestCompatible(version);
 
   if (dry) {
-    logger.info(\`Would update \${packageName}: \${currentVersion} → \${latestCompatible}\`);
+    logger.info(`Would update ${packageName}: ${currentVersion} → ${latestCompatible}`);
   } else {
     config.requires[packageName] = latestCompatible;
-    logger.success(\`Updated \${packageName}: \${currentVersion} → \${latestCompatible}\`);
+    logger.success(`Updated ${packageName}: ${currentVersion} → ${latestCompatible}`);
   }
 }
 
@@ -114,10 +114,10 @@ async function updateAllPackages(config: any, dry: boolean) {
 
   for (const update of updates) {
     if (dry) {
-      logger.info(\`Would update \${update.name}: \${update.current} → \${update.latest}\`);
+      logger.info(`Would update ${update.name}: ${update.current} → ${update.latest}`);
     } else {
       config.requires[update.name] = update.latest;
-      logger.success(\`Updated \${update.name}: \${update.current} → \${update.latest}\`);
+      logger.success(`Updated ${update.name}: ${update.current} → ${update.latest}`);
     }
   }
 }
@@ -134,7 +134,7 @@ function resolveLatestCompatible(versionRange: string): string {
     const parsed = semver.parse(baseVersion);
     if (parsed) {
       // Simulate a patch update
-      return \`^\${parsed.major}.\${parsed.minor}.\${parsed.patch + 1}\`;
+      return `^${parsed.major}.${parsed.minor}.${parsed.patch + 1}`;
     }
   }
 
@@ -143,7 +143,7 @@ function resolveLatestCompatible(versionRange: string): string {
     const parsed = semver.parse(baseVersion);
     if (parsed) {
       // Simulate a patch update
-      return \`~\${parsed.major}.\${parsed.minor}.\${parsed.patch + 1}\`;
+      return `~${parsed.major}.${parsed.minor}.${parsed.patch + 1}`;
     }
   }
 

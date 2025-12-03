@@ -34,7 +34,7 @@ export async function mergePartials(
     const layerPartials = layerSections.get(layer);
 
     if (!layerPartials) {
-      console.warn(\`Skipping partial \${partial.frontmatter.id} with unknown layer: \${layer}\`);
+      console.warn(`Skipping partial ${partial.frontmatter.id} with unknown layer: ${layer}`);
       continue;
     }
 
@@ -56,7 +56,7 @@ export async function mergePartials(
     // Add section header if content is not empty
     if (content.trim()) {
       const sectionHeader = createSectionHeader(partial);
-      layerPartials.push(\`\${sectionHeader}\\n\${content}\`);
+      layerPartials.push(`${sectionHeader}\\n${content}`);
     }
   }
 
@@ -66,7 +66,7 @@ export async function mergePartials(
 
     if (layerPartials.length > 0) {
       const layerHeader = createLayerHeader(layer);
-      sections.push(\`\${layerHeader}\\n\${layerPartials.join('\\n\\n')}\`);
+      sections.push(`${layerHeader}\\n${layerPartials.join('\\n\\n')}`);
     }
   }
 
@@ -83,7 +83,7 @@ export async function mergePartials(
  * Create a section header for a partial
  */
 function createSectionHeader(partial: PolicyPartial): string {
-  return \`<!-- BEGIN PARTIAL: \${partial.frontmatter.id} (from \${partial.packageName}) -->\`;
+  return `<!-- BEGIN PARTIAL: ${partial.frontmatter.id} (from ${partial.packageName}) -->`;
 }
 
 /**
@@ -97,20 +97,20 @@ function createLayerHeader(layer: string): string {
     team: 'Team-Specific Policies',
   };
 
-  const title = layerTitles[layer as keyof typeof layerTitles] || \`\${layer.charAt(0).toUpperCase()}\${layer.slice(1)} Policies\`;
+  const title = layerTitles[layer as keyof typeof layerTitles] || `${layer.charAt(0).toUpperCase()}${layer.slice(1)} Policies`;
 
-  return \`## \${title}\`;
+  return `## ${title}`;
 }
 
 /**
  * Create team append section
  */
 function createTeamAppendSection(content: string): string {
-  return \`<!-- BEGIN TEAM APPEND -->
+  return `<!-- BEGIN TEAM APPEND -->
 ## Team Customizations
 
-\${content}
-<!-- END TEAM APPEND -->\`;
+${content}
+<!-- END TEAM APPEND -->`;
 }
 
 /**
@@ -126,10 +126,10 @@ export function mergeWithConflictResolution(
       return newContent;
 
     case 'append':
-      return baseContent ? \`\${baseContent}\\n\\n\${newContent}\` : newContent;
+      return baseContent ? `${baseContent}\\n\\n${newContent}` : newContent;
 
     case 'prepend':
-      return baseContent ? \`\${newContent}\\n\\n\${baseContent}\` : newContent;
+      return baseContent ? `${newContent}\\n\\n${baseContent}` : newContent;
 
     case 'preserve':
       return baseContent || newContent;

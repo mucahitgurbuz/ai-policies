@@ -22,7 +22,7 @@ export async function extractProtectedBlocks(
       content: fullMatch,
       source: createPlaceholderPartial(blockId), // In real implementation, track source
       markers: {
-        start: \`<!-- BEGIN PROTECTED:\${blockId} -->\`,
+        start: `<!-- BEGIN PROTECTED:${blockId} -->`,
         end: '<!-- END PROTECTED -->',
       },
     });
@@ -42,7 +42,7 @@ export function mergeProtectedBlocks(
 
   for (const block of protectedBlocks) {
     // Find placeholder for this protected block
-    const placeholder = \`<!-- PROTECTED:\${block.id} -->\`;
+    const placeholder = `<!-- PROTECTED:${block.id} -->`;
 
     if (result.includes(placeholder)) {
       result = result.replace(placeholder, block.content);
@@ -65,9 +65,9 @@ export function createProtectedBlock(
 ): string {
   const sanitizedId = id.replace(/[^a-zA-Z0-9-_]/g, '-');
 
-  return \`<!-- BEGIN PROTECTED:\${sanitizedId} -->
-\${content}
-<!-- END PROTECTED -->\`;
+  return `<!-- BEGIN PROTECTED:${sanitizedId} -->
+${content}
+<!-- END PROTECTED -->`;
 }
 
 /**
@@ -90,7 +90,7 @@ export function validateProtectedBlocks(content: string): Array<{ message: strin
 
   if (beginMatches.length !== endMatches.length) {
     errors.push({
-      message: \`Unmatched protected block markers: \${beginMatches.length} BEGIN, \${endMatches.length} END\`,
+      message: `Unmatched protected block markers: ${beginMatches.length} BEGIN, ${endMatches.length} END`,
     });
   }
 
@@ -105,7 +105,7 @@ export function validateProtectedBlocks(content: string): Array<{ message: strin
     const nestedBegin = (fullMatch.match(/<!--\\s*BEGIN\\s+PROTECTED:/g) || []).length;
     if (nestedBegin > 1) {
       errors.push({
-        message: \`Protected block '\${blockId}' contains nested protected blocks\`,
+        message: `Protected block '${blockId}' contains nested protected blocks`,
         blockId,
       });
     }
@@ -133,7 +133,7 @@ function insertProtectedBlock(content: string, block: ProtectedBlock): string {
   }
 
   // If no good location found, append at the end
-  return \`\${content}\\n\\n\${block.content}\`;
+  return `${content}\\n\\n${block.content}`;
 }
 
 /**
@@ -158,7 +158,7 @@ export function extractProtectedContentFromPartial(partial: PolicyPartial): Prot
     content: protectedContent,
     source: partial,
     markers: {
-      start: \`<!-- BEGIN PROTECTED:\${partial.frontmatter.id} -->\`,
+      start: `<!-- BEGIN PROTECTED:${partial.frontmatter.id} -->`,
       end: '<!-- END PROTECTED -->',
     },
   });
@@ -203,7 +203,7 @@ function createPlaceholderPartial(blockId: string): PolicyPartial {
       owner: 'system',
     },
     content: '',
-    filePath: \`protected/\${blockId}.md\`,
+    filePath: `protected/${blockId}.md`,
     packageName: '@ai-policies/protected',
     packageVersion: '1.0.0',
   };

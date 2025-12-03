@@ -251,7 +251,7 @@ export function validatePartialCompatibility(
     for (const [weight, partialIds] of weights) {
       if (partialIds.length > 1) {
         issues.push({
-          message: \`Multiple partials in layer '\${layer}' have the same weight \${weight}\`,
+          message: `Multiple partials in layer '${layer}' have the same weight ${weight}`,
           partialIds,
         });
       }
@@ -271,29 +271,29 @@ export function createCompositionSummary(
   const stats = getPartialStatistics(partials);
   const lines: string[] = [];
 
-  lines.push(\`Composition Summary:\`);
-  lines.push(\`  Total partials: \${stats.total}\`);
-  lines.push(\`  Protected partials: \${stats.protected}\`);
-  lines.push(\`  Partials with dependencies: \${stats.withDependencies}\`);
-  lines.push(\`  Average weight: \${stats.averageWeight.toFixed(1)}\`);
+  lines.push(`Composition Summary:`);
+  lines.push(`  Total partials: ${stats.total}`);
+  lines.push(`  Protected partials: ${stats.protected}`);
+  lines.push(`  Partials with dependencies: ${stats.withDependencies}`);
+  lines.push(`  Average weight: ${stats.averageWeight.toFixed(1)}`);
   lines.push('');
 
   lines.push('By layer:');
   for (const [layer, count] of stats.byLayer) {
-    lines.push(\`  \${layer}: \${count}\`);
+    lines.push(`  ${layer}: ${count}`);
   }
   lines.push('');
 
   lines.push('By package:');
   for (const [pkg, count] of stats.byPackage) {
-    lines.push(\`  \${pkg}: \${count}\`);
+    lines.push(`  ${pkg}: ${count}`);
   }
 
   if (conflicts.length > 0) {
     lines.push('');
     lines.push('Conflicts resolved:');
     for (const conflict of conflicts) {
-      lines.push(\`  \${conflict.winner.frontmatter.id}: \${conflict.winner.packageName} won over \${conflict.losers.map(l => l.packageName).join(', ')} (\${conflict.reason})\`);
+      lines.push(`  ${conflict.winner.frontmatter.id}: ${conflict.winner.packageName} won over ${conflict.losers.map(l => l.packageName).join(', ')} (${conflict.reason})`);
     }
   }
 

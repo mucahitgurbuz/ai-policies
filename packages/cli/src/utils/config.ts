@@ -1,12 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
-import { ManifestConfig } from '../types/index.js';
+
+import type { ManifestConfig } from '@ai-policies/core-schemas';
 
 export const MANIFEST_FILE = '.ai-policies.yaml';
 export const LOCK_FILE = '.ai-policies.lock';
 
-export async function findManifest(cwd: string = process.cwd()): Promise<string | null> {
+export async function findManifest(
+  cwd: string = process.cwd()
+): Promise<string | null> {
   let currentDir = cwd;
 
   while (currentDir !== '/') {
@@ -20,7 +23,9 @@ export async function findManifest(cwd: string = process.cwd()): Promise<string 
   return null;
 }
 
-export async function loadManifest(manifestPath: string): Promise<ManifestConfig> {
+export async function loadManifest(
+  manifestPath: string
+): Promise<ManifestConfig> {
   const content = await fs.readFile(manifestPath, 'utf8');
   const config = yaml.load(content) as ManifestConfig;
 
@@ -39,7 +44,10 @@ export async function loadManifest(manifestPath: string): Promise<ManifestConfig
   return config;
 }
 
-export async function saveManifest(manifestPath: string, config: ManifestConfig): Promise<void> {
+export async function saveManifest(
+  manifestPath: string,
+  config: ManifestConfig
+): Promise<void> {
   const content = yaml.dump(config, {
     indent: 2,
     lineWidth: -1,
