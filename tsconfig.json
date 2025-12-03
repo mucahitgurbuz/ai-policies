@@ -1,42 +1,20 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "module": "ES2022",
+    "moduleResolution": "Node",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true,
-    "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo",
-    "baseUrl": ".",
-    "paths": {
-      "@ai-policies/cli": ["./packages/cli/src"],
-      "@ai-policies/core-schemas": ["./packages/core-schemas/src"],
-      "@ai-policies/compose-engine": ["./packages/compose-engine/src"],
-      "@ai-policies/provider-cursor": [
-        "./packages/providers/provider-cursor/src"
-      ],
-      "@ai-policies/provider-copilot": [
-        "./packages/providers/provider-copilot/src"
-      ],
-      "@ai-policies/policy-registry": ["./packages/policy-registry/src"],
-      "@ai-policies/update-bot-action": ["./packages/update-bot-action/src"]
-    }
+    "resolveJsonModule": true
   },
-  "exclude": ["node_modules", "dist", "build", ".next", ".nuxt", "coverage"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

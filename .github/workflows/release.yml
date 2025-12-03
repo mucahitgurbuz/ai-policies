@@ -4,8 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - 'src/**'
+      - 'package.json'
       - '.changeset/**'
-      - 'packages/**'
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -19,25 +20,17 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write # Required for npm trusted publishers (OIDC)
-    outputs:
-      published: ${{ steps.changesets.outputs.published }}
-      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
       # Ensure npm 11.5.1+ for trusted publishing OIDC support
@@ -45,21 +38,21 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
-      - name: Build packages
-        run: pnpm build
+      - name: Build
+        run: npm run build
 
-      - name: Run tests
-        run: pnpm test -- --run
+      - name: Test
+        run: npm run test:run
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm release
-          commit: 'chore: release packages'
-          title: 'chore: release packages'
+          publish: npm publish
+          commit: 'chore: release'
+          title: 'chore: release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No NPM_TOKEN needed - using OIDC trusted publishers instead
+          # No NPM_TOKEN needed - using OIDC trusted publishers

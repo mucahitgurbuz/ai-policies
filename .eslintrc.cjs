@@ -30,13 +30,10 @@ module.exports = {
   },
   ignorePatterns: [
     'dist',
-    'build',
     'node_modules',
     '*.d.ts',
     '.eslintrc.cjs',
     'vitest.config.ts',
     'examples',
-    'scripts',
-    'packages/update-bot-action',
   ],
 };

@@ -1,8 +1,0 @@
-packages:
-  - 'packages/*'
-  - 'packages/providers/*'
-  - 'examples/*'
-
-prefer-workspace-packages: true
-shared-workspace-lockfile: true
-save-workspace-protocol: rolling
