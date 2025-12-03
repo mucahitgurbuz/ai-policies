@@ -293,6 +293,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Run `pnpm build` to build all packages
 - Check TypeScript configuration with `pnpm typecheck`
 
+**Workspace package not found errors:**
+- Ensure `pnpm-workspace.yaml` includes the correct patterns
+- Verify all package.json files have proper `name` and `version` fields
+- Run `pnpm install` to refresh workspace dependencies
+
 ## 📞 Support
 
 - 🐛 [Report Issues](https://github.com/ai-policies/ai-policies/issues)
