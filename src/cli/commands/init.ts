@@ -158,7 +158,7 @@ async function promptForConfiguration() {
     },
   ]);
 
-  let config = getPresetConfig(projectType);
+  const config = getPresetConfig(projectType);
 
   if (includeWorkflows) {
     config.requires['@ai-policies/workflows-jira'] = '~1.0.0';

@@ -4,10 +4,7 @@
   "title": "AI Policies Package",
   "description": "Schema for AI Policies package.json files",
   "type": "object",
-  "required": [
-    "name",
-    "version"
-  ],
+  "required": ["name", "version"],
   "properties": {
     "name": {
       "type": "string",
@@ -52,9 +49,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "git"
-          ]
+          "enum": ["git"]
         },
         "url": {
           "type": "string",

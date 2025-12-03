@@ -179,7 +179,10 @@ export class PolicyRegistry {
         // Validate frontmatter
         const validation = validatePartialFrontmatter(parsed.data);
         if (!validation.valid) {
-          console.warn(`Invalid frontmatter in ${filePath}:`, validation.errors);
+          console.warn(
+            `Invalid frontmatter in ${filePath}:`,
+            validation.errors
+          );
           continue;
         }
 

@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/**"
-      - "package.json"
-      - ".changeset/**"
+      - 'src/**'
+      - 'package.json'
+      - '.changeset/**'
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -30,8 +30,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
-          registry-url: "https://registry.npmjs.org"
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
       # Ensure npm 11.5.1+ for trusted publishing OIDC support
       - name: Update npm for trusted publishing
@@ -51,8 +51,8 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: npm publish
-          commit: "chore: release"
-          title: "chore: release"
+          commit: 'chore: release'
+          title: 'chore: release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # No NPM_TOKEN needed - using OIDC trusted publishers
