@@ -14,11 +14,12 @@ This is a major release that redesigns AI Policies to follow ESLint's configurat
 #### Configuration Format
 
 - **`extends`** changed from object to array
+
   ```yaml
   # Before (v1.x)
   extends:
     '@ai-policies/core': '^1.0.0'
-  
+
   # After (v2.0)
   extends:
     - '@ai-policies/core'
@@ -91,6 +92,7 @@ See [Migration Guide](#migration-from-v1x) in README.md for details.
 ### Migration Guide
 
 1. Update your `.ai-policies.yaml`:
+
    ```yaml
    # Old
    requires:

@@ -21,6 +21,7 @@ Redesign ai-policies to follow ESLint's configuration and package model more clo
 ### Why ESLint-Style?
 
 ESLint's configuration model is:
+
 - **Widely understood** by JavaScript/TypeScript developers
 - **Simple**: Array order determines priority
 - **Extensible**: Mix npm packages with local configs
@@ -54,10 +55,10 @@ overrides:
 
 ```yaml
 extends:
-  - '@ai-policies/core'           # npm package
+  - '@ai-policies/core' # npm package
   - '@ai-policies/frontend-react' # npm package
   - '@ai-policies/workflows-jira' # npm package
-  - './team-policies'             # local directory
+  - './team-policies' # local directory
 
 output:
   cursor: '.cursorrules'
@@ -75,13 +76,13 @@ exclude:
 
 ### Key Changes
 
-| Aspect | Current (v1.x) | Proposed (v2.0) |
-|--------|----------------|-----------------|
-| `extends` format | Object with versions | Array (order matters) |
-| Package resolution | Built-in only | npm packages + local paths |
-| Priority system | Layers + weights | Array order (last wins) |
-| Protected content | `protectedLayers` | `protected` array of partial IDs |
-| Versioning | In config file | In package.json (npm handles it) |
+| Aspect             | Current (v1.x)       | Proposed (v2.0)                  |
+| ------------------ | -------------------- | -------------------------------- |
+| `extends` format   | Object with versions | Array (order matters)            |
+| Package resolution | Built-in only        | npm packages + local paths       |
+| Priority system    | Layers + weights     | Array order (last wins)          |
+| Protected content  | `protectedLayers`    | `protected` array of partial IDs |
+| Versioning         | In config file       | In package.json (npm handles it) |
 
 ### Conflict Resolution
 
@@ -89,9 +90,9 @@ exclude:
 
 ```yaml
 extends:
-  - '@ai-policies/core'        # defines 'code-style' partial
-  - '@ai-policies/team-a'      # also defines 'code-style' partial
-  - './local'                  # also defines 'code-style' partial
+  - '@ai-policies/core' # defines 'code-style' partial
+  - '@ai-policies/team-a' # also defines 'code-style' partial
+  - './local' # also defines 'code-style' partial
 ```
 
 Result: `./local`'s `code-style` is used (last in array wins).
@@ -100,8 +101,8 @@ Result: `./local`'s `code-style` is used (last in array wins).
 
 ```yaml
 extends:
-  - '@ai-policies/core'        # defines 'core-safety' (protected)
-  - './local'                  # tries to override 'core-safety'
+  - '@ai-policies/core' # defines 'core-safety' (protected)
+  - './local' # tries to override 'core-safety'
 
 protected:
   - 'core-safety'
@@ -149,7 +150,7 @@ export default {
   name: '@ai-policies/core',
   partials: './partials',
   // Optional: declare which partials should be protected by default
-  defaultProtected: ['core-safety', 'no-hardcoded-secrets']
+  defaultProtected: ['core-safety', 'no-hardcoded-secrets'],
 };
 ```
 
@@ -169,6 +170,7 @@ tags: [security, required]
 ```
 
 **Removed from frontmatter:**
+
 - ❌ `layer` - no longer needed
 - ❌ `weight` - no longer needed
 - ❌ `protected` - moved to config file
@@ -193,7 +195,7 @@ Reference in config:
 ```yaml
 extends:
   - '@ai-policies/core'
-  - './team-policies'    # Relative path to local directory
+  - './team-policies' # Relative path to local directory
 ```
 
 ### Resolution Algorithm
@@ -250,28 +252,28 @@ ai-policies sync
 ```typescript
 // Config file schema
 interface AIPoliciesConfig {
-  extends: string[];           // Package names or local paths
+  extends: string[]; // Package names or local paths
   output: {
     cursor?: string;
     copilot?: string;
   };
-  protected?: string[];        // Partial IDs that can't be overridden
-  exclude?: string[];          // Partial IDs to exclude
+  protected?: string[]; // Partial IDs that can't be overridden
+  exclude?: string[]; // Partial IDs to exclude
 }
 
 // Partial frontmatter (simplified)
 interface PartialFrontmatter {
-  id: string;                  // Unique identifier
-  description?: string;        // Human-readable description
-  owner?: string;              // Team/person responsible
-  tags?: string[];             // For filtering/categorization
+  id: string; // Unique identifier
+  description?: string; // Human-readable description
+  owner?: string; // Team/person responsible
+  tags?: string[]; // For filtering/categorization
 }
 
 // Package metadata
 interface PolicyPackage {
   name: string;
   version: string;
-  partials: string;            // Path to partials directory
+  partials: string; // Path to partials directory
   defaultProtected?: string[]; // Partials protected by default
 }
 ```
@@ -503,15 +505,15 @@ extends:
 ```yaml
 extends:
   - '@ai-policies/core'
-  - '@ai-policies/team-a'      # Might try to weaken security
-  - './local-experiments'      # Definitely tries to weaken security
+  - '@ai-policies/team-a' # Might try to weaken security
+  - './local-experiments' # Definitely tries to weaken security
 
 protected:
-  - 'core-safety'              # Can never be overridden
-  - 'no-hardcoded-secrets'     # Can never be overridden
-  - 'input-validation'         # Can never be overridden
+  - 'core-safety' # Can never be overridden
+  - 'no-hardcoded-secrets' # Can never be overridden
+  - 'input-validation' # Can never be overridden
+
 
 # Result: Even if team-a or local-experiments define partials
 # with these IDs, the original @ai-policies/core versions are used
 ```
-

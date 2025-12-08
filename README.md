@@ -1,5 +1,10 @@
 # AI Policies
 
+[![npm version](https://img.shields.io/npm/v/ai-policies.svg)](https://www.npmjs.com/package/ai-policies)
+[![CI](https://github.com/mucahitgurbuz/ai-policies/actions/workflows/ci.yml/badge.svg)](https://github.com/mucahitgurbuz/ai-policies/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/ai-policies.svg)](https://nodejs.org)
+
 Centralized AI IDE rules management for Cursor and GitHub Copilot.
 
 **AI Policies** helps organizations standardize AI assistant behavior across all projects with reusable, version-controlled rule sets.
@@ -18,28 +23,28 @@ AI Policies solves this with an **ESLint-like configuration model**:
 ```yaml
 # .ai-policies.yaml
 extends:
-  - '@ai-policies/core'           # Security & quality fundamentals
+  - '@ai-policies/core' # Security & quality fundamentals
   - '@ai-policies/frontend-react' # React best practices
-  - './team-policies'             # Your team's custom rules
+  - './team-policies' # Your team's custom rules
 
 output:
   cursor: '.cursorrules'
   copilot: '.github/copilot-instructions.md'
 
 protected:
-  - 'core-safety'                 # Can never be overridden
+  - 'core-safety' # Can never be overridden
 ```
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
+| Feature                 | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
 | **ESLint-style Config** | Familiar array-based `extends` - order matters, last wins |
-| **npm Packages** | Install and share policies via npm registry |
-| **Local Policies** | Mix npm packages with local team rules |
-| **Protected Rules** | Mark critical policies that can't be overridden |
-| **Multi-IDE Support** | Generate `.cursorrules` and Copilot instructions |
-| **Version Control** | Track rule changes with semantic versioning |
+| **npm Packages**        | Install and share policies via npm registry               |
+| **Local Policies**      | Mix npm packages with local team rules                    |
+| **Protected Rules**     | Mark critical policies that can't be overridden           |
+| **Multi-IDE Support**   | Generate `.cursorrules` and Copilot instructions          |
+| **Version Control**     | Track rule changes with semantic versioning               |
 
 ## Quick Start
 
@@ -84,20 +89,20 @@ output:
 
 ```yaml
 extends:
-  - '@ai-policies/core'           # npm package (first = lowest priority)
+  - '@ai-policies/core' # npm package (first = lowest priority)
   - '@ai-policies/frontend-react' # npm package
-  - './team-policies'             # local directory (last = highest priority)
+  - './team-policies' # local directory (last = highest priority)
 
 output:
   cursor: '.cursorrules'
   copilot: '.github/copilot-instructions.md'
 
 protected:
-  - 'core-safety'                 # These partials can never be overridden
+  - 'core-safety' # These partials can never be overridden
   - 'no-hardcoded-secrets'
 
 exclude:
-  - 'some-unwanted-partial'       # Exclude specific partials
+  - 'some-unwanted-partial' # Exclude specific partials
 ```
 
 ### How Conflict Resolution Works
@@ -106,9 +111,9 @@ exclude:
 
 ```yaml
 extends:
-  - '@ai-policies/core'        # defines 'code-style' partial
-  - '@ai-policies/team-a'      # also defines 'code-style' partial
-  - './local'                  # also defines 'code-style' partial (WINS)
+  - '@ai-policies/core' # defines 'code-style' partial
+  - '@ai-policies/team-a' # also defines 'code-style' partial
+  - './local' # also defines 'code-style' partial (WINS)
 ```
 
 The `./local` version of `code-style` is used because it's last in the array.
@@ -117,24 +122,24 @@ The `./local` version of `code-style` is used because it's last in the array.
 
 ```yaml
 extends:
-  - '@ai-policies/core'        # defines 'core-safety'
-  - './local'                  # tries to override 'core-safety' (IGNORED)
+  - '@ai-policies/core' # defines 'core-safety'
+  - './local' # tries to override 'core-safety' (IGNORED)
 
 protected:
-  - 'core-safety'              # Original version preserved
+  - 'core-safety' # Original version preserved
 ```
 
 ## CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `ai-policies init` | Initialize configuration in current directory |
-| `ai-policies sync` | Generate IDE configurations from policies |
-| `ai-policies install <pkg>` | Install a policy package and add to config |
-| `ai-policies migrate` | Migrate v1.x config to v2.0 format |
-| `ai-policies validate` | Validate configuration and partials |
-| `ai-policies diff` | Show pending changes |
-| `ai-policies doctor` | Check for common issues |
+| Command                     | Description                                   |
+| --------------------------- | --------------------------------------------- |
+| `ai-policies init`          | Initialize configuration in current directory |
+| `ai-policies sync`          | Generate IDE configurations from policies     |
+| `ai-policies install <pkg>` | Install a policy package and add to config    |
+| `ai-policies migrate`       | Migrate v1.x config to v2.0 format            |
+| `ai-policies validate`      | Validate configuration and partials           |
+| `ai-policies diff`          | Show pending changes                          |
+| `ai-policies doctor`        | Check for common issues                       |
 
 ### Examples
 
@@ -184,7 +189,7 @@ my-policies/
 export default {
   name: '@mycompany/ai-policies',
   partials: './partials',
-  defaultProtected: ['security-rules']  // Protected by default
+  defaultProtected: ['security-rules'], // Protected by default
 };
 ```
 
@@ -205,16 +210,16 @@ tags: [conventions, required]
 - Follow our naming conventions
 ```
 
-**Required field:** `id`  
+**Required field:** `id`
 **Optional fields:** `description`, `owner`, `tags`, `providers`
 
 ## Built-in Packages
 
-| Package | Description |
-|---------|-------------|
-| `@ai-policies/core` | Security fundamentals, code quality, error handling |
+| Package                       | Description                                         |
+| ----------------------------- | --------------------------------------------------- |
+| `@ai-policies/core`           | Security fundamentals, code quality, error handling |
 | `@ai-policies/frontend-react` | React patterns, hooks best practices, accessibility |
-| `@ai-policies/workflows-jira` | Jira integration, commit formats, PR templates |
+| `@ai-policies/workflows-jira` | Jira integration, commit formats, PR templates      |
 
 ## Scalability for Organizations
 
@@ -236,8 +241,8 @@ Reference shared policies via local paths:
 
 ```yaml
 extends:
-  - '../../shared/ai-policies'    # Shared across all packages
-  - './local-overrides'           # Package-specific rules
+  - '../../shared/ai-policies' # Shared across all packages
+  - './local-overrides' # Package-specific rules
 ```
 
 ## Migration from v1.x
@@ -251,6 +256,7 @@ ai-policies migrate
 This automatically converts your config:
 
 **Before (v1.x):**
+
 ```yaml
 extends:
   '@ai-policies/core': '^1.0.0'
@@ -260,6 +266,7 @@ compose:
 ```
 
 **After (v2.0):**
+
 ```yaml
 extends:
   - '@ai-policies/core'

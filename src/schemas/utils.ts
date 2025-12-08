@@ -95,7 +95,8 @@ export function createCompositionMetadata(
 export function parseMetadataFromHeader(
   content: string
 ): CompositionMetadata | null {
-  const metaMatch = content.match(/<!--\s*AI-POLICIES-META:\s*([^-]+)\s*-->/);
+  // Match base64 data (allows +, /, =, alphanumeric)
+  const metaMatch = content.match(/<!--\s*AI-POLICIES-META:\s*([A-Za-z0-9+/=]+)\s*/);
 
   if (!metaMatch) {
     return null;
