@@ -7,6 +7,7 @@ import { execSync } from 'child_process';
 import { findManifest, saveManifest } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import type { ManifestConfig } from '../../schemas/types.js';
+import { isLocalPath } from '../../schemas/utils.js';
 
 interface MigrateOptions {
   dry?: boolean;
@@ -174,9 +175,7 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
         logger.info('');
         logger.info('Installing packages...');
         try {
-          const packages = newConfig.extends.filter(
-            p => !p.startsWith('./') && !p.startsWith('/')
-          );
+          const packages = newConfig.extends.filter(p => !isLocalPath(p));
           if (packages.length > 0) {
             execSync(`npm install ${packages.join(' ')}`, {
               cwd: projectRoot,

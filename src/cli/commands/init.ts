@@ -11,6 +11,7 @@ import {
 } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import type { ManifestConfig } from '../../schemas/types.js';
+import { isLocalPath } from '../../schemas/utils.js';
 
 interface InitOptions {
   force?: boolean;
@@ -86,9 +87,7 @@ export const initCommand: CommandModule<{}, InitOptions> = {
 
       // Install packages
       if (!argv.skipInstall) {
-        const packages = config.extends.filter(
-          p => !p.startsWith('./') && !p.startsWith('/')
-        );
+        const packages = config.extends.filter(p => !isLocalPath(p));
         if (packages.length > 0) {
           logger.info('');
           logger.info('Installing packages...');

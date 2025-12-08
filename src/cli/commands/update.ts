@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 
 import { findManifest, loadManifest } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
+import { isLocalPath } from '../../schemas/utils.js';
 
 interface UpdateOptions {
   all?: boolean;
@@ -47,9 +48,7 @@ export const updateCommand: CommandModule<{}, UpdateOptions> = {
       const projectRoot = path.dirname(manifestPath);
 
       // Filter to only npm packages (exclude local paths)
-      const npmPackages = config.extends.filter(
-        pkg => !pkg.startsWith('./') && !pkg.startsWith('/')
-      );
+      const npmPackages = config.extends.filter(pkg => !isLocalPath(pkg));
 
       if (npmPackages.length === 0) {
         logger.info('No npm packages to update (only local paths found)');
