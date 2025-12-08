@@ -7,6 +7,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { glob } from 'glob';
 import matter from 'gray-matter';
+import { createRequire } from 'node:module';
 
 import type {
   PolicyPackage,
@@ -65,8 +66,9 @@ function resolveNpmPackage(
     }
   }
 
-  // Try Node.js require.resolve
+  // Try Node.js require.resolve (using createRequire for ES modules)
   try {
+    const require = createRequire(import.meta.url);
     const resolved = require.resolve(`${packageName}/package.json`, {
       paths: [projectRoot],
     });
