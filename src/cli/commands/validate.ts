@@ -74,27 +74,23 @@ export const validateCommand: CommandModule<{}, ValidateOptions> = {
   },
 };
 
-// Define the manifest schema using Zod
+// Define the manifest schema using Zod (v2.0 format)
 const ManifestSchema = z.object({
-  extends: z.record(z.string()),
+  extends: z.array(z.string()).min(1),
   output: z.object({
     cursor: z.string().optional(),
     copilot: z.string().optional(),
   }),
-  compose: z.object({
-    order: z.array(z.string()),
-    protectedLayers: z.array(z.string()),
-    teamAppend: z.boolean(),
-  }),
+  protected: z.array(z.string()).optional(),
+  exclude: z.array(z.string()).optional(),
 });
 
 const PartialFrontmatterSchema = z.object({
-  id: z.string(),
-  layer: z.enum(['core', 'domain', 'stack', 'team']),
-  weight: z.number(),
-  protected: z.boolean(),
-  dependsOn: z.array(z.string()),
-  owner: z.string(),
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  description: z.string().max(500).optional(),
+  owner: z.string().max(100).optional(),
+  tags: z.array(z.string().regex(/^[a-z0-9-]+$/)).optional(),
+  providers: z.array(z.enum(['cursor', 'copilot'])).optional(),
 });
 
 async function validateManifestSchema(manifestPath: string): Promise<string[]> {
@@ -122,31 +118,41 @@ async function validateManifestSchema(manifestPath: string): Promise<string[]> {
         );
       }
 
-      // Check that compose.order contains valid layers
-      const validLayers = ['core', 'domain', 'stack', 'team'];
-      for (const layer of manifest.compose.order) {
-        if (!validLayers.includes(layer)) {
+      // Validate extends entries (package names or local paths)
+      for (const entry of manifest.extends) {
+        const isLocalPath = entry.startsWith('./') || entry.startsWith('/');
+        const isScopedPackage = entry.startsWith('@') && entry.includes('/');
+        const isUnscopedPackage =
+          !entry.startsWith('@') &&
+          !entry.startsWith('./') &&
+          !entry.startsWith('/');
+
+        if (!isLocalPath && !isScopedPackage && !isUnscopedPackage) {
           errors.push(
-            `Invalid layer in compose.order: '${layer}'. Valid layers: ${validLayers.join(', ')}`
+            `Invalid extends entry: '${entry}'. Expected npm package name or local path (starting with ./ or /)`
           );
         }
       }
 
-      // Check that protectedLayers are in compose.order
-      for (const layer of manifest.compose.protectedLayers) {
-        if (!manifest.compose.order.includes(layer)) {
-          errors.push(
-            `Protected layer '${layer}' must be included in compose.order`
-          );
+      // Validate protected partial IDs format
+      if (manifest.protected) {
+        for (const partialId of manifest.protected) {
+          if (!/^[a-z0-9-]+$/.test(partialId)) {
+            errors.push(
+              `Invalid protected partial ID: '${partialId}'. Must be lowercase alphanumeric with hyphens.`
+            );
+          }
         }
       }
 
-      // Validate package names format
-      for (const packageName of Object.keys(manifest.extends)) {
-        if (!packageName.startsWith('@') || !packageName.includes('/')) {
-          errors.push(
-            `Invalid package name format: '${packageName}'. Expected format: @scope/name`
-          );
+      // Validate exclude partial IDs format
+      if (manifest.exclude) {
+        for (const partialId of manifest.exclude) {
+          if (!/^[a-z0-9-]+$/.test(partialId)) {
+            errors.push(
+              `Invalid exclude partial ID: '${partialId}'. Must be lowercase alphanumeric with hyphens.`
+            );
+          }
         }
       }
     }
@@ -164,11 +170,10 @@ async function validatePolicyPartials(): Promise<string[]> {
 
   // Placeholder implementation
   // In a real implementation, this would:
-  // 1. Find all partial files in the policy packages
-  // 2. Parse the frontmatter and validate against schema
-  // 3. Check for duplicate IDs
-  // 4. Validate dependsOn references
-  // 5. Check for circular dependencies
+  // 1. Find all partial files in the resolved policy packages
+  // 2. Parse the frontmatter and validate against PartialFrontmatterSchema
+  // 3. Check for duplicate IDs across packages
+  // 4. Validate that providers array only contains valid values
 
   logger.info('Policy partials validation (placeholder - no partials found)');
 
