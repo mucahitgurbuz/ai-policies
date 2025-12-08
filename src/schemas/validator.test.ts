@@ -8,17 +8,24 @@ import {
 describe('validateManifestConfig', () => {
   it('should validate a correct manifest', () => {
     const manifest = {
-      extends: {
-        '@ai-policies/core': '^1.0.0',
-      },
+      extends: ['@ai-policies/core', '@ai-policies/frontend-react'],
       output: {
         cursor: './.cursorrules',
         copilot: './.copilot/instructions.md',
       },
-      compose: {
-        order: ['core', 'domain', 'stack', 'team'],
-        protectedLayers: ['core'],
-        teamAppend: true,
+      protected: ['core-safety'],
+    };
+
+    const result = validateManifestConfig(manifest);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should validate manifest with local paths', () => {
+    const manifest = {
+      extends: ['@ai-policies/core', './team-policies'],
+      output: {
+        cursor: './.cursorrules',
       },
     };
 
@@ -32,10 +39,19 @@ describe('validateManifestConfig', () => {
       output: {
         cursor: './.cursorrules',
       },
-      compose: {
-        order: ['core'],
-        protectedLayers: [],
-        teamAppend: true,
+    };
+
+    const result = validateManifestConfig(manifest);
+    expect(result.valid).toBe(false);
+  });
+
+  it('should reject manifest with non-array extends (legacy format)', () => {
+    const manifest = {
+      extends: {
+        '@ai-policies/core': '^1.0.0', // legacy format - should fail
+      },
+      output: {
+        cursor: './.cursorrules',
       },
     };
 
@@ -45,63 +61,39 @@ describe('validateManifestConfig', () => {
 
   it('should reject manifest without any output targets', () => {
     const manifest = {
-      extends: {
-        '@ai-policies/core': '^1.0.0',
-      },
+      extends: ['@ai-policies/core'],
       output: {},
-      compose: {
-        order: ['core'],
-        protectedLayers: [],
-        teamAppend: true,
-      },
     };
 
     const result = validateManifestConfig(manifest);
     expect(result.valid).toBe(false);
-    // Schema anyOf requires at least cursor or copilot
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
-  it('should reject invalid package name format', () => {
+  it('should reject duplicate extends entries', () => {
     const manifest = {
-      extends: {
-        'invalid-package': '^1.0.0', // Missing @ scope - doesn't match schema pattern
-      },
+      extends: ['@ai-policies/core', '@ai-policies/core'], // duplicate
       output: {
         cursor: './.cursorrules',
-      },
-      compose: {
-        order: ['core'],
-        protectedLayers: [],
-        teamAppend: true,
       },
     };
 
     const result = validateManifestConfig(manifest);
-    // Schema patternProperties + additionalProperties:false rejects unmatched names
     expect(result.valid).toBe(false);
+    expect(result.errors.some(e => e.message.includes('Duplicate'))).toBe(true);
   });
 
-  it('should reject protected layer not in order', () => {
+  it('should accept manifest with exclude array', () => {
     const manifest = {
-      extends: {
-        '@ai-policies/core': '^1.0.0',
-      },
+      extends: ['@ai-policies/core'],
       output: {
         cursor: './.cursorrules',
       },
-      compose: {
-        order: ['core', 'domain'],
-        protectedLayers: ['stack'], // stack not in order
-        teamAppend: true,
-      },
+      exclude: ['some-partial'],
     };
 
     const result = validateManifestConfig(manifest);
-    expect(result.valid).toBe(false);
-    expect(result.errors.some(e => e.message.includes('Protected layer'))).toBe(
-      true
-    );
+    expect(result.valid).toBe(true);
   });
 });
 
@@ -109,11 +101,9 @@ describe('validatePartialFrontmatter', () => {
   it('should validate correct frontmatter', () => {
     const frontmatter = {
       id: 'core-safety',
-      layer: 'core',
-      weight: 10,
-      protected: true,
-      dependsOn: [],
+      description: 'Core safety rules',
       owner: 'security-team',
+      tags: ['security', 'required'],
     };
 
     const result = validatePartialFrontmatter(frontmatter);
@@ -121,24 +111,18 @@ describe('validatePartialFrontmatter', () => {
     expect(result.errors).toHaveLength(0);
   });
 
-  it('should reject missing required fields', () => {
+  it('should validate minimal frontmatter (only id required)', () => {
     const frontmatter = {
-      id: 'core-safety',
-      layer: 'core',
-      // Missing: weight, protected, dependsOn, owner
+      id: 'simple-partial',
     };
 
     const result = validatePartialFrontmatter(frontmatter);
-    expect(result.valid).toBe(false);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('should reject invalid layer', () => {
+  it('should reject missing id', () => {
     const frontmatter = {
-      id: 'test-partial',
-      layer: 'invalid-layer',
-      weight: 10,
-      protected: false,
-      dependsOn: [],
       owner: 'team',
     };
 
@@ -146,36 +130,44 @@ describe('validatePartialFrontmatter', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('should reject self-dependency', () => {
+  it('should reject invalid id format', () => {
     const frontmatter = {
-      id: 'test-partial',
-      layer: 'core',
-      weight: 10,
-      protected: false,
-      dependsOn: ['test-partial'], // Self-dependency
-      owner: 'team',
+      id: 'Invalid-ID', // Uppercase not allowed
     };
 
     const result = validatePartialFrontmatter(frontmatter);
     expect(result.valid).toBe(false);
-    expect(
-      result.errors.some(e => e.message.includes('cannot depend on itself'))
-    ).toBe(true);
   });
 
-  it('should warn on high weight for core layer', () => {
+  it('should accept valid providers array', () => {
+    const frontmatter = {
+      id: 'cursor-only',
+      providers: ['cursor'],
+    };
+
+    const result = validatePartialFrontmatter(frontmatter);
+    expect(result.valid).toBe(true);
+  });
+
+  it('should reject invalid provider', () => {
     const frontmatter = {
       id: 'test-partial',
-      layer: 'core',
-      weight: 150, // Weight > 100 for core layer
-      protected: false,
-      dependsOn: [],
-      owner: 'team',
+      providers: ['invalid-provider'],
     };
 
     const result = validatePartialFrontmatter(frontmatter);
     expect(result.valid).toBe(false);
-    expect(result.errors.some(e => e.message.includes('weight'))).toBe(true);
+  });
+
+  it('should reject legacy frontmatter fields', () => {
+    const frontmatter = {
+      id: 'test-partial',
+      layer: 'core', // legacy field - should be rejected
+      weight: 10, // legacy field - should be rejected
+    };
+
+    const result = validatePartialFrontmatter(frontmatter);
+    expect(result.valid).toBe(false); // additionalProperties: false
   });
 });
 
@@ -183,10 +175,10 @@ describe('validatePackageConfig', () => {
   it('should validate correct package config', () => {
     const config = {
       name: '@ai-policies/core',
-      version: '1.0.0',
+      version: '2.0.0',
       description: 'Core policies',
       'ai-policies': {
-        partials: 'partials',
+        partials: './partials',
       },
     };
 
@@ -196,7 +188,7 @@ describe('validatePackageConfig', () => {
 
   it('should reject missing name', () => {
     const config = {
-      version: '1.0.0',
+      version: '2.0.0',
     };
 
     const result = validatePackageConfig(config);

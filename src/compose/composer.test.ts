@@ -5,41 +5,30 @@ import { PolicyComposer, createComposer, composePartials } from './composer.js';
 // Helper to create mock partials
 function createMockPartial(
   id: string,
-  layer: 'core' | 'domain' | 'stack' | 'team' = 'core',
-  weight: number = 10,
-  content: string = '',
-  dependsOn: string[] = []
+  sourceIndex: number = 0,
+  content: string = ''
 ): PolicyPartial {
   return {
     frontmatter: {
       id,
-      layer,
-      weight,
-      protected: false,
-      dependsOn,
       owner: 'test-team',
     },
     content: content || `# ${id}\n\nContent for ${id}`,
     filePath: `${id}.md`,
     packageName: '@ai-policies/test',
     packageVersion: '1.0.0',
+    sourceIndex,
   };
 }
 
 // Default test config
 const testConfig: ManifestConfig = {
-  extends: {
-    '@ai-policies/test': '^1.0.0',
-  },
+  extends: ['@ai-policies/test'],
   output: {
     cursor: './.cursorrules',
     copilot: './.copilot/instructions.md',
   },
-  compose: {
-    order: ['core', 'domain', 'stack', 'team'],
-    protectedLayers: ['core'],
-    teamAppend: true,
-  },
+  protected: ['core-safety'],
 };
 
 describe('PolicyComposer', () => {
@@ -53,8 +42,7 @@ describe('PolicyComposer', () => {
     const partials = [
       createMockPartial(
         'core-safety',
-        'core',
-        10,
+        0,
         '# Core Safety\n\n- Rule 1\n- Rule 2'
       ),
     ];
@@ -69,80 +57,86 @@ describe('PolicyComposer', () => {
     expect(result.metadata.packages).toBeDefined();
   });
 
-  it('should order partials by layer priority', async () => {
+  it('should order partials by source index (extends array order)', async () => {
     const composer = createComposer();
     const partials = [
-      createMockPartial('team-rules', 'team', 10, '# Team Rules'),
-      createMockPartial('core-safety', 'core', 10, '# Core Safety'),
-      createMockPartial('stack-react', 'stack', 10, '# React Rules'),
+      createMockPartial('third-rules', 2, '# Third Rules'),
+      createMockPartial('core-safety', 0, '# Core Safety'),
+      createMockPartial('second-rules', 1, '# Second Rules'),
     ];
 
     const result = await composer.compose(partials, testConfig, {
       provider: 'cursor',
     });
 
-    // Core should come before stack, stack before team
+    // Lower sourceIndex should come first
     const coreIndex = result.content.indexOf('Core Safety');
-    const stackIndex = result.content.indexOf('React Rules');
-    const teamIndex = result.content.indexOf('Team Rules');
+    const secondIndex = result.content.indexOf('Second Rules');
+    const thirdIndex = result.content.indexOf('Third Rules');
 
-    expect(coreIndex).toBeLessThan(stackIndex);
-    expect(stackIndex).toBeLessThan(teamIndex);
-  });
-
-  it('should order partials by weight within same layer', async () => {
-    const composer = createComposer();
-    const partials = [
-      createMockPartial('second', 'core', 20, '# Second'),
-      createMockPartial('first', 'core', 10, '# First'),
-      createMockPartial('third', 'core', 30, '# Third'),
-    ];
-
-    const result = await composer.compose(partials, testConfig, {
-      provider: 'cursor',
-    });
-
-    const firstIndex = result.content.indexOf('First');
-    const secondIndex = result.content.indexOf('Second');
-    const thirdIndex = result.content.indexOf('Third');
-
-    expect(firstIndex).toBeLessThan(secondIndex);
+    expect(coreIndex).toBeLessThan(secondIndex);
     expect(secondIndex).toBeLessThan(thirdIndex);
   });
 
-  it('should include team append content when enabled', async () => {
+  it('should use "last wins" for duplicate IDs', async () => {
     const composer = createComposer();
     const partials = [
-      createMockPartial('core-safety', 'core', 10, '# Core Safety'),
+      {
+        ...createMockPartial('same-id', 0, '# First Version'),
+        packageName: '@ai-policies/first',
+      },
+      {
+        ...createMockPartial('same-id', 1, '# Second Version'),
+        packageName: '@ai-policies/second',
+      },
     ];
 
-    const configWithTeamAppend = {
-      ...testConfig,
-      compose: {
-        ...testConfig.compose,
-        teamAppend: true,
-      },
-    };
-
-    const result = await composer.compose(partials, configWithTeamAppend, {
+    const result = await composer.compose(partials, testConfig, {
       provider: 'cursor',
-      teamAppendContent: '## Custom Team Rules\n\n- Our special rule',
     });
 
-    expect(result.content).toContain('Custom Team Rules');
-    expect(result.content).toContain('Our special rule');
+    // Last one (higher sourceIndex) should win
+    expect(result.content).toContain('Second Version');
+    expect(result.content).not.toContain('First Version');
+  });
+
+  it('should preserve protected partials', async () => {
+    const composer = createComposer();
+    const partials = [
+      {
+        ...createMockPartial('core-safety', 0, '# Protected Version'),
+        packageName: '@ai-policies/first',
+      },
+      {
+        ...createMockPartial('core-safety', 1, '# Override Attempt'),
+        packageName: '@ai-policies/second',
+      },
+    ];
+
+    const configWithProtected = {
+      ...testConfig,
+      protected: ['core-safety'],
+    };
+
+    const result = await composer.compose(partials, configWithProtected, {
+      provider: 'cursor',
+    });
+
+    // Protected partial should be preserved (first version wins)
+    expect(result.content).toContain('Protected Version');
+    expect(result.content).not.toContain('Override Attempt');
   });
 
   it('should exclude specified partials', async () => {
     const composer = createComposer();
     const partials = [
-      createMockPartial('include-me', 'core', 10, '# Include Me'),
-      createMockPartial('exclude-me', 'core', 20, '# Exclude Me'),
+      createMockPartial('include-me', 0, '# Include Me'),
+      createMockPartial('exclude-me', 1, '# Exclude Me'),
     ];
 
     const result = await composer.compose(partials, testConfig, {
       provider: 'cursor',
-      excludePartials: ['exclude-me'],
+      exclude: ['exclude-me'],
     });
 
     expect(result.content).toContain('Include Me');
@@ -151,9 +145,7 @@ describe('PolicyComposer', () => {
 
   it('should generate metadata with content hash', async () => {
     const composer = createComposer();
-    const partials = [
-      createMockPartial('core-safety', 'core', 10, '# Core Safety'),
-    ];
+    const partials = [createMockPartial('core-safety', 0, '# Core Safety')];
 
     const result = await composer.compose(partials, testConfig, {
       provider: 'cursor',
@@ -175,13 +167,23 @@ describe('PolicyComposer', () => {
     expect(result.content).toBeDefined();
     expect(result.metadata).toBeDefined();
   });
+
+  it('should track protected partials in metadata', async () => {
+    const composer = createComposer();
+    const partials = [createMockPartial('core-safety', 0, '# Core Safety')];
+
+    const result = await composer.compose(partials, testConfig, {
+      provider: 'cursor',
+      protected: ['core-safety'],
+    });
+
+    expect(result.metadata.protectedPartials).toContain('core-safety');
+  });
 });
 
 describe('composePartials convenience function', () => {
   it('should compose partials using the convenience function', async () => {
-    const partials = [
-      createMockPartial('core-safety', 'core', 10, '# Core Safety'),
-    ];
+    const partials = [createMockPartial('core-safety', 0, '# Core Safety')];
 
     const result = await composePartials(partials, testConfig, 'cursor');
 
@@ -194,8 +196,8 @@ describe('PolicyComposer.validateInputs', () => {
   it('should detect duplicate partial IDs within same package', () => {
     const composer = createComposer();
     const partials = [
-      createMockPartial('same-id', 'core', 10),
-      { ...createMockPartial('same-id', 'core', 20) }, // Duplicate ID
+      createMockPartial('same-id', 0),
+      createMockPartial('same-id', 1), // Duplicate ID in same package
     ];
 
     const errors = composer.validateInputs(partials, testConfig);
@@ -206,25 +208,29 @@ describe('PolicyComposer.validateInputs', () => {
     );
   });
 
-  it('should detect invalid layer in partial', () => {
+  it('should warn about protected partials not found', () => {
     const composer = createComposer();
-    const partial = createMockPartial('test', 'core', 10);
-    (partial.frontmatter as any).layer = 'invalid';
-    const partials = [partial];
+    const partials = [createMockPartial('other-partial', 0)];
 
-    const errors = composer.validateInputs(partials, testConfig);
+    const configWithMissingProtected = {
+      ...testConfig,
+      protected: ['non-existent-partial'],
+    };
+
+    const errors = composer.validateInputs(
+      partials,
+      configWithMissingProtected
+    );
 
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors.some(e => e.message.includes('not in compose.order'))).toBe(
-      true
-    );
+    expect(errors.some(e => e.message.includes('not found'))).toBe(true);
   });
 
   it('should return no errors for valid partials', () => {
     const composer = createComposer();
     const partials = [
-      createMockPartial('core-safety', 'core', 10),
-      createMockPartial('react-hooks', 'stack', 20),
+      createMockPartial('core-safety', 0),
+      createMockPartial('react-hooks', 1),
     ];
 
     const errors = composer.validateInputs(partials, testConfig);

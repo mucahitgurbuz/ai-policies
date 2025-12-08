@@ -1,11 +1,8 @@
 ---
 id: react-components
-layer: stack
-weight: 30
-protected: false
-dependsOn: [core-safety]
-owner: frontend-team
 description: React component development guidelines and patterns
+owner: frontend-team
+tags: [react, frontend, components]
 ---
 
 # React Component Guidelines

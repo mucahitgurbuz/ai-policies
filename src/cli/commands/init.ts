@@ -2,6 +2,7 @@ import type { CommandModule } from 'yargs';
 import path from 'path';
 import fs from 'fs-extra';
 import inquirer from 'inquirer';
+import { execSync } from 'child_process';
 
 import {
   getDefaultManifest,
@@ -9,10 +10,13 @@ import {
   MANIFEST_FILE,
 } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
+import type { ManifestConfig } from '../../schemas/types.js';
+import { isLocalPath } from '../../schemas/utils.js';
 
 interface InitOptions {
   force?: boolean;
   preset?: string;
+  skipInstall?: boolean;
 }
 
 export const initCommand: CommandModule<{}, InitOptions> = {
@@ -30,6 +34,11 @@ export const initCommand: CommandModule<{}, InitOptions> = {
       type: 'string',
       description: 'Use a preset configuration',
       choices: ['basic', 'frontend', 'backend', 'fullstack'],
+    },
+    'skip-install': {
+      type: 'boolean',
+      description: 'Skip npm install step',
+      default: false,
     },
   },
   handler: async argv => {
@@ -76,6 +85,26 @@ export const initCommand: CommandModule<{}, InitOptions> = {
         logger.success(`Created directory ${path.relative(cwd, copilotDir)}`);
       }
 
+      // Install packages
+      if (!argv.skipInstall) {
+        const packages = config.extends.filter(p => !isLocalPath(p));
+        if (packages.length > 0) {
+          logger.info('');
+          logger.info('Installing packages...');
+          try {
+            execSync(`npm install ${packages.join(' ')}`, {
+              cwd,
+              stdio: 'inherit',
+            });
+            logger.success('Packages installed');
+          } catch (error) {
+            logger.warn(
+              'Failed to install packages. Run npm install manually.'
+            );
+          }
+        }
+      }
+
       logger.info('');
       logger.info('Next steps:');
       logger.info('  1. Review and customize your .ai-policies.yaml');
@@ -94,35 +123,30 @@ export const initCommand: CommandModule<{}, InitOptions> = {
   },
 };
 
-function getPresetConfig(preset: string) {
+function getPresetConfig(preset: string): ManifestConfig {
   const base = getDefaultManifest();
 
   switch (preset) {
     case 'frontend':
       return {
         ...base,
-        extends: {
-          '@ai-policies/core': '^1.0.0',
-          '@ai-policies/frontend-react': '^1.0.0',
-        },
+        extends: ['@ai-policies/core', '@ai-policies/frontend-react'],
       };
 
     case 'backend':
       return {
         ...base,
-        extends: {
-          '@ai-policies/core': '^1.0.0',
-        },
+        extends: ['@ai-policies/core'],
       };
 
     case 'fullstack':
       return {
         ...base,
-        extends: {
-          '@ai-policies/core': '^1.0.0',
-          '@ai-policies/frontend-react': '^1.0.0',
-          '@ai-policies/workflows-jira': '~1.0.0',
-        },
+        extends: [
+          '@ai-policies/core',
+          '@ai-policies/frontend-react',
+          '@ai-policies/workflows-jira',
+        ],
       };
 
     default:
@@ -130,7 +154,7 @@ function getPresetConfig(preset: string) {
   }
 }
 
-async function promptForConfiguration() {
+async function promptForConfiguration(): Promise<ManifestConfig> {
   const { projectType, includeWorkflows, outputPaths } = await inquirer.prompt([
     {
       type: 'list',
@@ -160,8 +184,11 @@ async function promptForConfiguration() {
 
   const config = getPresetConfig(projectType);
 
-  if (includeWorkflows) {
-    config.extends['@ai-policies/workflows-jira'] = '~1.0.0';
+  if (
+    includeWorkflows &&
+    !config.extends.includes('@ai-policies/workflows-jira')
+  ) {
+    config.extends.push('@ai-policies/workflows-jira');
   }
 
   if (outputPaths) {

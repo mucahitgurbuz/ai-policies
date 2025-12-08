@@ -1,0 +1,34 @@
+{
+  "name": "@ai-policies/workflows-jira",
+  "version": "2.0.0",
+  "description": "Jira integration and workflow guidelines for AI policies",
+  "type": "module",
+  "main": "index.js",
+  "keywords": [
+    "ai-policies",
+    "cursor",
+    "copilot",
+    "ai",
+    "policies",
+    "jira",
+    "workflows"
+  ],
+  "author": "AI Policies Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mucahitgurbuz/ai-policies.git",
+    "directory": "packages/workflows-jira"
+  },
+  "homepage": "https://github.com/mucahitgurbuz/ai-policies#readme",
+  "ai-policies": {
+    "partials": "./partials"
+  },
+  "peerDependencies": {
+    "ai-policies": "^2.0.0"
+  },
+  "files": [
+    "index.js",
+    "partials"
+  ]
+}

@@ -1,12 +1,12 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import type {
-  ManifestConfig,
-  CompositionResult,
-  Provider,
-} from '../../schemas/types.js';
-import { PolicyRegistry, getPartials } from '../../policies/registry.js';
+import type { ManifestConfig, Provider } from '../../schemas/types.js';
+import {
+  resolveExtendsArray,
+  getAllPartials,
+  getDefaultProtectedPartials,
+} from '../../packages/resolver.js';
 import { PolicyComposer } from '../../compose/composer.js';
 import { renderCursorRules } from '../../providers/cursor-provider.js';
 import { renderCopilotInstructions } from '../../providers/copilot-provider.js';
@@ -31,14 +31,27 @@ export async function generateConfigurations(
 ): Promise<SyncResult> {
   const result: SyncResult = {};
 
-  // Load partials from policy packages
-  const partials = await getPartials(config.extends);
+  // Resolve all packages from extends array
+  const packages = await resolveExtendsArray(config.extends, projectRoot);
 
-  if (partials.length === 0) {
+  if (packages.length === 0) {
     throw new Error(
-      'No policy partials found. Check your package requirements in .ai-policies.yaml'
+      'No policy packages found. Check your extends entries in .ai-policies.yaml'
     );
   }
+
+  // Get all partials from packages
+  const allPartials = getAllPartials(packages);
+
+  if (allPartials.length === 0) {
+    throw new Error('No policy partials found in the resolved packages.');
+  }
+
+  // Combine protected partials from config and package defaults
+  const defaultProtected = getDefaultProtectedPartials(packages);
+  const protectedPartials = [
+    ...new Set([...(config.protected || []), ...defaultProtected]),
+  ];
 
   // Create composer instance
   const composer = new PolicyComposer();
@@ -46,10 +59,10 @@ export async function generateConfigurations(
   // Generate Cursor rules if configured
   if (config.output.cursor) {
     const cursorPath = path.resolve(projectRoot, config.output.cursor);
-    const compositionResult = await composer.compose(partials, config, {
+    const compositionResult = await composer.compose(allPartials, config, {
       provider: 'cursor' as Provider,
-      teamAppendContent: config.overrides?.teamAppendContent,
-      excludePartials: config.overrides?.excludePartials,
+      protected: protectedPartials,
+      exclude: config.exclude,
     });
 
     const cursorContent = renderCursorRules(compositionResult, {
@@ -66,10 +79,10 @@ export async function generateConfigurations(
   // Generate Copilot instructions if configured
   if (config.output.copilot) {
     const copilotPath = path.resolve(projectRoot, config.output.copilot);
-    const compositionResult = await composer.compose(partials, config, {
+    const compositionResult = await composer.compose(allPartials, config, {
       provider: 'copilot' as Provider,
-      teamAppendContent: config.overrides?.teamAppendContent,
-      excludePartials: config.overrides?.excludePartials,
+      protected: protectedPartials,
+      exclude: config.exclude,
     });
 
     const copilotContent = renderCopilotInstructions(compositionResult, {

@@ -6,11 +6,10 @@ import { dirname, join } from 'path';
 
 import type {
   ManifestConfig,
-  PartialFrontmatter,
-  PolicyPackageConfig,
   ValidationResult,
   ValidationError,
 } from './types.js';
+import { isLocalPath, isValidPackageName } from './utils.js';
 
 // Get current directory for schema files
 const __filename = fileURLToPath(import.meta.url);
@@ -71,14 +70,7 @@ export function validatePartialFrontmatter(data: unknown): ValidationResult {
   const valid = validatePartial(data);
 
   if (valid) {
-    // Additional semantic validation
-    const partial = data as PartialFrontmatter;
-    const errors = performSemanticPartialValidation(partial);
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
+    return { valid: true, errors: [] };
   }
 
   return {
@@ -120,68 +112,64 @@ function performSemanticManifestValidation(
     });
   }
 
-  // Check that compose.order contains valid layers
-  const validLayers: Set<string> = new Set(['core', 'domain', 'stack', 'team']);
-  for (const layer of manifest.compose.order) {
-    if (!validLayers.has(layer)) {
-      errors.push({
-        message: `Invalid layer in compose.order: '${layer}'. Valid layers: ${Array.from(validLayers).join(', ')}`,
-        path: 'compose.order',
-        value: layer,
-      });
+  // Validate extends entries (npm packages or local paths)
+  for (let i = 0; i < manifest.extends.length; i++) {
+    const entry = manifest.extends[i];
+
+    if (!isLocalPath(entry) && !isValidPackageName(entry)) {
+      // Allow non-scoped npm packages too
+      const simplePackageRegex = /^[a-z0-9-]+$/;
+      if (!simplePackageRegex.test(entry)) {
+        errors.push({
+          message: `Invalid extends entry: '${entry}'. Must be an npm package name or local path (starting with ./ or /)`,
+          path: `extends[${i}]`,
+          value: entry,
+        });
+      }
     }
   }
 
-  // Check that protectedLayers are in compose.order
-  for (const layer of manifest.compose.protectedLayers) {
-    if (!manifest.compose.order.includes(layer)) {
+  // Check for duplicate extends entries
+  const seen = new Set<string>();
+  for (const entry of manifest.extends) {
+    if (seen.has(entry)) {
       errors.push({
-        message: `Protected layer '${layer}' must be included in compose.order`,
-        path: 'compose.protectedLayers',
-        value: layer,
+        message: `Duplicate extends entry: '${entry}'`,
+        path: 'extends',
+        value: entry,
       });
+    }
+    seen.add(entry);
+  }
+
+  // Check for duplicate protected entries
+  if (manifest.protected) {
+    const protectedSeen = new Set<string>();
+    for (const id of manifest.protected) {
+      if (protectedSeen.has(id)) {
+        errors.push({
+          message: `Duplicate protected entry: '${id}'`,
+          path: 'protected',
+          value: id,
+        });
+      }
+      protectedSeen.add(id);
     }
   }
 
-  // Validate package names format
-  for (const packageName of Object.keys(manifest.extends)) {
-    if (!packageName.startsWith('@') || !packageName.includes('/')) {
-      errors.push({
-        message: `Invalid package name format: '${packageName}'. Expected format: @scope/name`,
-        path: `extends.${packageName}`,
-        value: packageName,
-      });
+  // Check for duplicate exclude entries
+  if (manifest.exclude) {
+    const excludeSeen = new Set<string>();
+    for (const id of manifest.exclude) {
+      if (excludeSeen.has(id)) {
+        errors.push({
+          message: `Duplicate exclude entry: '${id}'`,
+          path: 'exclude',
+          value: id,
+        });
+      }
+      excludeSeen.add(id);
     }
-  }
-
-  return errors;
-}
-
-/**
- * Perform additional semantic validation for partial frontmatter
- */
-function performSemanticPartialValidation(
-  partial: PartialFrontmatter
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-
-  // Check for self-dependencies
-  if (partial.dependsOn.includes(partial.id)) {
-    errors.push({
-      message: `Partial '${partial.id}' cannot depend on itself`,
-      path: 'dependsOn',
-      value: partial.id,
-    });
-  }
-
-  // Check weight bounds for specific layers
-  if (partial.layer === 'core' && partial.weight > 100) {
-    errors.push({
-      message:
-        'Core layer partials should have weight <= 100 to maintain priority',
-      path: 'weight',
-      value: partial.weight,
-    });
   }
 
   return errors;

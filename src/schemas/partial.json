@@ -4,7 +4,7 @@
   "title": "AI Policies Partial",
   "description": "Schema for policy partial frontmatter in Markdown files",
   "type": "object",
-  "required": ["id", "layer", "weight", "protected", "dependsOn", "owner"],
+  "required": ["id"],
   "properties": {
     "id": {
       "type": "string",
@@ -13,29 +13,10 @@
       "minLength": 1,
       "maxLength": 100
     },
-    "layer": {
+    "description": {
       "type": "string",
-      "description": "Composition layer for this partial",
-      "enum": ["core", "domain", "stack", "team"]
-    },
-    "weight": {
-      "type": "integer",
-      "description": "Ordering weight within the layer (lower weights come first)",
-      "minimum": 0,
-      "maximum": 1000
-    },
-    "protected": {
-      "type": "boolean",
-      "description": "Whether this partial's content is protected from being overridden"
-    },
-    "dependsOn": {
-      "type": "array",
-      "description": "List of partial IDs that this partial depends on",
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z0-9-]+$"
-      },
-      "uniqueItems": true
+      "description": "Human-readable description of what this partial does",
+      "maxLength": 500
     },
     "owner": {
       "type": "string",
@@ -60,16 +41,6 @@
         "enum": ["cursor", "copilot"]
       },
       "uniqueItems": true
-    },
-    "version": {
-      "type": "string",
-      "description": "Version when this partial was last modified",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
-    },
-    "description": {
-      "type": "string",
-      "description": "Human-readable description of what this partial does",
-      "maxLength": 500
     }
   },
   "additionalProperties": false

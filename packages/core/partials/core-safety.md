@@ -1,11 +1,8 @@
 ---
 id: core-safety
-layer: core
-weight: 10
-protected: true
-dependsOn: []
-owner: security-team
 description: Fundamental safety rules that must be followed in all code generation
+owner: security-team
+tags: [security, required]
 ---
 
 # Core Safety Rules

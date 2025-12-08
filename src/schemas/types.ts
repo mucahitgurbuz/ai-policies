@@ -1,13 +1,17 @@
 /**
- * TypeScript types derived from JSON schemas
+ * TypeScript types for AI Policies
+ * ESLint-style configuration with array-based extends and simplified partials
  */
 
-export type Layer = 'core' | 'domain' | 'stack' | 'team';
 export type Provider = 'cursor' | 'copilot';
 
+/**
+ * Manifest configuration
+ * Uses array-based extends with "last wins" conflict resolution
+ */
 export interface ManifestConfig {
-  /** Policy packages to extend (ESLint-style) */
-  extends: Record<string, string>;
+  /** Policy packages to extend (array order matters - last wins) */
+  extends: string[];
 
   /** Output file paths for different IDE providers */
   output: {
@@ -15,57 +19,36 @@ export interface ManifestConfig {
     copilot?: string;
   };
 
-  /** Composition settings for merging policy partials */
-  compose: {
-    /** Layer composition order (higher priority layers come later) */
-    order: Layer[];
-    /** Layers that cannot be overridden by higher priority layers */
-    protectedLayers: Layer[];
-    /** Allow team layer to append content rather than override */
-    teamAppend: boolean;
-  };
+  /** Partial IDs that cannot be overridden by later packages */
+  protected?: string[];
 
-  /** Team-specific overrides and customizations */
-  overrides?: {
-    /** Additional content to append to team layer */
-    teamAppendContent?: string;
-    /** Partial IDs to exclude from composition */
-    excludePartials?: string[];
-  };
+  /** Partial IDs to exclude from final output */
+  exclude?: string[];
 }
 
+/**
+ * Partial frontmatter
+ */
 export interface PartialFrontmatter {
   /** Unique identifier for this partial within its package */
   id: string;
 
-  /** Composition layer for this partial */
-  layer: Layer;
-
-  /** Ordering weight within the layer (lower weights come first) */
-  weight: number;
-
-  /** Whether this partial's content is protected from being overridden */
-  protected: boolean;
-
-  /** List of partial IDs that this partial depends on */
-  dependsOn: string[];
+  /** Human-readable description of what this partial does */
+  description?: string;
 
   /** Team or individual responsible for maintaining this partial */
-  owner: string;
+  owner?: string;
 
   /** Optional tags for categorizing and filtering partials */
   tags?: string[];
 
   /** IDE providers this partial applies to (if not specified, applies to all) */
   providers?: Provider[];
-
-  /** Version when this partial was last modified */
-  version?: string;
-
-  /** Human-readable description of what this partial does */
-  description?: string;
 }
 
+/**
+ * A policy partial with content and metadata
+ */
 export interface PolicyPartial {
   /** Frontmatter metadata */
   frontmatter: PartialFrontmatter;
@@ -81,8 +64,28 @@ export interface PolicyPartial {
 
   /** Package version */
   packageVersion: string;
+
+  /** Order index from extends array (for conflict resolution) */
+  sourceIndex: number;
 }
 
+/**
+ * npm package export format for policy packages
+ */
+export interface PolicyPackageExport {
+  /** Package name */
+  name: string;
+
+  /** Path to partials directory (relative to package root) */
+  partials: string;
+
+  /** Partials that should be protected by default when using this package */
+  defaultProtected?: string[];
+}
+
+/**
+ * Policy package configuration (from package.json)
+ */
 export interface PolicyPackageConfig {
   /** Package name in scoped format */
   name: string;
@@ -116,13 +119,16 @@ export interface PolicyPackageConfig {
 
   /** AI Policies specific configuration */
   'ai-policies'?: {
-    /** Directory containing unified partials (applies to all providers) */
+    /** Directory containing partials */
     partials?: string;
     /** Tags that apply to all partials in this package */
     tags?: string[];
   };
 }
 
+/**
+ * Resolved policy package
+ */
 export interface PolicyPackage {
   /** Package configuration */
   config: PolicyPackageConfig;
@@ -132,8 +138,14 @@ export interface PolicyPackage {
 
   /** Package root directory */
   rootPath: string;
+
+  /** Default protected partials declared by this package */
+  defaultProtected: string[];
 }
 
+/**
+ * Result of policy composition
+ */
 export interface CompositionResult {
   /** Generated content */
   content: string;
@@ -142,6 +154,9 @@ export interface CompositionResult {
   metadata: CompositionMetadata;
 }
 
+/**
+ * Metadata about a composition
+ */
 export interface CompositionMetadata {
   /** Package versions used in composition */
   packages: Record<string, string>;
@@ -152,22 +167,36 @@ export interface CompositionMetadata {
   /** Generation timestamp */
   generatedAt: string;
 
-  /** Partials included in composition */
+  /** Partials included in composition (in order) */
   partials: Array<{
     id: string;
     packageName: string;
-    layer: Layer;
-    weight: number;
   }>;
 
-  /** Composition settings used */
-  settings: {
-    order: Layer[];
-    protectedLayers: Layer[];
-    teamAppend: boolean;
-  };
+  /** Protected partials that were preserved */
+  protectedPartials: string[];
 }
 
+/**
+ * Conflict resolution result
+ */
+export interface ConflictResolution {
+  /** Partial ID that had conflicts */
+  partialId: string;
+
+  /** Winning partial (last in extends order, unless protected) */
+  winner: PolicyPartial;
+
+  /** Losing partials that were overridden */
+  overridden: PolicyPartial[];
+
+  /** Reason for the resolution */
+  reason: 'last-wins' | 'protected';
+}
+
+/**
+ * Validation error
+ */
 export interface ValidationError {
   /** Error message */
   message: string;
@@ -182,25 +211,13 @@ export interface ValidationError {
   value?: unknown;
 }
 
+/**
+ * Validation result
+ */
 export interface ValidationResult {
   /** Whether validation passed */
   valid: boolean;
 
   /** Validation errors if any */
   errors: ValidationError[];
-}
-
-export interface DependencyResolution {
-  /** Resolved package versions */
-  resolved: Record<string, string>;
-
-  /** Dependency conflicts if any */
-  conflicts: Array<{
-    package: string;
-    requested: string[];
-    resolved?: string;
-  }>;
-
-  /** Missing dependencies */
-  missing: string[];
 }

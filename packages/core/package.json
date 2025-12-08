@@ -1,0 +1,34 @@
+{
+  "name": "@ai-policies/core",
+  "version": "2.0.0",
+  "description": "Core AI policies for safety, security, and code quality",
+  "type": "module",
+  "main": "index.js",
+  "keywords": [
+    "ai-policies",
+    "cursor",
+    "copilot",
+    "ai",
+    "policies",
+    "safety",
+    "security"
+  ],
+  "author": "AI Policies Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mucahitgurbuz/ai-policies.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/mucahitgurbuz/ai-policies#readme",
+  "ai-policies": {
+    "partials": "./partials"
+  },
+  "peerDependencies": {
+    "ai-policies": "^2.0.0"
+  },
+  "files": [
+    "index.js",
+    "partials"
+  ]
+}

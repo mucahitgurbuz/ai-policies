@@ -1,11 +1,8 @@
 ---
 id: code-quality
-layer: core
-weight: 20
-protected: false
-dependsOn: [core-safety]
-owner: engineering-team
 description: Core code quality standards and best practices
+owner: engineering-team
+tags: [quality, best-practices]
 ---
 
 # Code Quality Standards

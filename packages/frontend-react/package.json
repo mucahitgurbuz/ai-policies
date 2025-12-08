@@ -1,0 +1,34 @@
+{
+  "name": "@ai-policies/frontend-react",
+  "version": "2.0.0",
+  "description": "React and frontend development best practices for AI policies",
+  "type": "module",
+  "main": "index.js",
+  "keywords": [
+    "ai-policies",
+    "cursor",
+    "copilot",
+    "ai",
+    "policies",
+    "react",
+    "frontend"
+  ],
+  "author": "AI Policies Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mucahitgurbuz/ai-policies.git",
+    "directory": "packages/frontend-react"
+  },
+  "homepage": "https://github.com/mucahitgurbuz/ai-policies#readme",
+  "ai-policies": {
+    "partials": "./partials"
+  },
+  "peerDependencies": {
+    "ai-policies": "^2.0.0"
+  },
+  "files": [
+    "index.js",
+    "partials"
+  ]
+}

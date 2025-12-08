@@ -1,11 +1,8 @@
 ---
 id: jira-integration
-layer: domain
-weight: 40
-protected: false
-dependsOn: []
-owner: devops-team
 description: Guidelines for Jira integration and workflow management
+owner: devops-team
+tags: [jira, workflows, integration]
 ---
 
 # Jira Integration Guidelines

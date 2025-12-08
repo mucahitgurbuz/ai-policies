@@ -4,20 +4,19 @@
   "title": "AI Policies Manifest",
   "description": "Configuration file schema for AI Policies (.ai-policies.yaml)",
   "type": "object",
-  "required": ["extends", "output", "compose"],
+  "required": ["extends", "output"],
   "properties": {
     "extends": {
-      "type": "object",
-      "description": "Policy packages to extend (ESLint-style configuration)",
-      "patternProperties": {
-        "^@[a-z0-9-]+/[a-z0-9-]+$": {
-          "type": "string",
-          "pattern": "^(\\^|~|>=|>|<=|<|=)?[0-9]+\\.[0-9]+\\.[0-9]+([a-zA-Z0-9.-]*)?$",
-          "description": "Semantic version range"
-        }
+      "type": "array",
+      "description": "Policy packages to extend (array order matters - last wins)",
+      "items": {
+        "type": "string",
+        "description": "Package name (npm) or local path (starts with ./ or /)"
       },
-      "additionalProperties": false,
-      "minProperties": 1
+      "minItems": 1,
+      "examples": [
+        ["@ai-policies/core", "@ai-policies/frontend-react", "./team-policies"]
+      ]
     },
     "output": {
       "type": "object",
@@ -41,55 +40,24 @@
         { "required": ["cursor", "copilot"] }
       ]
     },
-    "compose": {
-      "type": "object",
-      "description": "Composition settings for merging policy partials",
-      "required": ["order", "protectedLayers", "teamAppend"],
-      "properties": {
-        "order": {
-          "type": "array",
-          "description": "Layer composition order (higher priority layers come later)",
-          "items": {
-            "type": "string",
-            "enum": ["core", "domain", "stack", "team"]
-          },
-          "minItems": 1,
-          "uniqueItems": true
-        },
-        "protectedLayers": {
-          "type": "array",
-          "description": "Layers that cannot be overridden by higher priority layers",
-          "items": {
-            "type": "string",
-            "enum": ["core", "domain", "stack", "team"]
-          },
-          "uniqueItems": true
-        },
-        "teamAppend": {
-          "type": "boolean",
-          "description": "Allow team layer to append content rather than override"
-        }
+    "protected": {
+      "type": "array",
+      "description": "Partial IDs that cannot be overridden by later packages",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
       },
-      "additionalProperties": false
+      "uniqueItems": true,
+      "examples": [["core-safety", "no-hardcoded-secrets"]]
     },
-    "overrides": {
-      "type": "object",
-      "description": "Team-specific overrides and customizations",
-      "properties": {
-        "teamAppendContent": {
-          "type": "string",
-          "description": "Additional content to append to team layer"
-        },
-        "excludePartials": {
-          "type": "array",
-          "description": "Partial IDs to exclude from composition",
-          "items": {
-            "type": "string"
-          },
-          "uniqueItems": true
-        }
+    "exclude": {
+      "type": "array",
+      "description": "Partial IDs to exclude from final output",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
       },
-      "additionalProperties": false
+      "uniqueItems": true
     }
   },
   "additionalProperties": false

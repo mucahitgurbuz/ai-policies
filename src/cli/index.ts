@@ -9,6 +9,8 @@ import { diffCommand } from './commands/diff.js';
 import { updateCommand } from './commands/update.js';
 import { doctorCommand } from './commands/doctor.js';
 import { validateCommand } from './commands/validate.js';
+import { installCommand } from './commands/install.js';
+import { migrateCommand } from './commands/migrate.js';
 
 export async function main() {
   await yargs(hideBin(process.argv))
@@ -16,6 +18,8 @@ export async function main() {
     .usage('$0 <command> [options]')
     .command(initCommand)
     .command(syncCommand)
+    .command(installCommand)
+    .command(migrateCommand)
     .command(diffCommand)
     .command(updateCommand)
     .command(doctorCommand)
