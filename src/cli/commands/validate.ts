@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { findManifest } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
+import { isLocalPath } from '../../schemas/utils.js';
 
 interface ValidateOptions {
   schema?: boolean;
@@ -120,16 +121,13 @@ async function validateManifestSchema(manifestPath: string): Promise<string[]> {
 
       // Validate extends entries (package names or local paths)
       for (const entry of manifest.extends) {
-        const isLocalPath = entry.startsWith('./') || entry.startsWith('/');
+        const isLocal = isLocalPath(entry);
         const isScopedPackage = entry.startsWith('@') && entry.includes('/');
-        const isUnscopedPackage =
-          !entry.startsWith('@') &&
-          !entry.startsWith('./') &&
-          !entry.startsWith('/');
+        const isUnscopedPackage = !entry.startsWith('@') && !isLocal;
 
-        if (!isLocalPath && !isScopedPackage && !isUnscopedPackage) {
+        if (!isLocal && !isScopedPackage && !isUnscopedPackage) {
           errors.push(
-            `Invalid extends entry: '${entry}'. Expected npm package name or local path (starting with ./ or /)`
+            `Invalid extends entry: '${entry}'. Expected npm package name or local path (starting with ./, ../, or /)`
           );
         }
       }
