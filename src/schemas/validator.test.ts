@@ -5,8 +5,8 @@ import {
   validatePackageConfig,
 } from './validator.js';
 
-describe('validateManifestConfig (v2)', () => {
-  it('should validate a correct v2 manifest', () => {
+describe('validateManifestConfig', () => {
+  it('should validate a correct manifest', () => {
     const manifest = {
       extends: ['@ai-policies/core', '@ai-policies/frontend-react'],
       output: {
@@ -45,10 +45,10 @@ describe('validateManifestConfig (v2)', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('should reject manifest with non-array extends', () => {
+  it('should reject manifest with non-array extends (legacy format)', () => {
     const manifest = {
       extends: {
-        '@ai-policies/core': '^1.0.0', // v1 format - should fail
+        '@ai-policies/core': '^1.0.0', // legacy format - should fail
       },
       output: {
         cursor: './.cursorrules',
@@ -97,8 +97,8 @@ describe('validateManifestConfig (v2)', () => {
   });
 });
 
-describe('validatePartialFrontmatter (v2)', () => {
-  it('should validate correct v2 frontmatter', () => {
+describe('validatePartialFrontmatter', () => {
+  it('should validate correct frontmatter', () => {
     const frontmatter = {
       id: 'core-safety',
       description: 'Core safety rules',
@@ -159,11 +159,11 @@ describe('validatePartialFrontmatter (v2)', () => {
     expect(result.valid).toBe(false);
   });
 
-  it('should reject v1 frontmatter fields', () => {
+  it('should reject legacy frontmatter fields', () => {
     const frontmatter = {
       id: 'test-partial',
-      layer: 'core', // v1 field - should be rejected
-      weight: 10, // v1 field - should be rejected
+      layer: 'core', // legacy field - should be rejected
+      weight: 10, // legacy field - should be rejected
     };
 
     const result = validatePartialFrontmatter(frontmatter);

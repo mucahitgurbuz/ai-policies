@@ -2,7 +2,7 @@ import type { PolicyPartial, ConflictResolution } from '../schemas/types.js';
 import type { DeduplicationResult } from './types.js';
 
 /**
- * Deduplicate partials with "last wins" strategy (v2.0)
+ * Deduplicate partials with "last wins" strategy
  * Protected partials are preserved regardless of order
  */
 export function deduplicatePartials(
@@ -147,7 +147,7 @@ export function groupPartialsByPackage(
 }
 
 /**
- * Get statistics about partials (v2.0 - simplified)
+ * Get statistics about partials
  */
 export function getPartialStatistics(partials: PolicyPartial[]) {
   const stats = {
@@ -177,7 +177,7 @@ export function getPartialStatistics(partials: PolicyPartial[]) {
 }
 
 /**
- * Create a summary of composition changes (v2.0)
+ * Create a summary of composition changes
  */
 export function createCompositionSummary(
   partials: PolicyPartial[],

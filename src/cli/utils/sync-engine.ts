@@ -22,7 +22,7 @@ export interface SyncResult {
 }
 
 /**
- * Generate IDE configuration content from policy packages (v2.0)
+ * Generate IDE configuration content from policy packages
  */
 export async function generateConfigurations(
   config: ManifestConfig,

@@ -43,7 +43,7 @@ const validatePartial = ajv.compile(partialSchema);
 const validatePackage = ajv.compile(packageSchema);
 
 /**
- * Validate a manifest configuration (v2.0)
+ * Validate a manifest configuration
  */
 export function validateManifestConfig(data: unknown): ValidationResult {
   const valid = validateManifest(data);
@@ -66,7 +66,7 @@ export function validateManifestConfig(data: unknown): ValidationResult {
 }
 
 /**
- * Validate partial frontmatter (v2.0)
+ * Validate partial frontmatter
  */
 export function validatePartialFrontmatter(data: unknown): ValidationResult {
   const valid = validatePartial(data);
@@ -98,7 +98,7 @@ export function validatePackageConfig(data: unknown): ValidationResult {
 }
 
 /**
- * Perform additional semantic validation for manifest (v2.0)
+ * Perform additional semantic validation for manifest
  */
 function performSemanticManifestValidation(
   manifest: ManifestConfig

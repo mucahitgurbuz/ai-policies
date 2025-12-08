@@ -1,5 +1,5 @@
 /**
- * Utility functions for AI Policies v2.0
+ * Utility functions for AI Policies
  */
 
 import type {
@@ -69,7 +69,7 @@ export function createContentHash(content: string): string {
 }
 
 /**
- * Create composition metadata (v2.0)
+ * Create composition metadata
  */
 export function createCompositionMetadata(
   packages: Record<string, string>,

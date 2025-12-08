@@ -7,7 +7,7 @@ import type {
 } from '../schemas/types.js';
 
 /**
- * Options for composing policies (v2.0)
+ * Options for composing policies
  */
 export interface CompositionOptions {
   /** Provider to compose for (affects which partials are included) */

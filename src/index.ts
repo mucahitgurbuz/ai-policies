@@ -1,5 +1,5 @@
 /**
- * AI Policies v2.0 - Centralized AI IDE rules management
+ * AI Policies - Centralized AI IDE rules management
  *
  * This is the main entry point for the library.
  * For CLI usage, see src/cli/index.ts

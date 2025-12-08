@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { PolicyPartial, ManifestConfig } from '../schemas/types.js';
 import { PolicyComposer, createComposer, composePartials } from './composer.js';
 
-// Helper to create mock partials (v2 format)
+// Helper to create mock partials
 function createMockPartial(
   id: string,
   sourceIndex: number = 0,
@@ -21,7 +21,7 @@ function createMockPartial(
   };
 }
 
-// Default test config (v2 format)
+// Default test config
 const testConfig: ManifestConfig = {
   extends: ['@ai-policies/test'],
   output: {

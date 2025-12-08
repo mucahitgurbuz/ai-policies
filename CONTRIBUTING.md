@@ -67,7 +67,7 @@ ai-policies/
 └── .github/                    # GitHub workflows and templates
 ```
 
-## Contributing to Policy Packages
+## Contributing Policy Packages
 
 ### Creating New Policy Packages
 
@@ -93,7 +93,7 @@ my-policies/
     "partials": "./partials"
   },
   "peerDependencies": {
-    "ai-policies": "^2.0.0"
+    "ai-policies": ">=2.0.0"
   }
 }
 ```
@@ -108,7 +108,7 @@ export default {
 };
 ```
 
-### Policy Partial Format (v2.0)
+### Policy Partial Format
 
 ```markdown
 ---
@@ -140,7 +140,7 @@ const bad = 'anti-pattern';
 **Required field:** `id`
 **Optional fields:** `description`, `owner`, `tags`, `providers`
 
-> **Note:** v2.0 removed `layer`, `weight`, `protected`, and `dependsOn` from partial frontmatter. These are now handled by the configuration file and extends array order.
+> **Note:** The `layer`, `weight`, `protected`, and `dependsOn` fields are not used. Priority is determined by the order in the `extends` array, and protection is configured at the manifest level.
 
 ### Policy Package Guidelines
 

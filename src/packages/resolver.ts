@@ -1,5 +1,5 @@
 /**
- * Package resolver for AI Policies v2.0
+ * Package resolver for AI Policies
  * Resolves npm packages and local paths to policy packages
  */
 

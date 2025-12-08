@@ -52,7 +52,7 @@ describe('Config Utils', () => {
   });
 
   describe('loadManifest', () => {
-    it('should load valid v2 manifest', async () => {
+    it('should load valid manifest', async () => {
       const manifestPath = path.join(tempDir, MANIFEST_FILE);
       await fs.writeFile(
         manifestPath,
@@ -85,7 +85,7 @@ protected:
       await expect(loadManifest(manifestPath)).rejects.toThrow('missing "extends"');
     });
 
-    it('should throw error for v1 format (object extends)', async () => {
+    it('should throw error for legacy format (object extends)', async () => {
       const manifestPath = path.join(tempDir, MANIFEST_FILE);
       await fs.writeFile(
         manifestPath,

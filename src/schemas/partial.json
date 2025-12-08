@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://ai-policies.dev/schemas/partial.json",
-  "title": "AI Policies Partial v2",
-  "description": "Schema for policy partial frontmatter in Markdown files (v2.0)",
+  "title": "AI Policies Partial",
+  "description": "Schema for policy partial frontmatter in Markdown files",
   "type": "object",
   "required": ["id"],
   "properties": {

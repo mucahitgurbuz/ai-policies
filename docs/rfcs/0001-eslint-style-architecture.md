@@ -3,7 +3,6 @@
 - **Status**: Implemented
 - **Author**: @mguerbuez
 - **Created**: 2024-12-08
-- **Target Version**: 2.0.0
 
 ## Summary
 

@@ -19,7 +19,7 @@ import { mergePartials } from './merger.js';
 import { deduplicatePartials, sortPartialsBySourceIndex } from './utils.js';
 
 /**
- * Main composition engine (v2.0)
+ * Main composition engine
  * Uses "last wins" conflict resolution with protected partial support
  */
 export class PolicyComposer {
@@ -43,7 +43,7 @@ export class PolicyComposer {
   }
 
   /**
-   * Compose policies into a single output (v2.0)
+   * Compose policies into a single output
    */
   async compose(
     partials: PolicyPartial[],
@@ -127,7 +127,7 @@ ${mergedContent}`;
   }
 
   /**
-   * Validate composition inputs (v2.0)
+   * Validate composition inputs
    */
   validateInputs(
     partials: PolicyPartial[],
@@ -191,7 +191,7 @@ export function createComposer(): PolicyComposer {
 }
 
 /**
- * Convenience function for simple composition (v2.0)
+ * Convenience function for simple composition
  */
 export async function composePartials(
   partials: PolicyPartial[],

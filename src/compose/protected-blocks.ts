@@ -1,7 +1,7 @@
 import type { PolicyPartial } from '../schemas/types.js';
 
 /**
- * Protected block information (v2.0)
+ * Protected block information
  */
 export interface ProtectedBlock {
   /** Block identifier (partial ID) */

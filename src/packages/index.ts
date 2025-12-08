@@ -1,5 +1,5 @@
 /**
- * Package resolution for AI Policies v2.0
+ * Package resolution for AI Policies
  */
 
 export * from './resolver.js';

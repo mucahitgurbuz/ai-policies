@@ -265,7 +265,7 @@ compose:
   protectedLayers: [core]
 ```
 
-**After (v2.0):**
+**After:**
 
 ```yaml
 extends:

@@ -13,7 +13,7 @@ export interface MergeOptions {
 }
 
 /**
- * Merge partials into a single content string (v2.0)
+ * Merge partials into a single content string
  * Partials are merged in order (as received from extends array resolution)
  */
 export async function mergePartials(

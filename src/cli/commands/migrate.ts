@@ -33,7 +33,7 @@ interface V1ManifestConfig {
 
 export const migrateCommand: CommandModule<{}, MigrateOptions> = {
   command: 'migrate',
-  describe: 'Migrate v1.x configuration to v2.0 format',
+  describe: 'Migrate legacy v1.x configuration to current format',
   builder: {
     dry: {
       alias: 'd',
@@ -63,9 +63,9 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       const rawContent = await fs.readFile(manifestPath, 'utf8');
       const rawConfig = yaml.load(rawContent) as any;
 
-      // Check if already v2 format (extends is array)
+      // Check if already current format (extends is array)
       if (Array.isArray(rawConfig.extends)) {
-        logger.info('Configuration is already in v2.0 format. Nothing to migrate.');
+        logger.info('Configuration is already in current format. Nothing to migrate.');
         return;
       }
 
@@ -79,15 +79,15 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       logger.info('Detected v1.x configuration format');
       logger.info('');
 
-      // Convert to v2 format
-      const v2Config: ManifestConfig = {
+      // Convert to current format
+      const newConfig: ManifestConfig = {
         extends: Object.keys(v1Config.extends),
         output: v1Config.output,
       };
 
       // Handle protected partials
       // In v1, protectedLayers protected all partials in that layer
-      // In v2, we need to explicitly list partial IDs
+      // Now we need to explicitly list partial IDs
       // We'll add a comment about this and use core-safety as a sensible default
       const protectedPartials: string[] = [];
       if (v1Config.compose?.protectedLayers?.includes('core')) {
@@ -95,12 +95,12 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       }
 
       if (protectedPartials.length > 0) {
-        v2Config.protected = protectedPartials;
+        newConfig.protected = protectedPartials;
       }
 
       // Handle excludePartials from overrides
       if (v1Config.overrides?.excludePartials?.length) {
-        v2Config.exclude = v1Config.overrides.excludePartials;
+        newConfig.exclude = v1Config.overrides.excludePartials;
       }
 
       // Log changes
@@ -109,7 +109,7 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
 
       logger.info('1. extends: object -> array');
       logger.info(`   Before: ${JSON.stringify(v1Config.extends)}`);
-      logger.info(`   After:  ${JSON.stringify(v2Config.extends)}`);
+      logger.info(`   After:  ${JSON.stringify(newConfig.extends)}`);
       logger.info('');
 
       logger.info('2. compose section: REMOVED');
@@ -123,14 +123,14 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
         logger.info('');
       }
 
-      if (v2Config.exclude?.length) {
+      if (newConfig.exclude?.length) {
         logger.info('4. exclude: Migrated from overrides.excludePartials');
-        logger.info(`   Value: ${JSON.stringify(v2Config.exclude)}`);
+        logger.info(`   Value: ${JSON.stringify(newConfig.exclude)}`);
         logger.info('');
       }
 
       // Warnings about removed features
-      logger.warn('IMPORTANT: The following v1.x features are removed in v2.0:');
+      logger.warn('IMPORTANT: The following v1.x features are no longer supported:');
       logger.warn('- compose.order: Partial ordering is now based on extends array order');
       logger.warn('- compose.protectedLayers: Use "protected" array with specific partial IDs');
       logger.warn('- compose.teamAppend: Team content now works via extends array');
@@ -140,7 +140,7 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       if (argv.dry) {
         logger.info('DRY RUN: Would write the following config:');
         logger.info('');
-        logger.log(yaml.dump(v2Config, { indent: 2, lineWidth: -1, noRefs: true }));
+        logger.log(yaml.dump(newConfig, { indent: 2, lineWidth: -1, noRefs: true }));
         return;
       }
 
@@ -150,15 +150,15 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       logger.success(`Backed up old config to ${path.basename(backupPath)}`);
 
       // Write new config
-      await saveManifest(manifestPath, v2Config);
-      logger.success('Wrote new v2.0 configuration');
+      await saveManifest(manifestPath, newConfig);
+      logger.success('Wrote new configuration');
 
       // Install packages if needed
       if (!argv.skipInstall) {
         logger.info('');
         logger.info('Installing packages...');
         try {
-          const packages = v2Config.extends.filter(p => !p.startsWith('./') && !p.startsWith('/'));
+          const packages = newConfig.extends.filter(p => !p.startsWith('./') && !p.startsWith('/'));
           if (packages.length > 0) {
             execSync(`npm install ${packages.join(' ')}`, {
               cwd: projectRoot,

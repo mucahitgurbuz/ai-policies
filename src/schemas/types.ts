@@ -1,12 +1,12 @@
 /**
- * TypeScript types for AI Policies v2.0
+ * TypeScript types for AI Policies
  * ESLint-style configuration with array-based extends and simplified partials
  */
 
 export type Provider = 'cursor' | 'copilot';
 
 /**
- * v2.0 Manifest configuration
+ * Manifest configuration
  * Uses array-based extends with "last wins" conflict resolution
  */
 export interface ManifestConfig {
@@ -27,8 +27,7 @@ export interface ManifestConfig {
 }
 
 /**
- * Simplified partial frontmatter (v2.0)
- * Removed: layer, weight, protected, dependsOn
+ * Partial frontmatter
  */
 export interface PartialFrontmatter {
   /** Unique identifier for this partial within its package */
@@ -156,7 +155,7 @@ export interface CompositionResult {
 }
 
 /**
- * Metadata about a composition (v2.0 - simplified)
+ * Metadata about a composition
  */
 export interface CompositionMetadata {
   /** Package versions used in composition */

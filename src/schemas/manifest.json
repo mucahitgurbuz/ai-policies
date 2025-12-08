@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://ai-policies.dev/schemas/manifest.json",
-  "title": "AI Policies Manifest v2",
-  "description": "Configuration file schema for AI Policies v2.0 (.ai-policies.yaml)",
+  "title": "AI Policies Manifest",
+  "description": "Configuration file schema for AI Policies (.ai-policies.yaml)",
   "type": "object",
   "required": ["extends", "output"],
   "properties": {

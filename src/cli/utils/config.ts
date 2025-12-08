@@ -29,7 +29,7 @@ export async function loadManifest(
   const content = await fs.readFile(manifestPath, 'utf8');
   const config = yaml.load(content) as ManifestConfig;
 
-  // Validate v2 format
+  // Validate config format
   if (!config.extends) {
     throw new Error('Invalid manifest: missing "extends" section');
   }
