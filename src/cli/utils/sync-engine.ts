@@ -1,11 +1,12 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import type {
-  ManifestConfig,
-  Provider,
-} from '../../schemas/types.js';
-import { resolveExtendsArray, getAllPartials, getDefaultProtectedPartials } from '../../packages/resolver.js';
+import type { ManifestConfig, Provider } from '../../schemas/types.js';
+import {
+  resolveExtendsArray,
+  getAllPartials,
+  getDefaultProtectedPartials,
+} from '../../packages/resolver.js';
 import { PolicyComposer } from '../../compose/composer.js';
 import { renderCursorRules } from '../../providers/cursor-provider.js';
 import { renderCopilotInstructions } from '../../providers/copilot-provider.js';
@@ -43,9 +44,7 @@ export async function generateConfigurations(
   const allPartials = getAllPartials(packages);
 
   if (allPartials.length === 0) {
-    throw new Error(
-      'No policy partials found in the resolved packages.'
-    );
+    throw new Error('No policy partials found in the resolved packages.');
   }
 
   // Combine protected partials from config and package defaults

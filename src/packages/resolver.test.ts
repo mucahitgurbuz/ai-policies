@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
@@ -178,7 +178,10 @@ id: ${id}
       const package1 = path.join(tempDir, 'pkg1');
       const package2 = path.join(tempDir, 'pkg2');
 
-      for (const [pkgPath, idx] of [[package1, 0], [package2, 1]] as const) {
+      for (const [pkgPath, idx] of [
+        [package1, 0],
+        [package2, 1],
+      ] as const) {
         await fs.ensureDir(path.join(pkgPath, 'partials'));
         await fs.writeJson(path.join(pkgPath, 'package.json'), {
           name: `@test/pkg${idx}`,
@@ -289,4 +292,3 @@ id: rule-${idx}
     });
   });
 });
-

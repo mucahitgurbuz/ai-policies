@@ -151,7 +151,12 @@ describe('generateMetadataHeader / parseMetadataFromHeader', () => {
         sourceIndex: 0,
       },
     ];
-    const metadata = createCompositionMetadata(packages, partials, [], '# Content');
+    const metadata = createCompositionMetadata(
+      packages,
+      partials,
+      [],
+      '# Content'
+    );
 
     const header = generateMetadataHeader(metadata);
     const parsed = parseMetadataFromHeader(header);
@@ -181,4 +186,3 @@ describe('generateMetadataHeader / parseMetadataFromHeader', () => {
     expect(header).toContain('@test/b@2.0.0');
   });
 });
-

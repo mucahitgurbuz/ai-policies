@@ -23,10 +23,7 @@ export interface ProtectedBlock {
 /**
  * Create protected block markers in content
  */
-export function createProtectedBlock(
-  id: string,
-  content: string
-): string {
+export function createProtectedBlock(id: string, content: string): string {
   const sanitizedId = id.replace(/[^a-zA-Z0-9-_]/g, '-');
 
   return `<!-- BEGIN PROTECTED:${sanitizedId} -->
@@ -89,9 +86,7 @@ export function validateProtectedBlocks(
 export function removeProtectedBlocks(content: string): string {
   const protectedRegex =
     /<!--\s*BEGIN\s+PROTECTED:[^\s]+\s*-->[\s\S]*?<!--\s*END\s+PROTECTED\s*-->/g;
-  return content
-    .replace(protectedRegex, '')
-    .replace(/\n\s*\n\s*\n/g, '\n\n');
+  return content.replace(protectedRegex, '').replace(/\n\s*\n\s*\n/g, '\n\n');
 }
 
 /**
@@ -112,7 +107,9 @@ export function getProtectedBlockIds(content: string): string[] {
 /**
  * Extract protected blocks from existing content
  */
-export function extractProtectedBlocks(existingContent: string): ProtectedBlock[] {
+export function extractProtectedBlocks(
+  existingContent: string
+): ProtectedBlock[] {
   const blocks: ProtectedBlock[] = [];
 
   const protectedRegex =
@@ -120,7 +117,7 @@ export function extractProtectedBlocks(existingContent: string): ProtectedBlock[
 
   let match;
   while ((match = protectedRegex.exec(existingContent)) !== null) {
-    const [fullMatch, blockId, innerContent] = match;
+    const [fullMatch, blockId, _innerContent] = match;
 
     blocks.push({
       id: blockId,

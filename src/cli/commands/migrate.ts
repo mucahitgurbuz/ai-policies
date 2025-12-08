@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import { execSync } from 'child_process';
 
-import { findManifest, saveManifest, MANIFEST_FILE } from '../utils/config.js';
+import { findManifest, saveManifest } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import type { ManifestConfig } from '../../schemas/types.js';
 
@@ -51,9 +51,7 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
     try {
       const manifestPath = await findManifest();
       if (!manifestPath) {
-        logger.error(
-          'No .ai-policies.yaml found. Nothing to migrate.'
-        );
+        logger.error('No .ai-policies.yaml found. Nothing to migrate.');
         process.exit(1);
       }
 
@@ -65,13 +63,17 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
 
       // Check if already current format (extends is array)
       if (Array.isArray(rawConfig.extends)) {
-        logger.info('Configuration is already in current format. Nothing to migrate.');
+        logger.info(
+          'Configuration is already in current format. Nothing to migrate.'
+        );
         return;
       }
 
       // Validate v1 format
       if (!rawConfig.extends || typeof rawConfig.extends !== 'object') {
-        logger.error('Invalid configuration format. Expected v1.x extends object.');
+        logger.error(
+          'Invalid configuration format. Expected v1.x extends object.'
+        );
         process.exit(1);
       }
 
@@ -113,7 +115,9 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       logger.info('');
 
       logger.info('2. compose section: REMOVED');
-      logger.info('   - Layer ordering is now determined by extends array order');
+      logger.info(
+        '   - Layer ordering is now determined by extends array order'
+      );
       logger.info('   - Weights are no longer used');
       logger.info('');
 
@@ -130,17 +134,29 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       }
 
       // Warnings about removed features
-      logger.warn('IMPORTANT: The following v1.x features are no longer supported:');
-      logger.warn('- compose.order: Partial ordering is now based on extends array order');
-      logger.warn('- compose.protectedLayers: Use "protected" array with specific partial IDs');
-      logger.warn('- compose.teamAppend: Team content now works via extends array');
-      logger.warn('- overrides.teamAppendContent: Create a local policy package instead');
+      logger.warn(
+        'IMPORTANT: The following v1.x features are no longer supported:'
+      );
+      logger.warn(
+        '- compose.order: Partial ordering is now based on extends array order'
+      );
+      logger.warn(
+        '- compose.protectedLayers: Use "protected" array with specific partial IDs'
+      );
+      logger.warn(
+        '- compose.teamAppend: Team content now works via extends array'
+      );
+      logger.warn(
+        '- overrides.teamAppendContent: Create a local policy package instead'
+      );
       logger.warn('');
 
       if (argv.dry) {
         logger.info('DRY RUN: Would write the following config:');
         logger.info('');
-        logger.log(yaml.dump(newConfig, { indent: 2, lineWidth: -1, noRefs: true }));
+        logger.log(
+          yaml.dump(newConfig, { indent: 2, lineWidth: -1, noRefs: true })
+        );
         return;
       }
 
@@ -158,7 +174,9 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
         logger.info('');
         logger.info('Installing packages...');
         try {
-          const packages = newConfig.extends.filter(p => !p.startsWith('./') && !p.startsWith('/'));
+          const packages = newConfig.extends.filter(
+            p => !p.startsWith('./') && !p.startsWith('/')
+          );
           if (packages.length > 0) {
             execSync(`npm install ${packages.join(' ')}`, {
               cwd: projectRoot,
@@ -167,7 +185,9 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
             logger.success('Packages installed');
           }
         } catch (error) {
-          logger.warn('Failed to install packages. You may need to run npm install manually.');
+          logger.warn(
+            'Failed to install packages. You may need to run npm install manually.'
+          );
         }
       }
 
@@ -176,7 +196,9 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
       logger.info('');
       logger.info('Next steps:');
       logger.info('1. Review the migrated .ai-policies.yaml');
-      logger.info('2. Update partial frontmatter to remove layer, weight, protected, dependsOn');
+      logger.info(
+        '2. Update partial frontmatter to remove layer, weight, protected, dependsOn'
+      );
       logger.info('3. Run "ai-policies sync" to regenerate IDE configurations');
       logger.info('4. Delete .ai-policies.yaml.v1.backup when satisfied');
     } catch (error) {
@@ -187,4 +209,3 @@ export const migrateCommand: CommandModule<{}, MigrateOptions> = {
     }
   },
 };
-

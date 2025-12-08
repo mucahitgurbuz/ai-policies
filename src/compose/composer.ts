@@ -50,7 +50,7 @@ export class PolicyComposer {
     config: ManifestConfig,
     options: CompositionOptions
   ): Promise<CompositionResult> {
-    const errors: CompositionError[] = [];
+    const _errors: CompositionError[] = [];
     const protectedIds = options.protected || config.protected || [];
     const excludeIds = options.exclude || config.exclude || [];
 
@@ -66,8 +66,11 @@ export class PolicyComposer {
       );
 
       // Step 3: Deduplicate partials with "last wins" (respecting protected)
-      const { partials: deduplicatedPartials, conflicts, protectedWarnings } =
-        deduplicatePartials(includedPartials, protectedIds);
+      const {
+        partials: deduplicatedPartials,
+        conflicts,
+        protectedWarnings,
+      } = deduplicatePartials(includedPartials, protectedIds);
 
       // Log warnings about protected partials
       for (const warning of protectedWarnings) {
@@ -79,7 +82,7 @@ export class PolicyComposer {
         if (conflict.reason === 'last-wins') {
           console.log(
             `Conflict resolved: Using '${conflict.partialId}' from ${conflict.winner.packageName} ` +
-            `(last in extends) over ${conflict.overridden.map(p => p.packageName).join(', ')}`
+              `(last in extends) over ${conflict.overridden.map(p => p.packageName).join(', ')}`
           );
         }
       }
@@ -174,7 +177,9 @@ ${mergedContent}`;
       const allPartialIds = new Set(partials.map(p => p.frontmatter.id));
       for (const excludeId of config.exclude) {
         if (!allPartialIds.has(excludeId)) {
-          console.warn(`Warning: Excluded partial '${excludeId}' not found in any package`);
+          console.warn(
+            `Warning: Excluded partial '${excludeId}' not found in any package`
+          );
         }
       }
     }

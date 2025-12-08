@@ -37,7 +37,7 @@ export async function loadManifest(
   if (!Array.isArray(config.extends)) {
     throw new Error(
       'Invalid manifest: "extends" must be an array. ' +
-      'Run "ai-policies migrate" to convert from v1.x format.'
+        'Run "ai-policies migrate" to convert from v1.x format.'
     );
   }
 

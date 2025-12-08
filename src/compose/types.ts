@@ -1,7 +1,5 @@
 import type {
   PolicyPartial,
-  ManifestConfig,
-  CompositionResult,
   Provider,
   ConflictResolution,
 } from '../schemas/types.js';

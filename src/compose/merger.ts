@@ -1,7 +1,4 @@
-import type {
-  PolicyPartial,
-  Provider,
-} from '../schemas/types.js';
+import type { PolicyPartial, Provider } from '../schemas/types.js';
 import type { ContentTransformer, TransformContext } from './types.js';
 
 export interface MergeOptions {

@@ -16,7 +16,8 @@ export const installCommand: CommandModule<{}, InstallOptions> = {
   builder: {
     package: {
       type: 'string',
-      description: 'Package name to install (e.g., @ai-policies/frontend-react)',
+      description:
+        'Package name to install (e.g., @ai-policies/frontend-react)',
       demandOption: true,
     },
     dev: {
@@ -78,4 +79,3 @@ export const installCommand: CommandModule<{}, InstallOptions> = {
     }
   },
 };
-

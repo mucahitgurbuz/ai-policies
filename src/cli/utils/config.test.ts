@@ -82,7 +82,9 @@ protected:
 `
       );
 
-      await expect(loadManifest(manifestPath)).rejects.toThrow('missing "extends"');
+      await expect(loadManifest(manifestPath)).rejects.toThrow(
+        'missing "extends"'
+      );
     });
 
     it('should throw error for legacy format (object extends)', async () => {
@@ -110,7 +112,9 @@ output:
 `
       );
 
-      await expect(loadManifest(manifestPath)).rejects.toThrow('missing "output"');
+      await expect(loadManifest(manifestPath)).rejects.toThrow(
+        'missing "output"'
+      );
     });
   });
 
@@ -131,8 +135,8 @@ output:
       const content = await fs.readFile(manifestPath, 'utf8');
       expect(content).toContain("- '@ai-policies/core'");
       expect(content).toContain('- ./local');
-      expect(content).toContain("cursor: .cursorrules");
-      expect(content).toContain("- core-safety");
+      expect(content).toContain('cursor: .cursorrules');
+      expect(content).toContain('- core-safety');
     });
 
     it('should be loadable after save', async () => {
@@ -158,4 +162,3 @@ output:
     });
   });
 });
-

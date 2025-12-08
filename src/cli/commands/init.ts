@@ -86,7 +86,9 @@ export const initCommand: CommandModule<{}, InitOptions> = {
 
       // Install packages
       if (!argv.skipInstall) {
-        const packages = config.extends.filter(p => !p.startsWith('./') && !p.startsWith('/'));
+        const packages = config.extends.filter(
+          p => !p.startsWith('./') && !p.startsWith('/')
+        );
         if (packages.length > 0) {
           logger.info('');
           logger.info('Installing packages...');
@@ -97,7 +99,9 @@ export const initCommand: CommandModule<{}, InitOptions> = {
             });
             logger.success('Packages installed');
           } catch (error) {
-            logger.warn('Failed to install packages. Run npm install manually.');
+            logger.warn(
+              'Failed to install packages. Run npm install manually.'
+            );
           }
         }
       }
@@ -181,7 +185,10 @@ async function promptForConfiguration(): Promise<ManifestConfig> {
 
   const config = getPresetConfig(projectType);
 
-  if (includeWorkflows && !config.extends.includes('@ai-policies/workflows-jira')) {
+  if (
+    includeWorkflows &&
+    !config.extends.includes('@ai-policies/workflows-jira')
+  ) {
     config.extends.push('@ai-policies/workflows-jira');
   }
 

@@ -102,10 +102,7 @@ describe('sortPartialsBySourceIndex', () => {
   });
 
   it('should not mutate original array', () => {
-    const partials = [
-      createMockPartial('b', 1),
-      createMockPartial('a', 0),
-    ];
+    const partials = [createMockPartial('b', 1), createMockPartial('a', 0)];
     const original = [...partials];
 
     sortPartialsBySourceIndex(partials);
@@ -189,9 +186,7 @@ describe('getPartialStatistics', () => {
 
 describe('createCompositionSummary', () => {
   it('should create summary with conflict info', () => {
-    const partials = [
-      createMockPartial('a', 0, '@test/pkg1'),
-    ];
+    const partials = [createMockPartial('a', 0, '@test/pkg1')];
 
     const conflicts = [
       {
@@ -210,4 +205,3 @@ describe('createCompositionSummary', () => {
     expect(summary).toContain('last-wins');
   });
 });
-

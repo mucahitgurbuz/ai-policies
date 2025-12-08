@@ -1,5 +1,4 @@
 import type { CommandModule } from 'yargs';
-import path from 'path';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import { z } from 'zod';

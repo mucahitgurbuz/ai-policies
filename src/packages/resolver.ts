@@ -47,7 +47,10 @@ function resolveLocalPath(localPath: string, projectRoot: string): string {
 /**
  * Resolve an npm package from node_modules
  */
-function resolveNpmPackage(packageName: string, projectRoot: string): string | null {
+function resolveNpmPackage(
+  packageName: string,
+  projectRoot: string
+): string | null {
   // Try to resolve from project's node_modules
   const possiblePaths = [
     path.join(projectRoot, 'node_modules', packageName),
@@ -109,7 +112,9 @@ async function loadPackage(
     const indexPath = path.join(packagePath, 'index.js');
     if (await fs.pathExists(indexPath)) {
       try {
-        const pkgExport = await import(indexPath) as { default?: PolicyPackageExport };
+        const pkgExport = (await import(indexPath)) as {
+          default?: PolicyPackageExport;
+        };
         if (pkgExport.default?.defaultProtected) {
           defaultProtected = pkgExport.default.defaultProtected;
         }
@@ -131,7 +136,12 @@ async function loadPackage(
     : path.join(packagePath, 'partials');
 
   // Load partials
-  const partials = await loadPartials(partialsDir, config.name, config.version, sourceIndex);
+  const partials = await loadPartials(
+    partialsDir,
+    config.name,
+    config.version,
+    sourceIndex
+  );
 
   return {
     config,
@@ -232,7 +242,9 @@ export function getAllPartials(packages: PolicyPackage[]): PolicyPartial[] {
 /**
  * Get all default protected partial IDs from packages
  */
-export function getDefaultProtectedPartials(packages: PolicyPackage[]): string[] {
+export function getDefaultProtectedPartials(
+  packages: PolicyPackage[]
+): string[] {
   const protected_: string[] = [];
 
   for (const pkg of packages) {
@@ -241,4 +253,3 @@ export function getDefaultProtectedPartials(packages: PolicyPackage[]): string[]
 
   return [...new Set(protected_)];
 }
-

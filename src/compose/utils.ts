@@ -50,7 +50,7 @@ export function deduplicatePartials(
       if (resolution.reason === 'protected') {
         protectedWarnings.push(
           `Protected partial '${id}' from '${resolution.winner.packageName}' was preserved. ` +
-          `Overrides from ${resolution.overridden.map(p => p.packageName).join(', ')} were ignored.`
+            `Overrides from ${resolution.overridden.map(p => p.packageName).join(', ')} were ignored.`
         );
       }
     }
@@ -102,7 +102,9 @@ function resolveConflict(
 /**
  * Sort partials by their source index (extends array order)
  */
-export function sortPartialsBySourceIndex(partials: PolicyPartial[]): PolicyPartial[] {
+export function sortPartialsBySourceIndex(
+  partials: PolicyPartial[]
+): PolicyPartial[] {
   return [...partials].sort((a, b) => a.sourceIndex - b.sourceIndex);
 }
 
@@ -199,7 +201,9 @@ export function createCompositionSummary(
     lines.push('');
     lines.push('Conflicts resolved:');
     for (const conflict of conflicts) {
-      const overriddenPkgs = conflict.overridden.map(p => p.packageName).join(', ');
+      const overriddenPkgs = conflict.overridden
+        .map(p => p.packageName)
+        .join(', ');
       lines.push(
         `  ${conflict.partialId}: ${conflict.winner.packageName} won (${conflict.reason}) over ${overriddenPkgs}`
       );

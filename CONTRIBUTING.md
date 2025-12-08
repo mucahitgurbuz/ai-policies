@@ -104,19 +104,19 @@ my-policies/
 export default {
   name: '@mycompany/ai-policies',
   partials: './partials',
-  defaultProtected: ['critical-security-rules']  // Optional
+  defaultProtected: ['critical-security-rules'], // Optional
 };
 ```
 
 ### Policy Partial Format
 
-```markdown
+````markdown
 ---
 id: my-rule-id
 description: Brief description of what this rule covers
 owner: team-name
 tags: [security, react, required]
-providers: [cursor, copilot]  # Optional - omit to apply to all
+providers: [cursor, copilot] # Optional - omit to apply to all
 ---
 
 # My Rule Title
@@ -135,7 +135,9 @@ const good = 'example';
 // ❌ Bad example
 const bad = 'anti-pattern';
 ```
-```
+````
+
+````
 
 **Required field:** `id`
 **Optional fields:** `description`, `owner`, `tags`, `providers`
@@ -166,7 +168,7 @@ npm run format
 
 # Check formatting
 npm run format:check
-```
+````
 
 ### TypeScript Guidelines
 
@@ -246,12 +248,13 @@ Great Bug Reports tend to have:
 
 ### Bug Report Template
 
-```markdown
+````markdown
 **Describe the bug**
 A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Run command '...'
 2. With configuration '....'
 3. See error
@@ -260,6 +263,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Configuration**
+
 ```yaml
 # Your .ai-policies.yaml content
 extends:
@@ -267,8 +271,10 @@ extends:
 output:
   cursor: '.cursorrules'
 ```
+````
 
 **Environment:**
+
 - OS: [e.g. macOS, Windows, Linux]
 - Node.js version: [e.g. 20.10.0]
 - AI Policies version: [e.g. 2.0.0]
@@ -276,6 +282,7 @@ output:
 
 **Additional context**
 Add any other context about the problem here.
+
 ```
 
 ## Feature Requests
@@ -329,3 +336,4 @@ Contributors are recognized in:
 - [Contributors page](https://github.com/mucahitgurbuz/ai-policies/graphs/contributors)
 
 Thank you for contributing to AI Policies! 🎉
+```

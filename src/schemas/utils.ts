@@ -43,7 +43,9 @@ export function isValidPackageName(name: string): boolean {
  * Check if a path is a local path (starts with ./ or /)
  */
 export function isLocalPath(path: string): boolean {
-  return path.startsWith('./') || path.startsWith('/') || path.startsWith('../');
+  return (
+    path.startsWith('./') || path.startsWith('/') || path.startsWith('../')
+  );
 }
 
 /**
@@ -96,7 +98,9 @@ export function parseMetadataFromHeader(
   content: string
 ): CompositionMetadata | null {
   // Match base64 data (allows +, /, =, alphanumeric)
-  const metaMatch = content.match(/<!--\s*AI-POLICIES-META:\s*([A-Za-z0-9+/=]+)\s*/);
+  const metaMatch = content.match(
+    /<!--\s*AI-POLICIES-META:\s*([A-Za-z0-9+/=]+)\s*/
+  );
 
   if (!metaMatch) {
     return null;

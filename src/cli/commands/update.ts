@@ -44,7 +44,7 @@ export const updateCommand: CommandModule<{}, UpdateOptions> = {
       }
 
       const config = await loadManifest(manifestPath);
-      const projectRoot = path.dirname(manifestPath);
+      const _projectRoot = path.dirname(manifestPath);
 
       if (argv.package) {
         await updateSpecificPackage(config, argv.package, argv.dry ?? false);

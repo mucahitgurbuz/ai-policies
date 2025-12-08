@@ -6,8 +6,6 @@ import { dirname, join } from 'path';
 
 import type {
   ManifestConfig,
-  PartialFrontmatter,
-  PolicyPackageConfig,
   ValidationResult,
   ValidationError,
 } from './types.js';
