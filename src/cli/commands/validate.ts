@@ -77,7 +77,7 @@ export const validateCommand: CommandModule<{}, ValidateOptions> = {
 
 // Define the manifest schema using Zod
 const ManifestSchema = z.object({
-  requires: z.record(z.string()),
+  extends: z.record(z.string()),
   output: z.object({
     cursor: z.string().optional(),
     copilot: z.string().optional(),
@@ -143,7 +143,7 @@ async function validateManifestSchema(manifestPath: string): Promise<string[]> {
       }
 
       // Validate package names format
-      for (const packageName of Object.keys(manifest.requires)) {
+      for (const packageName of Object.keys(manifest.extends)) {
         if (!packageName.startsWith('@') || !packageName.includes('/')) {
           errors.push(
             `Invalid package name format: '${packageName}'. Expected format: @scope/name`

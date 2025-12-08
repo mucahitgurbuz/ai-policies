@@ -22,7 +22,6 @@ description: React component development guidelines and patterns
 ### Component Structure
 
 ```tsx
-// ✅ Good: Well-structured functional component
 interface UserCardProps {
   user: User;
   onEdit?: (user: User) => void;
@@ -34,8 +33,16 @@ export const UserCard: React.FC<UserCardProps> = ({
   onEdit,
   className,
 }) => {
+  // 1. State declarations
   const [isEditing, setIsEditing] = useState(false);
 
+  // 2. Computed values (useMemo)
+  const displayName = useMemo(
+    () => `${user.firstName} ${user.lastName}`,
+    [user.firstName, user.lastName]
+  );
+
+  // 3. Event handlers (useCallback)
   const handleEditClick = useCallback(() => {
     setIsEditing(true);
   }, []);
@@ -48,6 +55,12 @@ export const UserCard: React.FC<UserCardProps> = ({
     [onEdit]
   );
 
+  // 4. Effects
+  useEffect(() => {
+    // Side effects here
+  }, []);
+
+  // 5. Render
   return (
     <div className={cn('user-card', className)}>{/* Component content */}</div>
   );
@@ -94,16 +107,34 @@ const updateUser = (user: User) => dispatch({ type: 'UPDATE_USER', user });
 - **Be careful with object dependencies** - use useCallback/useMemo
 
 ```tsx
-// ✅ Good: Proper useEffect usage
+// ✅ Good: Proper useEffect usage with cleanup
+useEffect(() => {
+  let cancelled = false;
+
+  const fetchData = async () => {
+    const data = await api.getData(id);
+    if (!cancelled) {
+      setData(data);
+    }
+  };
+
+  fetchData();
+
+  return () => {
+    cancelled = true; // Cleanup
+  };
+}, [id]);
+
+// ✅ Good: Subscriptions with cleanup
 useEffect(() => {
   const subscription = subscribeToData(userId, data => {
     setData(data);
   });
 
   return () => {
-    subscription.unsubscribe(); // Cleanup
+    subscription.unsubscribe();
   };
-}, [userId]); // Include all dependencies
+}, [userId]);
 ```
 
 ### Performance Hooks
@@ -113,9 +144,27 @@ useEffect(() => {
 - **Use React.memo** for components that render frequently with same props
 - **Don't over-optimize** - measure first, optimize when needed
 
-## Event Handling
+```tsx
+// ✅ Expensive calculations
+const expensiveValue = useMemo(() => {
+  return items.reduce((acc, item) => acc + item.value, 0);
+}, [items]);
 
-### Event Handlers
+// ✅ Stable function references
+const handleSubmit = useCallback(
+  (data: FormData) => {
+    onSubmit(data);
+  },
+  [onSubmit]
+);
+
+// ✅ Component memoization
+const OptimizedComponent = React.memo(({ data, onAction }) => {
+  return <div>{/* Component content */}</div>;
+});
+```
+
+## Event Handling
 
 - **Use useCallback** for event handlers to prevent unnecessary re-renders
 - **Handle errors** in event handlers gracefully
@@ -123,7 +172,6 @@ useEffect(() => {
 - **Use proper TypeScript types** for events
 
 ```tsx
-// ✅ Good: Proper event handling
 const handleSubmit = useCallback(
   (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -225,3 +273,4 @@ useEffect(() => {
 const updatedUser = { ...user, name: 'New Name' };
 setItems([...items, newItem]);
 ```
+

@@ -88,3 +88,4 @@ logger.error('Authentication failed', {
   // Never log passwords or tokens
 });
 ```
+

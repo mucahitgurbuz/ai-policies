@@ -4,11 +4,11 @@
   "title": "AI Policies Manifest",
   "description": "Configuration file schema for AI Policies (.ai-policies.yaml)",
   "type": "object",
-  "required": ["requires", "output", "compose"],
+  "required": ["extends", "output", "compose"],
   "properties": {
-    "requires": {
+    "extends": {
       "type": "object",
-      "description": "Policy packages and their version ranges",
+      "description": "Policy packages to extend (ESLint-style configuration)",
       "patternProperties": {
         "^@[a-z0-9-]+/[a-z0-9-]+$": {
           "type": "string",

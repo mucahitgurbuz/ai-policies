@@ -132,31 +132,13 @@ export class PolicyRegistry {
     packagePath: string,
     packageName: string
   ): Promise<PolicyPartial[]> {
-    const partials: PolicyPartial[] = [];
-
-    // Load cursor partials
-    const cursorDir = path.join(packagePath, 'cursor', 'partials');
-    if (await fs.pathExists(cursorDir)) {
-      const cursorPartials = await this.loadPartialsFromDirectory(
-        cursorDir,
-        packageName,
-        'cursor'
-      );
-      partials.push(...cursorPartials);
+    // Load from unified partials directory (applies to all providers)
+    const partialsDir = path.join(packagePath, 'partials');
+    if (await fs.pathExists(partialsDir)) {
+      return this.loadPartialsFromDirectory(partialsDir, packageName);
     }
 
-    // Load copilot partials
-    const copilotDir = path.join(packagePath, 'copilot', 'partials');
-    if (await fs.pathExists(copilotDir)) {
-      const copilotPartials = await this.loadPartialsFromDirectory(
-        copilotDir,
-        packageName,
-        'copilot'
-      );
-      partials.push(...copilotPartials);
-    }
-
-    return partials;
+    return [];
   }
 
   /**
@@ -164,8 +146,7 @@ export class PolicyRegistry {
    */
   private async loadPartialsFromDirectory(
     directory: string,
-    packageName: string,
-    provider: 'cursor' | 'copilot'
+    packageName: string
   ): Promise<PolicyPartial[]> {
     const partials: PolicyPartial[] = [];
     const pattern = path.join(directory, '**/*.md');
@@ -195,10 +176,8 @@ export class PolicyRegistry {
           packageVersion: '1.0.0',
         };
 
-        // Add provider filter if not specified
-        if (!partial.frontmatter.providers) {
-          partial.frontmatter.providers = [provider];
-        }
+        // Unified partials apply to all providers by default
+        // Individual partials can still specify providers in frontmatter if needed
 
         partials.push(partial);
       } catch (error) {

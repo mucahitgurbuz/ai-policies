@@ -8,7 +8,7 @@ import {
 describe('validateManifestConfig', () => {
   it('should validate a correct manifest', () => {
     const manifest = {
-      requires: {
+      extends: {
         '@ai-policies/core': '^1.0.0',
       },
       output: {
@@ -27,7 +27,7 @@ describe('validateManifestConfig', () => {
     expect(result.errors).toHaveLength(0);
   });
 
-  it('should reject manifest without requires', () => {
+  it('should reject manifest without extends', () => {
     const manifest = {
       output: {
         cursor: './.cursorrules',
@@ -45,7 +45,7 @@ describe('validateManifestConfig', () => {
 
   it('should reject manifest without any output targets', () => {
     const manifest = {
-      requires: {
+      extends: {
         '@ai-policies/core': '^1.0.0',
       },
       output: {},
@@ -64,7 +64,7 @@ describe('validateManifestConfig', () => {
 
   it('should reject invalid package name format', () => {
     const manifest = {
-      requires: {
+      extends: {
         'invalid-package': '^1.0.0', // Missing @ scope - doesn't match schema pattern
       },
       output: {
@@ -84,7 +84,7 @@ describe('validateManifestConfig', () => {
 
   it('should reject protected layer not in order', () => {
     const manifest = {
-      requires: {
+      extends: {
         '@ai-policies/core': '^1.0.0',
       },
       output: {
@@ -186,10 +186,7 @@ describe('validatePackageConfig', () => {
       version: '1.0.0',
       description: 'Core policies',
       'ai-policies': {
-        partials: {
-          cursor: 'cursor/partials',
-          copilot: 'copilot/partials',
-        },
+        partials: 'partials',
       },
     };
 

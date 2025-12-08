@@ -80,11 +80,11 @@ async function updateSpecificPackage(
     throw new Error('Invalid package format. Use: name@version');
   }
 
-  if (!config.requires[packageName]) {
+  if (!config.extends[packageName]) {
     throw new Error(`Package "${packageName}" not found in manifest`);
   }
 
-  const currentVersion = config.requires[packageName];
+  const currentVersion = config.extends[packageName];
 
   // Simulate version resolution (placeholder)
   const latestCompatible = resolveLatestCompatible(version);
@@ -94,7 +94,7 @@ async function updateSpecificPackage(
       `Would update ${packageName}: ${currentVersion} → ${latestCompatible}`
     );
   } else {
-    config.requires[packageName] = latestCompatible;
+    config.extends[packageName] = latestCompatible;
     logger.success(
       `Updated ${packageName}: ${currentVersion} → ${latestCompatible}`
     );
@@ -106,7 +106,7 @@ async function updateAllPackages(config: any, dry: boolean) {
 
   const updates: Array<{ name: string; current: string; latest: string }> = [];
 
-  for (const [packageName, currentVersion] of Object.entries(config.requires)) {
+  for (const [packageName, currentVersion] of Object.entries(config.extends)) {
     // Simulate version resolution (placeholder)
     const latestCompatible = resolveLatestCompatible(currentVersion as string);
 
@@ -130,7 +130,7 @@ async function updateAllPackages(config: any, dry: boolean) {
         `Would update ${update.name}: ${update.current} → ${update.latest}`
       );
     } else {
-      config.requires[update.name] = update.latest;
+      config.extends[update.name] = update.latest;
       logger.success(
         `Updated ${update.name}: ${update.current} → ${update.latest}`
       );

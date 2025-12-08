@@ -28,7 +28,7 @@ function createMockPartial(
 
 // Default test config
 const testConfig: ManifestConfig = {
-  requires: {
+  extends: {
     '@ai-policies/test': '^1.0.0',
   },
   output: {

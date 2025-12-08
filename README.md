@@ -28,7 +28,7 @@ ai-policies sync
 Create `.ai-policies.yaml` in your project root:
 
 ```yaml
-requires:
+extends:
   '@ai-policies/core': '^1.0.0'
   '@ai-policies/frontend-react': '^1.0.0'
 

@@ -29,8 +29,8 @@ export async function loadManifest(
   const content = await fs.readFile(manifestPath, 'utf8');
   const config = yaml.load(content) as ManifestConfig;
 
-  if (!config.requires) {
-    throw new Error('Invalid manifest: missing "requires" section');
+  if (!config.extends) {
+    throw new Error('Invalid manifest: missing "extends" section');
   }
 
   if (!config.output) {
@@ -59,7 +59,7 @@ export async function saveManifest(
 
 export function getDefaultManifest(): ManifestConfig {
   return {
-    requires: {
+    extends: {
       '@ai-policies/core': '^1.0.0',
     },
     output: {

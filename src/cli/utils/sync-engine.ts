@@ -32,7 +32,7 @@ export async function generateConfigurations(
   const result: SyncResult = {};
 
   // Load partials from policy packages
-  const partials = await getPartials(config.requires);
+  const partials = await getPartials(config.extends);
 
   if (partials.length === 0) {
     throw new Error(

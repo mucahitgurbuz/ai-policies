@@ -144,11 +144,11 @@ function performSemanticManifestValidation(
   }
 
   // Validate package names format
-  for (const packageName of Object.keys(manifest.requires)) {
+  for (const packageName of Object.keys(manifest.extends)) {
     if (!packageName.startsWith('@') || !packageName.includes('/')) {
       errors.push({
         message: `Invalid package name format: '${packageName}'. Expected format: @scope/name`,
-        path: `requires.${packageName}`,
+        path: `extends.${packageName}`,
         value: packageName,
       });
     }

@@ -101,7 +101,7 @@ function getPresetConfig(preset: string) {
     case 'frontend':
       return {
         ...base,
-        requires: {
+        extends: {
           '@ai-policies/core': '^1.0.0',
           '@ai-policies/frontend-react': '^1.0.0',
         },
@@ -110,7 +110,7 @@ function getPresetConfig(preset: string) {
     case 'backend':
       return {
         ...base,
-        requires: {
+        extends: {
           '@ai-policies/core': '^1.0.0',
         },
       };
@@ -118,7 +118,7 @@ function getPresetConfig(preset: string) {
     case 'fullstack':
       return {
         ...base,
-        requires: {
+        extends: {
           '@ai-policies/core': '^1.0.0',
           '@ai-policies/frontend-react': '^1.0.0',
           '@ai-policies/workflows-jira': '~1.0.0',
@@ -161,7 +161,7 @@ async function promptForConfiguration() {
   const config = getPresetConfig(projectType);
 
   if (includeWorkflows) {
-    config.requires['@ai-policies/workflows-jira'] = '~1.0.0';
+    config.extends['@ai-policies/workflows-jira'] = '~1.0.0';
   }
 
   if (outputPaths) {

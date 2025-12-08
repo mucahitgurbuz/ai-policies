@@ -149,14 +149,14 @@ async function runHealthChecks(autoFix: boolean): Promise<HealthIssue[]> {
     await checkForEmptySections(config, projectRoot, issues);
 
     // Check 6: Duplicate packages
-    const packageNames = Object.keys(config.requires);
+    const packageNames = Object.keys(config.extends);
     const duplicates = packageNames.filter(
       (name, index) => packageNames.indexOf(name) !== index
     );
     if (duplicates.length > 0) {
       issues.push({
         message: `Duplicate packages found: ${duplicates.join(', ')}`,
-        fix: 'Remove duplicate entries from requires section',
+        fix: 'Remove duplicate entries from extends section',
         severity: 'error',
       });
     }

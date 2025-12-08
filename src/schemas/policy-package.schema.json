@@ -73,20 +73,9 @@
       "description": "AI Policies specific configuration",
       "properties": {
         "partials": {
-          "type": "object",
-          "description": "Partial directories for different providers",
-          "properties": {
-            "cursor": {
-              "type": "string",
-              "description": "Directory containing Cursor partials",
-              "default": "cursor/partials"
-            },
-            "copilot": {
-              "type": "string",
-              "description": "Directory containing Copilot partials",
-              "default": "copilot/partials"
-            }
-          }
+          "type": "string",
+          "description": "Directory containing unified partials (applies to all providers)",
+          "default": "partials"
         },
         "tags": {
           "type": "array",

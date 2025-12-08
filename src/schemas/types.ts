@@ -6,8 +6,8 @@ export type Layer = 'core' | 'domain' | 'stack' | 'team';
 export type Provider = 'cursor' | 'copilot';
 
 export interface ManifestConfig {
-  /** Policy packages and their version ranges */
-  requires: Record<string, string>;
+  /** Policy packages to extend (ESLint-style) */
+  extends: Record<string, string>;
 
   /** Output file paths for different IDE providers */
   output: {
@@ -116,11 +116,8 @@ export interface PolicyPackageConfig {
 
   /** AI Policies specific configuration */
   'ai-policies'?: {
-    /** Partial directories for different providers */
-    partials?: {
-      cursor?: string;
-      copilot?: string;
-    };
+    /** Directory containing unified partials (applies to all providers) */
+    partials?: string;
     /** Tags that apply to all partials in this package */
     tags?: string[];
   };
