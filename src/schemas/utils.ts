@@ -1,49 +1,19 @@
 /**
- * Utility functions for working with schemas and validation
+ * Utility functions for AI Policies v2.0
  */
 
 import type {
-  Layer,
   Provider,
   PartialFrontmatter,
-  ManifestConfig,
   PolicyPartial,
   CompositionMetadata,
 } from './types.js';
-
-/**
- * Check if a string is a valid layer
- */
-export function isValidLayer(value: string): value is Layer {
-  return ['core', 'domain', 'stack', 'team'].includes(value);
-}
 
 /**
  * Check if a string is a valid provider
  */
 export function isValidProvider(value: string): value is Provider {
   return ['cursor', 'copilot'].includes(value);
-}
-
-/**
- * Get layer priority (lower number = higher priority)
- */
-export function getLayerPriority(layer: Layer): number {
-  const priorities: Record<Layer, number> = {
-    core: 0,
-    domain: 1,
-    stack: 2,
-    team: 3,
-  };
-
-  return priorities[layer];
-}
-
-/**
- * Sort layers by priority
- */
-export function sortLayersByPriority(layers: Layer[]): Layer[] {
-  return [...layers].sort((a, b) => getLayerPriority(a) - getLayerPriority(b));
 }
 
 /**
@@ -62,11 +32,18 @@ export function shouldIncludePartialForProvider(
 }
 
 /**
- * Validate package name format
+ * Validate package name format (scoped npm package)
  */
 export function isValidPackageName(name: string): boolean {
   const packageNameRegex = /^@[a-z0-9-]+\/[a-z0-9-]+$/;
   return packageNameRegex.test(name);
+}
+
+/**
+ * Check if a path is a local path (starts with ./ or /)
+ */
+export function isLocalPath(path: string): boolean {
+  return path.startsWith('./') || path.startsWith('/') || path.startsWith('../');
 }
 
 /**
@@ -75,15 +52,6 @@ export function isValidPackageName(name: string): boolean {
 export function isValidSemver(version: string): boolean {
   const semverRegex = /^[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]*)?$/;
   return semverRegex.test(version);
-}
-
-/**
- * Validate version range format
- */
-export function isValidVersionRange(range: string): boolean {
-  const versionRangeRegex =
-    /^(\^|~|>=|>|<=|<|=)?[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]*)?$/;
-  return versionRangeRegex.test(range);
 }
 
 /**
@@ -101,12 +69,12 @@ export function createContentHash(content: string): string {
 }
 
 /**
- * Create composition metadata
+ * Create composition metadata (v2.0)
  */
 export function createCompositionMetadata(
   packages: Record<string, string>,
   partials: PolicyPartial[],
-  settings: ManifestConfig['compose'],
+  protectedPartials: string[],
   content: string
 ): CompositionMetadata {
   return {
@@ -116,10 +84,8 @@ export function createCompositionMetadata(
     partials: partials.map(p => ({
       id: p.frontmatter.id,
       packageName: p.packageName,
-      layer: p.frontmatter.layer,
-      weight: p.frontmatter.weight,
     })),
-    settings,
+    protectedPartials,
   };
 }
 
@@ -162,53 +128,4 @@ AI-POLICIES-META: ${base64Data}
 Generated at: ${metadata.generatedAt}
 Packages: ${packagesList}
 -->`;
-}
-
-/**
- * Detect circular dependencies in partials
- */
-export function detectCircularDependencies(
-  partials: PartialFrontmatter[]
-): string[][] {
-  const graph = new Map<string, string[]>();
-
-  // Build dependency graph
-  for (const partial of partials) {
-    graph.set(partial.id, partial.dependsOn);
-  }
-
-  const cycles: string[][] = [];
-  const visited = new Set<string>();
-  const visiting = new Set<string>();
-
-  function visit(node: string, path: string[]): void {
-    if (visiting.has(node)) {
-      // Found a cycle
-      const cycleStart = path.indexOf(node);
-      cycles.push(path.slice(cycleStart).concat(node));
-      return;
-    }
-
-    if (visited.has(node)) {
-      return;
-    }
-
-    visiting.add(node);
-    const dependencies = graph.get(node) || [];
-
-    for (const dep of dependencies) {
-      visit(dep, [...path, node]);
-    }
-
-    visiting.delete(node);
-    visited.add(node);
-  }
-
-  for (const partial of partials) {
-    if (!visited.has(partial.id)) {
-      visit(partial.id, []);
-    }
-  }
-
-  return cycles;
 }

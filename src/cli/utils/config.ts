@@ -29,16 +29,20 @@ export async function loadManifest(
   const content = await fs.readFile(manifestPath, 'utf8');
   const config = yaml.load(content) as ManifestConfig;
 
+  // Validate v2 format
   if (!config.extends) {
     throw new Error('Invalid manifest: missing "extends" section');
   }
 
-  if (!config.output) {
-    throw new Error('Invalid manifest: missing "output" section');
+  if (!Array.isArray(config.extends)) {
+    throw new Error(
+      'Invalid manifest: "extends" must be an array. ' +
+      'Run "ai-policies migrate" to convert from v1.x format.'
+    );
   }
 
-  if (!config.compose) {
-    throw new Error('Invalid manifest: missing "compose" section');
+  if (!config.output) {
+    throw new Error('Invalid manifest: missing "output" section');
   }
 
   return config;
@@ -59,17 +63,11 @@ export async function saveManifest(
 
 export function getDefaultManifest(): ManifestConfig {
   return {
-    extends: {
-      '@ai-policies/core': '^1.0.0',
-    },
+    extends: ['@ai-policies/core'],
     output: {
       cursor: './.cursorrules',
       copilot: './.copilot/instructions.md',
     },
-    compose: {
-      order: ['core', 'domain', 'stack', 'team'],
-      protectedLayers: ['core'],
-      teamAppend: true,
-    },
+    protected: ['core-safety'],
   };
 }

@@ -1,51 +1,20 @@
-import type { PolicyPartial, ManifestConfig, Layer } from '../schemas/types.js';
-import { getLayerPriority } from '../schemas/utils.js';
-import type { ConflictResolution } from './types.js';
+import type { PolicyPartial, ConflictResolution } from '../schemas/types.js';
+import type { DeduplicationResult } from './types.js';
 
 /**
- * Sort partials by composition rules (layer priority + weight)
+ * Deduplicate partials with "last wins" strategy (v2.0)
+ * Protected partials are preserved regardless of order
  */
-export function sortPartialsByComposition(
+export function deduplicatePartials(
   partials: PolicyPartial[],
-  composeSettings: ManifestConfig['compose']
-): PolicyPartial[] {
-  const layerOrder = new Map<Layer, number>();
-
-  // Create layer priority map from compose order
-  for (let i = 0; i < composeSettings.order.length; i++) {
-    layerOrder.set(composeSettings.order[i], i);
-  }
-
-  return [...partials].sort((a, b) => {
-    const aLayerPriority = layerOrder.get(a.frontmatter.layer) ?? 999;
-    const bLayerPriority = layerOrder.get(b.frontmatter.layer) ?? 999;
-
-    // First sort by layer priority
-    if (aLayerPriority !== bLayerPriority) {
-      return aLayerPriority - bLayerPriority;
-    }
-
-    // Then sort by weight within the same layer
-    if (a.frontmatter.weight !== b.frontmatter.weight) {
-      return a.frontmatter.weight - b.frontmatter.weight;
-    }
-
-    // Finally sort by ID for deterministic ordering
-    return a.frontmatter.id.localeCompare(b.frontmatter.id);
-  });
-}
-
-/**
- * Deduplicate partials with conflict resolution
- */
-export function deduplicatePartials(partials: PolicyPartial[]): {
-  partials: PolicyPartial[];
-  conflicts: ConflictResolution[];
-} {
+  protectedIds: string[]
+): DeduplicationResult {
+  const protectedSet = new Set(protectedIds);
   const partialMap = new Map<string, PolicyPartial[]>();
   const conflicts: ConflictResolution[] = [];
+  const protectedWarnings: string[] = [];
 
-  // Group partials by ID
+  // Group partials by ID, preserving order
   for (const partial of partials) {
     const id = partial.frontmatter.id;
     if (!partialMap.has(id)) {
@@ -55,90 +24,86 @@ export function deduplicatePartials(partials: PolicyPartial[]): {
   }
 
   const deduplicatedPartials: PolicyPartial[] = [];
+  const addedIds = new Set<string>();
 
-  // Resolve conflicts for each ID
-  for (const [id, candidates] of partialMap) {
+  // Process partials in order to maintain extends array order
+  for (const partial of partials) {
+    const id = partial.frontmatter.id;
+
+    // Skip if already processed
+    if (addedIds.has(id)) {
+      continue;
+    }
+
+    const candidates = partialMap.get(id)!;
+
     if (candidates.length === 1) {
+      // No conflict
       deduplicatedPartials.push(candidates[0]);
     } else {
-      const resolution = resolvePartialConflict(candidates);
+      // Conflict - resolve it
+      const resolution = resolveConflict(candidates, protectedSet);
       deduplicatedPartials.push(resolution.winner);
       conflicts.push(resolution);
+
+      // Log warning if protected partial was preserved
+      if (resolution.reason === 'protected') {
+        protectedWarnings.push(
+          `Protected partial '${id}' from '${resolution.winner.packageName}' was preserved. ` +
+          `Overrides from ${resolution.overridden.map(p => p.packageName).join(', ')} were ignored.`
+        );
+      }
     }
+
+    addedIds.add(id);
   }
 
-  return { partials: deduplicatedPartials, conflicts };
+  return { partials: deduplicatedPartials, conflicts, protectedWarnings };
 }
 
 /**
- * Resolve conflict between multiple partials with the same ID
+ * Resolve conflict between partials with same ID
+ * Rule: Last wins, unless protected
  */
-function resolvePartialConflict(
-  candidates: PolicyPartial[]
+function resolveConflict(
+  candidates: PolicyPartial[],
+  protectedIds: Set<string>
 ): ConflictResolution {
-  // Priority rules:
-  // 1. Protected partials win
-  // 2. Higher layer priority wins (team > stack > domain > core)
-  // 3. Higher weight wins
-  // 4. Lexicographically later package name wins (for determinism)
+  const id = candidates[0].frontmatter.id;
+  const isProtected = protectedIds.has(id);
 
-  let winner = candidates[0];
-  let reason: ConflictResolution['reason'] = 'explicit';
+  if (isProtected) {
+    // Protected: first occurrence wins (the one that defined protection)
+    // Find the earliest partial from a package that declared it protected
+    const winner = candidates[0]; // First in extends order
+    const overridden = candidates.slice(1);
 
-  for (const candidate of candidates.slice(1)) {
-    const comparison = comparePartials(winner, candidate);
-
-    if (comparison < 0) {
-      winner = candidate;
-      reason =
-        comparison === -1
-          ? 'protected'
-          : comparison === -2
-            ? 'layer-priority'
-            : 'weight';
-    }
+    return {
+      partialId: id,
+      winner,
+      overridden,
+      reason: 'protected',
+    };
   }
 
-  const losers = candidates.filter(p => p !== winner);
+  // Not protected: last wins (highest sourceIndex)
+  const sorted = [...candidates].sort((a, b) => b.sourceIndex - a.sourceIndex);
+  const winner = sorted[0];
+  const overridden = sorted.slice(1);
 
-  return { winner, losers, reason };
+  return {
+    partialId: id,
+    winner,
+    overridden,
+    reason: 'last-wins',
+  };
 }
 
 /**
- * Compare two partials for conflict resolution
- * Returns: negative if b wins, positive if a wins, 0 if equal
+ * Sort partials by their source index (extends array order)
  */
-function comparePartials(a: PolicyPartial, b: PolicyPartial): number {
-  // Protected partials always win
-  if (a.frontmatter.protected && !b.frontmatter.protected) return 1;
-  if (!a.frontmatter.protected && b.frontmatter.protected) return -1;
-
-  // Higher layer priority wins (team > stack > domain > core)
-  const aLayerPriority = getLayerPriority(a.frontmatter.layer);
-  const bLayerPriority = getLayerPriority(b.frontmatter.layer);
-
-  if (aLayerPriority !== bLayerPriority) {
-    return bLayerPriority - aLayerPriority; // Higher priority (lower number) wins
-  }
-
-  // Higher weight wins
-  if (a.frontmatter.weight !== b.frontmatter.weight) {
-    return b.frontmatter.weight - a.frontmatter.weight;
-  }
-
-  // Package name for determinism
-  return b.packageName.localeCompare(a.packageName);
-}
-
-/**
- * Filter partials by layer
- */
-export function filterPartialsByLayer(
-  partials: PolicyPartial[],
-  layers: Layer[]
-): PolicyPartial[] {
-  const layerSet = new Set(layers);
-  return partials.filter(partial => layerSet.has(partial.frontmatter.layer));
+export function sortPartialsBySourceIndex(partials: PolicyPartial[]): PolicyPartial[] {
+  return [...partials].sort((a, b) => a.sourceIndex - b.sourceIndex);
 }
 
 /**
@@ -182,92 +147,37 @@ export function groupPartialsByPackage(
 }
 
 /**
- * Get statistics about partials
+ * Get statistics about partials (v2.0 - simplified)
  */
 export function getPartialStatistics(partials: PolicyPartial[]) {
   const stats = {
     total: partials.length,
-    byLayer: new Map<Layer, number>(),
     byPackage: new Map<string, number>(),
-    protected: 0,
-    withDependencies: 0,
-    averageWeight: 0,
     totalContentLength: 0,
+    tagsUsed: new Set<string>(),
   };
 
-  let totalWeight = 0;
-
   for (const partial of partials) {
-    // Layer statistics
-    const layer = partial.frontmatter.layer;
-    stats.byLayer.set(layer, (stats.byLayer.get(layer) || 0) + 1);
-
     // Package statistics
     const pkg = partial.packageName;
     stats.byPackage.set(pkg, (stats.byPackage.get(pkg) || 0) + 1);
 
-    // Other statistics
-    if (partial.frontmatter.protected) {
-      stats.protected++;
-    }
-
-    if (partial.frontmatter.dependsOn.length > 0) {
-      stats.withDependencies++;
-    }
-
-    totalWeight += partial.frontmatter.weight;
+    // Content length
     stats.totalContentLength += partial.content.length;
-  }
 
-  stats.averageWeight = partials.length > 0 ? totalWeight / partials.length : 0;
+    // Tags
+    if (partial.frontmatter.tags) {
+      for (const tag of partial.frontmatter.tags) {
+        stats.tagsUsed.add(tag);
+      }
+    }
+  }
 
   return stats;
 }
 
 /**
- * Validate partial compatibility
- */
-export function validatePartialCompatibility(
-  partials: PolicyPartial[]
-): Array<{ message: string; partialIds: string[] }> {
-  const issues: Array<{ message: string; partialIds: string[] }> = [];
-
-  // Check for weight conflicts within the same layer
-  const layerWeights = new Map<Layer, Map<number, string[]>>();
-
-  for (const partial of partials) {
-    const layer = partial.frontmatter.layer;
-    const weight = partial.frontmatter.weight;
-
-    if (!layerWeights.has(layer)) {
-      layerWeights.set(layer, new Map());
-    }
-
-    const weights = layerWeights.get(layer)!;
-    if (!weights.has(weight)) {
-      weights.set(weight, []);
-    }
-
-    weights.get(weight)!.push(partial.frontmatter.id);
-  }
-
-  // Report weight conflicts
-  for (const [layer, weights] of layerWeights) {
-    for (const [weight, partialIds] of weights) {
-      if (partialIds.length > 1) {
-        issues.push({
-          message: `Multiple partials in layer '${layer}' have the same weight ${weight}`,
-          partialIds,
-        });
-      }
-    }
-  }
-
-  return issues;
-}
-
-/**
- * Create a summary of composition changes
+ * Create a summary of composition changes (v2.0)
  */
 export function createCompositionSummary(
   partials: PolicyPartial[],
@@ -278,15 +188,6 @@ export function createCompositionSummary(
 
   lines.push(`Composition Summary:`);
   lines.push(`  Total partials: ${stats.total}`);
-  lines.push(`  Protected partials: ${stats.protected}`);
-  lines.push(`  Partials with dependencies: ${stats.withDependencies}`);
-  lines.push(`  Average weight: ${stats.averageWeight.toFixed(1)}`);
-  lines.push('');
-
-  lines.push('By layer:');
-  for (const [layer, count] of stats.byLayer) {
-    lines.push(`  ${layer}: ${count}`);
-  }
   lines.push('');
 
   lines.push('By package:');
@@ -298,11 +199,12 @@ export function createCompositionSummary(
     lines.push('');
     lines.push('Conflicts resolved:');
     for (const conflict of conflicts) {
+      const overriddenPkgs = conflict.overridden.map(p => p.packageName).join(', ');
       lines.push(
-        `  ${conflict.winner.frontmatter.id}: ${conflict.winner.packageName} won over ${conflict.losers.map(l => l.packageName).join(', ')} (${conflict.reason})`
+        `  ${conflict.partialId}: ${conflict.winner.packageName} won (${conflict.reason}) over ${overriddenPkgs}`
       );
     }
   }
 
-  return lines.join('\\n');
+  return lines.join('\n');
 }

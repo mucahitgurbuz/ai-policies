@@ -5,6 +5,72 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2024-12-08
+
+### ⚠️ Breaking Changes
+
+This is a major release that redesigns AI Policies to follow ESLint's configuration model.
+
+#### Configuration Format
+
+- **`extends`** changed from object to array
+  ```yaml
+  # Before (v1.x)
+  extends:
+    '@ai-policies/core': '^1.0.0'
+  
+  # After (v2.0)
+  extends:
+    - '@ai-policies/core'
+  ```
+
+- **`compose` section removed** - Priority is now determined by array order (last wins)
+
+- **`protected` is now a config-level array** instead of partial frontmatter
+  ```yaml
+  # v2.0 - Protect specific partials
+  protected:
+    - 'core-safety'
+    - 'no-hardcoded-secrets'
+  ```
+
+#### Partial Frontmatter
+
+- **Removed fields**: `layer`, `weight`, `protected`, `dependsOn`
+- **Required field**: `id`
+- **Optional fields**: `description`, `owner`, `tags`, `providers`
+
+### Added
+
+- **ESLint-style array `extends`** - Familiar configuration pattern
+- **npm package resolution** - Install policy packages from npm registry
+- **Local path support** - Mix npm packages with `./local-policies`
+- **`install` command** - `ai-policies install @ai-policies/frontend-react`
+- **`migrate` command** - Automatic v1.x to v2.0 migration
+- **`defaultProtected`** - Packages can declare default protected partials
+- **`exclude` config option** - Exclude specific partials from output
+
+### Changed
+
+- **Conflict resolution** - Simple "last wins" rule instead of layers/weights
+- **Package structure** - Moved from `src/policies/` to `packages/` with npm format
+- **Simplified partial format** - Only `id` is required in frontmatter
+
+### Removed
+
+- Layer system (`core`, `domain`, `stack`, `team`)
+- Weight-based ordering within layers
+- `dependsOn` dependency resolution
+- `compose.order` and `compose.protectedLayers` config
+- `compose.teamAppend` and `overrides.teamAppendContent`
+- Built-in policy registry (replaced by npm resolution)
+
+### Migration
+
+Run `ai-policies migrate` to automatically convert your v1.x configuration.
+
+See [Migration Guide](#migration-from-v1x) in README.md for details.
+
 ## [1.1.0] - 2024-12-08
 
 ### Changed
@@ -63,4 +129,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Protected partials that cannot be overridden
 - Weight-based ordering within layers
 - Dependency resolution between partials
-

@@ -24,7 +24,6 @@ export const syncCommand: CommandModule<{}, SyncOptions> = {
       default: false,
     },
     verbose: {
-      alias: 'v',
       type: 'boolean',
       description: 'Show detailed output',
       default: false,
@@ -44,6 +43,15 @@ export const syncCommand: CommandModule<{}, SyncOptions> = {
       const projectRoot = path.dirname(manifestPath);
 
       logger.info('Loading policy packages...');
+      if (argv.verbose) {
+        logger.info(`  Extends: ${config.extends.join(', ')}`);
+        if (config.protected?.length) {
+          logger.info(`  Protected: ${config.protected.join(', ')}`);
+        }
+        if (config.exclude?.length) {
+          logger.info(`  Excluded: ${config.exclude.join(', ')}`);
+        }
+      }
 
       // Generate configurations using the compose engine
       const result = await generateConfigurations(config, projectRoot);

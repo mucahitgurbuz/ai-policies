@@ -1,5 +1,5 @@
 /**
- * AI Policies - Centralized AI IDE rules management
+ * AI Policies v2.0 - Centralized AI IDE rules management
  *
  * This is the main entry point for the library.
  * For CLI usage, see src/cli/index.ts
@@ -13,14 +13,12 @@ export * from './schemas/utils.js';
 // Composition engine
 export * from './compose/composer.js';
 export * from './compose/merger.js';
-export * from './compose/resolver.js';
+export * from './compose/utils.js';
+export * from './compose/types.js';
+
+// Package resolution
+export * from './packages/resolver.js';
 
 // Providers
-export { CursorProvider } from './providers/cursor-provider.js';
-export { CopilotProvider } from './providers/copilot-provider.js';
-
-// Policy registry
-export { PolicyRegistry, getPartials } from './policies/registry.js';
-
-
-
+export { renderCursorRules } from './providers/cursor-provider.js';
+export { renderCopilotInstructions } from './providers/copilot-provider.js';

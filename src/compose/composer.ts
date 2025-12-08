@@ -15,16 +15,12 @@ import type {
   CompositionError,
   ContentTransformer,
 } from './types.js';
-import { resolveDependencies } from './resolver.js';
 import { mergePartials } from './merger.js';
-import {
-  extractProtectedBlocks,
-  mergeProtectedBlocks,
-} from './protected-blocks.js';
-import { sortPartialsByComposition, deduplicatePartials } from './utils.js';
+import { deduplicatePartials, sortPartialsBySourceIndex } from './utils.js';
 
 /**
- * Main composition engine
+ * Main composition engine (v2.0)
+ * Uses "last wins" conflict resolution with protected partial support
  */
 export class PolicyComposer {
   private transformers: ContentTransformer[] = [];
@@ -47,7 +43,7 @@ export class PolicyComposer {
   }
 
   /**
-   * Compose policies into a single output
+   * Compose policies into a single output (v2.0)
    */
   async compose(
     partials: PolicyPartial[],
@@ -55,6 +51,8 @@ export class PolicyComposer {
     options: CompositionOptions
   ): Promise<CompositionResult> {
     const errors: CompositionError[] = [];
+    const protectedIds = options.protected || config.protected || [];
+    const excludeIds = options.exclude || config.exclude || [];
 
     try {
       // Step 1: Filter partials for the target provider
@@ -64,74 +62,38 @@ export class PolicyComposer {
 
       // Step 2: Exclude specified partials
       const includedPartials = filteredPartials.filter(
-        partial => !options.excludePartials?.includes(partial.frontmatter.id)
+        partial => !excludeIds.includes(partial.frontmatter.id)
       );
 
-      // Step 3: Deduplicate partials (same ID from different packages)
-      const { partials: deduplicatedPartials, conflicts } =
-        deduplicatePartials(includedPartials);
+      // Step 3: Deduplicate partials with "last wins" (respecting protected)
+      const { partials: deduplicatedPartials, conflicts, protectedWarnings } =
+        deduplicatePartials(includedPartials, protectedIds);
 
-      // Log conflicts as warnings
+      // Log warnings about protected partials
+      for (const warning of protectedWarnings) {
+        console.warn(warning);
+      }
+
+      // Log conflict resolutions
       for (const conflict of conflicts) {
-        console.warn(
-          `Conflict resolved: Using ${conflict.winner.frontmatter.id} from ${conflict.winner.packageName} over ${conflict.losers.map(l => l.packageName).join(', ')}`
-        );
-      }
-
-      // Step 4: Resolve dependencies
-      const dependencyResult = resolveDependencies(deduplicatedPartials);
-
-      if (dependencyResult.circular.length > 0) {
-        errors.push({
-          message: `Circular dependencies detected: ${dependencyResult.circular.map(c => c.join(' -> ')).join(', ')}`,
-          type: 'circular',
-        });
-      }
-
-      if (dependencyResult.missing.length > 0) {
-        for (const missing of dependencyResult.missing) {
-          errors.push({
-            message: `Missing dependencies for ${missing.partialId}: ${missing.missingDeps.join(', ')}`,
-            type: 'dependency',
-            partialId: missing.partialId,
-          });
+        if (conflict.reason === 'last-wins') {
+          console.log(
+            `Conflict resolved: Using '${conflict.partialId}' from ${conflict.winner.packageName} ` +
+            `(last in extends) over ${conflict.overridden.map(p => p.packageName).join(', ')}`
+          );
         }
       }
 
-      if (errors.length > 0 && !options.debug) {
-        throw new Error(
-          `Composition failed: ${errors.map(e => e.message).join('; ')}`
-        );
-      }
+      // Step 4: Sort partials by source index (maintains extends order)
+      const sortedPartials = sortPartialsBySourceIndex(deduplicatedPartials);
 
-      // Step 5: Sort partials by composition rules
-      const sortedPartials = sortPartialsByComposition(
-        dependencyResult.resolved,
-        config.compose
-      );
+      // Step 5: Merge partials into final content
+      const mergedContent = await mergePartials(sortedPartials, {
+        transformers: [...this.transformers, ...(options.transformers || [])],
+        provider: options.provider,
+      });
 
-      // Step 6: Extract protected blocks from existing content
-      // (This would read from existing files in a real implementation)
-      const protectedBlocks = await extractProtectedBlocks(
-        '',
-        config.compose.protectedLayers
-      );
-
-      // Step 7: Merge partials into final content
-      const mergedContent = await mergePartials(
-        sortedPartials,
-        config.compose,
-        {
-          teamAppendContent: options.teamAppendContent,
-          transformers: [...this.transformers, ...(options.transformers || [])],
-          provider: options.provider,
-        }
-      );
-
-      // Step 8: Apply protected blocks
-      const finalContent = mergeProtectedBlocks(mergedContent, protectedBlocks);
-
-      // Step 9: Create metadata
+      // Step 6: Create metadata
       const packages = sortedPartials.reduce(
         (acc, partial) => {
           acc[partial.packageName] = partial.packageVersion;
@@ -143,15 +105,15 @@ export class PolicyComposer {
       const metadata = createCompositionMetadata(
         packages,
         sortedPartials,
-        config.compose,
-        finalContent
+        protectedIds,
+        mergedContent
       );
 
-      // Step 10: Generate final output with metadata header
+      // Step 7: Generate final output with metadata header
       const metadataHeader = generateMetadataHeader(metadata);
       const output = `${metadataHeader}
 
-${finalContent}`;
+${mergedContent}`;
 
       return {
         content: output,
@@ -165,7 +127,7 @@ ${finalContent}`;
   }
 
   /**
-   * Validate composition inputs
+   * Validate composition inputs (v2.0)
    */
   validateInputs(
     partials: PolicyPartial[],
@@ -193,15 +155,27 @@ ${finalContent}`;
       packageIds.add(partial.frontmatter.id);
     }
 
-    // Validate layer ordering
-    const orderSet = new Set(config.compose.order);
-    for (const partial of partials) {
-      if (!orderSet.has(partial.frontmatter.layer)) {
-        errors.push({
-          message: `Partial '${partial.frontmatter.id}' has layer '${partial.frontmatter.layer}' which is not in compose.order`,
-          type: 'validation',
-          partialId: partial.frontmatter.id,
-        });
+    // Check that protected partials exist
+    if (config.protected) {
+      const allPartialIds = new Set(partials.map(p => p.frontmatter.id));
+      for (const protectedId of config.protected) {
+        if (!allPartialIds.has(protectedId)) {
+          errors.push({
+            message: `Protected partial '${protectedId}' not found in any package`,
+            type: 'validation',
+            partialId: protectedId,
+          });
+        }
+      }
+    }
+
+    // Check that excluded partials exist (warning only)
+    if (config.exclude) {
+      const allPartialIds = new Set(partials.map(p => p.frontmatter.id));
+      for (const excludeId of config.exclude) {
+        if (!allPartialIds.has(excludeId)) {
+          console.warn(`Warning: Excluded partial '${excludeId}' not found in any package`);
+        }
       }
     }
 
@@ -217,7 +191,7 @@ export function createComposer(): PolicyComposer {
 }
 
 /**
- * Convenience function for simple composition
+ * Convenience function for simple composition (v2.0)
  */
 export async function composePartials(
   partials: PolicyPartial[],

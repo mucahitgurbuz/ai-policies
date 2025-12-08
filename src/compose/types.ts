@@ -2,10 +2,13 @@ import type {
   PolicyPartial,
   ManifestConfig,
   CompositionResult,
-  CompositionMetadata,
   Provider,
+  ConflictResolution,
 } from '../schemas/types.js';
 
+/**
+ * Options for composing policies (v2.0)
+ */
 export interface CompositionOptions {
   /** Provider to compose for (affects which partials are included) */
   provider: Provider;
@@ -16,13 +19,16 @@ export interface CompositionOptions {
   /** Custom content transformers */
   transformers?: ContentTransformer[];
 
-  /** Team append content to add at the end */
-  teamAppendContent?: string;
+  /** Partial IDs that cannot be overridden (from config) */
+  protected?: string[];
 
   /** Partial IDs to exclude from composition */
-  excludePartials?: string[];
+  exclude?: string[];
 }
 
+/**
+ * Content transformer
+ */
 export interface ContentTransformer {
   /** Transformer name */
   name: string;
@@ -34,6 +40,9 @@ export interface ContentTransformer {
   priority: number;
 }
 
+/**
+ * Context passed to content transformers
+ */
 export interface TransformContext {
   /** Current partial being processed */
   partial: PolicyPartial;
@@ -43,17 +52,17 @@ export interface TransformContext {
 
   /** All partials in composition */
   allPartials: PolicyPartial[];
-
-  /** Composition settings */
-  settings: ManifestConfig['compose'];
 }
 
+/**
+ * Error during composition
+ */
 export interface CompositionError {
   /** Error message */
   message: string;
 
   /** Error type */
-  type: 'validation' | 'dependency' | 'conflict' | 'protected' | 'circular';
+  type: 'validation' | 'resolution' | 'conflict' | 'protected';
 
   /** Related partial ID if applicable */
   partialId?: string;
@@ -62,44 +71,16 @@ export interface CompositionError {
   context?: Record<string, unknown>;
 }
 
-export interface DependencyResolutionResult {
-  /** Resolved order of partials */
-  resolved: PolicyPartial[];
+/**
+ * Result of partial deduplication with "last wins" strategy
+ */
+export interface DeduplicationResult {
+  /** Deduplicated partials (in order) */
+  partials: PolicyPartial[];
 
-  /** Circular dependencies detected */
-  circular: string[][];
+  /** Conflict resolutions that occurred */
+  conflicts: ConflictResolution[];
 
-  /** Missing dependencies */
-  missing: Array<{
-    partialId: string;
-    missingDeps: string[];
-  }>;
-}
-
-export interface ProtectedBlock {
-  /** Block identifier */
-  id: string;
-
-  /** Block content */
-  content: string;
-
-  /** Source partial */
-  source: PolicyPartial;
-
-  /** Start and end markers */
-  markers: {
-    start: string;
-    end: string;
-  };
-}
-
-export interface ConflictResolution {
-  /** Winning partial */
-  winner: PolicyPartial;
-
-  /** Losing partials */
-  losers: PolicyPartial[];
-
-  /** Reason for resolution */
-  reason: 'layer-priority' | 'weight' | 'protected' | 'explicit';
+  /** Warnings about protected partials that were preserved */
+  protectedWarnings: string[];
 }
