@@ -152,7 +152,7 @@ describe('generateMetadataHeader / parseMetadataFromHeader', () => {
       },
     ];
     const metadata = createCompositionMetadata(packages, partials, [], '# Content');
-    
+
     const header = generateMetadataHeader(metadata);
     const parsed = parseMetadataFromHeader(header);
 

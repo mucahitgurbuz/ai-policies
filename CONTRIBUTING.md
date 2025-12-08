@@ -137,7 +137,7 @@ const bad = 'anti-pattern';
 ```
 ```
 
-**Required field:** `id`  
+**Required field:** `id`
 **Optional fields:** `description`, `owner`, `tags`, `providers`
 
 > **Note:** v2.0 removed `layer`, `weight`, `protected`, and `dependsOn` from partial frontmatter. These are now handled by the configuration file and extends array order.

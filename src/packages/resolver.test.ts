@@ -29,7 +29,7 @@ describe('Package Resolver', () => {
       // Create a test package
       const packagePath = path.join(tempDir, 'test-package');
       await fs.ensureDir(path.join(packagePath, 'partials'));
-      
+
       await fs.writeJson(path.join(packagePath, 'package.json'), {
         name: '@test/package',
         version: '1.0.0',

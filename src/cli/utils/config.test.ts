@@ -36,7 +36,7 @@ describe('Config Utils', () => {
     it('should find manifest in parent directory', async () => {
       const childDir = path.join(tempDir, 'child', 'grandchild');
       await fs.ensureDir(childDir);
-      
+
       const manifestPath = path.join(tempDir, MANIFEST_FILE);
       await fs.writeFile(manifestPath, 'extends: []');
 
