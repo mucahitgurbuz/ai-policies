@@ -131,4 +131,3 @@ async function getUser(id) {
   }
 }
 ```
-

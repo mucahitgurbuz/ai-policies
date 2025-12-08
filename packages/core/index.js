@@ -8,4 +8,3 @@ export default {
   partials: './partials',
   defaultProtected: ['core-safety'],
 };
-

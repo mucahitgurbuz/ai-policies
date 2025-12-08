@@ -123,4 +123,3 @@ jobs:
           issue: ${{ steps.ticket.outputs.ticket }}
           transition: 'In Review'
 ```
-

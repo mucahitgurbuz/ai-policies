@@ -273,4 +273,3 @@ useEffect(() => {
 const updatedUser = { ...user, name: 'New Name' };
 setItems([...items, newItem]);
 ```
-
